@@ -8,9 +8,9 @@
 #define BUTTON_NORTH    0b00000100
 #define BUTTON_EAST     0b00001000
 
-
 struct controllerInstructions {
-    uint8_t msg_type; // om det i framtiden implementeras att ge direkta positions instructionen för att flytta på drönaren hade det varit i en annan struct
+    // om det i framtiden implementeras att ge direkta positions instructionen för att flytta på drönaren hade det varit i en annan struct
+    uint8_t msg_type; 
 
     uint8_t
         stick_LX, stick_LY,
@@ -21,9 +21,11 @@ struct controllerInstructions {
     uint8_t button_input;
 };
 
-bool is_pressed(uint8_t &input, uint8_t &button) {
-    return (bool)(input & button);
-}
+struct gyroscopeData{
+    uint8_t
+        gyro_X, gyro_Y, gyro_Z,
+        accel_X, accel_Y, accel_Z;
+};
 
 struct droneInfo {
     uint8_t state;
@@ -34,9 +36,9 @@ struct droneInfo {
         power_SW,
         power_NW;
 
-    uint8_t
-        gyro_X, gyro_Y, gyro_Z,
-        accel_X, accel_Y, accel_Z;
-}
+    gyroscopeData gyroscope;
+};
+
+bool is_pressed(uint8_t &input, uint8_t &button);
 
 #endif
