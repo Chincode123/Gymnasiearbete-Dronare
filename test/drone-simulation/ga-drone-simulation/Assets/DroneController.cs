@@ -6,13 +6,18 @@ using UnityEngine;
 
 public class DroneController : MonoBehaviour
 {
-    Vector3 d_accel, d_gyro;
-    Vector3 previousVelocity;
+    Vector3 acceleration, gyro, d_gyro;
+    Vector3 previousVelocity, previousGyro;
 
     [SerializeField] float maxPropellerPower;
     [SerializeField] float[] propellerPower = new float[4];
     [SerializeField] Transform[] propellers = new Transform[4];
     [SerializeField] Vector3[] propellerDirections = new Vector3[4];
+
+    Vector3[] previousPorpellerPositions = new Vector3[4];
+    Vector3[] propellerVelocities = new Vector3[4];
+    Vector3[] previousPropellerVelocities = new Vector3[4];
+    Vector3[] propellerAccelerations = new Vector3[4];
 
     // 0-vector is up
     Vector3 direction;
@@ -25,6 +30,9 @@ public class DroneController : MonoBehaviour
         {
             propellerDirections[i] = propellers[i].position - transform.position;
         }
+
+
+        //Time.timeScale = 0.1f;
     }
 
     void Update()
@@ -53,71 +61,71 @@ public class DroneController : MonoBehaviour
         UpdateGyroscopeValues(Time.fixedDeltaTime);
     }
 
+
+    // [Get from mpu]
     void UpdateGyroscopeValues(float timeIncrement)
     {
-        d_accel = (rigidbody.velocity - previousVelocity) / timeIncrement;
+        acceleration = (rigidbody.velocity - previousVelocity) / timeIncrement;
         previousVelocity = rigidbody.velocity;
 
-        d_gyro = rigidbody.angularVelocity * Mathf.Rad2Deg;
+        gyro = rigidbody.angularVelocity * Mathf.Rad2Deg;
+        d_gyro = (gyro - previousGyro) / timeIncrement;
+        previousGyro = gyro;
+
+
+        // propelers
+        for (int i = 0; i < 4; i++)
+        {
+            propellerVelocities[i] = (propellers[i].position - previousPorpellerPositions[i]) / timeIncrement;
+            previousPorpellerPositions[i] = propellers[i].position;
+
+            propellerAccelerations[i] = (propellerVelocities[i] - previousPropellerVelocities[i]) / timeIncrement;
+            previousPropellerVelocities[i] = propellerVelocities[i];
+
+            // velocities
+            Debug.DrawLine(propellers[i].position, propellers[i].position + propellerVelocities[i], Color.blue);
+            // accelerations
+            Debug.DrawLine(propellers[i].position, propellers[i].position + propellerAccelerations[i], Color.red);
+        }
     }
 
     void ShiftPropellerPower()
     {
         for (int i = 0; i < 4; i++)
-        {
-            //int sign = (Vector3.Dot(transform.up, propellerDirections[i]) < 0) ? -1 : 1;
-            //float fsign = sign * Vector3.Project(transform.up, propellerDirections[i]).magnitude;
+        {                    
+            //Vector3 projected_acceleration = Vector3.Project(acceleration, transform.up);
+            //if (Mathf.Abs(projected_acceleration.y) < 0.1f)
+            //{
+            //    Vector3 projected_velocity = Vector3.Project(rigidbody.velocity, transform.up);
+            //    propellerPower[i] -= projected_velocity.y * Time.deltaTime * 10;
+            //}
+            //else
+            //    propellerPower[i] -= projected_acceleration.y * Time.deltaTime;
 
 
-            //int up_down = (Vector3.Project(rigidbody.velocity, transform.up).y < 0) ? 1 : -1;
 
-            //float shift = (up_down * rigidbody.velocity.magnitude + Mathf.LerpUnclamped(0, 1, d_gyro.sqrMagnitude / 1000000) * sign / Time.deltaTime) *Time.deltaTime;   
-            //propellerPower[i] += shift;
+            float shift = 0;
 
 
-            //Debug.Log(i + ": gyro: " + d_gyro + " m:" + Mathf.LerpUnclamped(-1, 1, d_gyro.sqrMagnitude / 1000000) + " acc: " + d_accel + " m:" + d_accel.magnitude + " fsign: " + fsign + " shift: " + shift);
-
-
-            //int velocity_dir = (Vector3.Dot(transform.up, rigidbody.velocity) < 0) ? 1 : -1;
-            //int acceleration_dir = (Vector3.Dot(transform.up, d_accel) < 0) ? 1 : -1;
-            //int rotation_dir = (Vector3.Dot(transform.up, propellerDirections[i]) < 0) ? 1 : -1;
-
-            //float velocity_importance = Vector3.Project(transform.up, rigidbody.velocity).magnitude;
-            //float acceleration_importance = Vector3.Project(transform.up, d_accel).magnitude;
-            //float rotaiton_importance = Vector3.Project(transform.up, propellerDirections[i]).magnitude;
-
-            //float calculated_velocity = velocity_dir * velocity_importance;
-            //float calculated_acceleration = acceleration_importance + acceleration_dir * 2;
-            //float calculated_rotation = rotation_dir * rotaiton_importance * 5;
-
-            //float shift = maxPropellerPower * ((calculated_velocity + acceleration_dir * calculated_acceleration * calculated_rotation) / 8) * Time.deltaTime;
-            //propellerPower[i] += shift;
-
-            //Debug.Log(i + ": vDir:" + velocity_dir + " vImp:" + velocity_importance + " vCalc:" + calculated_velocity +
-            //    " aDir:" + acceleration_dir + " aImp:" + acceleration_importance + " aCalc:" + calculated_acceleration +
-            //    " rDir:" + rotation_dir + " rImp:" + rotaiton_importance + " rCalc:" + calculated_rotation + " shift:" + shift);
-
-
-            
-            
-            Vector3 projected_acceleration = Vector3.Project(d_accel, transform.up);
-            if (Mathf.Abs(projected_acceleration.y) < 0.01f)
+            Vector3 projected_acceleration = Vector3.Project(propellerAccelerations[i], transform.up);
+            int acceleration_direction = (Vector3.Dot(projected_acceleration, transform.up) < 0) ? -1 : 1;
+            if (projected_acceleration.magnitude < 0.3f)
             {
-                Vector3 projected_velocity = Vector3.Project(rigidbody.velocity, transform.up);
-                propellerPower[i] -= projected_velocity.y * Time.deltaTime;
+                Vector3 projected_velocity = Vector3.Project(propellerVelocities[i], transform.up);
+                int velocity_direction = (Vector3.Dot(projected_velocity, transform.up) < 0) ? -1 : 1;
+                propellerPower[i] -= projected_velocity.magnitude * velocity_direction * Time.deltaTime * 10;
             }
             else
-                propellerPower[i] -= projected_acceleration.y * Time.deltaTime;
+                propellerPower[i] -= projected_acceleration.magnitude * acceleration_direction * Time.deltaTime;
 
 
 
 
-
-
-            float shift = Vector3.Project(transform.up, propellerDirections[i]).sqrMagnitude * ((Vector3.Dot(transform.up, propellerDirections[i]) < 0) ? -.1f : 1) * d_gyro.sqrMagnitude * Time.deltaTime;
+            shift *= Time.deltaTime;
             propellerPower[i] += shift;
 
 
+            Debug.Log(shift);
 
 
 
@@ -137,30 +145,21 @@ public class DroneController : MonoBehaviour
         return (a / (max - min)) * (nMax - nMin);
     }
 
-    void OnDrawGizmos()
-    {
-        // propeller forces
-        for (int i = 0; i < 4; i++)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(propellers[i].position, propellers[i].position + propellerPower[i] * propellers[i].up);
-        }
+    //void OnDrawGizmos()
+    //{
+    //    // propeller forces
+    //    for (int i = 0; i < 4; i++)
+    //    {
+    //        Gizmos.color = Color.red;
+    //        Gizmos.DrawLine(propellers[i].position, propellers[i].position + propellerPower[i] * propellers[i].up);
+    //    }
 
-        // velocitiy
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(transform.position, transform.position + rigidbody.velocity);
+    //    // velocitiy
+    //    Gizmos.color = Color.yellow;
+    //    Gizmos.DrawLine(transform.position, transform.position + rigidbody.velocity);
 
-        // acceleration
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawLine(transform.position, transform.position + d_accel);
-
-        // dir
-        Gizmos.color = Color.cyan;
-
-        Vector3 u = Vector3.ProjectOnPlane(transform.up, Vector3.up);
-        float angle = Mathf.Atan2(u.z, u.x) + transform.rotation.eulerAngles.y * Mathf.Deg2Rad;
-        Vector3 direction = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
-
-        Gizmos.DrawLine(transform.position, transform.position + direction);
-    }
+    //    // acceleration
+    //    Gizmos.color = Color.magenta;
+    //    Gizmos.DrawLine(transform.position, transform.position + acceleration);
+    //}
 }
