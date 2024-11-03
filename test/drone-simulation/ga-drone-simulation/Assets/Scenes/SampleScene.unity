@@ -715,7 +715,7 @@ GameObject:
   m_Component:
   - component: {fileID: 251445361}
   m_Layer: 0
-  m_Name: bottom-rigth
+  m_Name: bottom-right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1007,18 +1007,25 @@ MonoBehaviour:
   - {fileID: 1311497565}
   - {fileID: 155781938}
   propellerDirections:
-  - {x: 0.5478, y: 0, z: 0.6717}
-  - {x: -0.5046984, y: 0, z: 0.62580204}
-  - {x: -0.5278038, y: 0, z: -0.65269697}
-  - {x: 0.5246948, y: 0, z: -0.60680544}
-  a_p: 2
-  a_i: 0.5
-  a_d: 2
-  desiredAngle: -0
-  v_p: 10
-  v_i: 5
-  v_d: 0.1
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  pitchP: 1.5
+  pitchI: 0.05
+  pitchD: 1
+  desiredPitch: -0
+  rollP: 1
+  rollI: 0.05
+  rollD: 0.5
+  desiredRoll: -0
+  velocityP: 10
+  velocityI: 5
+  velocityD: 0.1
   desiredVelocity: 0
+  angleP: 5
+  angleI: 0.1
+  angleD: 5
   rigidbody: {fileID: 675060069}
 --- !u!54 &675060069
 Rigidbody:
@@ -1034,7 +1041,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 110
+  m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!4 &675060070
 Transform:
@@ -1044,7 +1051,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 675060067}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.96, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

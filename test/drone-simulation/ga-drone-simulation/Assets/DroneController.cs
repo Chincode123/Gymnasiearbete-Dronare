@@ -20,16 +20,21 @@ public class DroneController : MonoBehaviour
     Vector3[] propellerAccelerations = new Vector3[4];
 
 
-    [SerializeField] float a_p, a_i, a_d;
-    float angleIntegral = 0, previousAngleError = 0;
-    [SerializeField] float desiredAngle;
+    [SerializeField] float pitchP, pitchI, pitchD;
+    float pitchIntegral = 0, previousPitchError = 0;
+    [SerializeField] float desiredPitch;
 
-    [SerializeField] float v_p, v_i, v_d;
+    [SerializeField] float rollP, rollI, rollD;
+    float rollIntegral = 0, previousRollError = 0;
+    [SerializeField] float desiredRoll;
+
+    [SerializeField] float velocityP, velocityI, velocityD;
     float velocityIntegral = 0, previousVelocityError = 0;
     [SerializeField] float desiredVelocity;
 
-    // 0-vector is up
-    Vector3 direction;
+    [SerializeField] float angleP, angleI, angleD;
+
+    Vector3 rotation;
 
     [SerializeField] new Rigidbody rigidbody;
 
@@ -47,8 +52,9 @@ public class DroneController : MonoBehaviour
     void Update()
     {
         desiredVelocity = 10 * Input.GetAxisRaw("Triggers") * Mathf.Abs(Input.GetAxisRaw("Triggers"));
+        desiredPitch = (-Mathf.PI / 6) * Input.GetAxisRaw("Vertical");
+        desiredRoll = (-Mathf.PI / 8) * Input.GetAxisRaw("Horizontal");
 
-        desiredAngle = (-Mathf.PI / 8) * Input.GetAxisRaw("Vertical");
 
         ShiftPropellerPower();
 
@@ -73,6 +79,7 @@ public class DroneController : MonoBehaviour
         previousVelocity = rigidbody.velocity;
 
         gyro = rigidbody.angularVelocity * Mathf.Rad2Deg;
+        rotation += gyro * timeIncrement;
         d_gyro = (gyro - previousGyro) / timeIncrement;
         previousGyro = gyro;
 
@@ -102,34 +109,50 @@ public class DroneController : MonoBehaviour
         float velocityDerivitive = (velocityErorr - previousVelocityError) / Time.deltaTime;
         previousVelocityError = velocityErorr;
 
-        float basePower = v_p * velocityErorr + v_i * velocityIntegral + v_d * velocityDerivitive;
-
+        float basePower = velocityP * velocityErorr + velocityI * velocityIntegral + velocityD * velocityDerivitive;
         basePower = Mathf.Clamp(basePower, 0, maxPropellerPower);
 
-        desiredAngle = Mathf.Clamp(desiredAngle, -Mathf.PI/2, Mathf.PI/2);
-        float angleError = desiredAngle - Mathf.Atan2(-transform.up.z, transform.up.y);
 
-        angleIntegral += angleError * Time.deltaTime;
 
-        float angleDerivitive = (angleError - previousAngleError) / Time.deltaTime;
-        previousAngleError = angleError;
+        float pitchError = desiredPitch - Mathf.Atan2(-transform.up.z, transform.up.y);
 
-        float shift = a_p * angleError + a_i * angleIntegral + a_d * angleDerivitive;
+        pitchIntegral += pitchError * Time.deltaTime;
 
-        propellerPower[0] = basePower + shift;
-        propellerPower[1] = basePower + shift;
-        propellerPower[2] = basePower - shift;
-        propellerPower[3] = basePower - shift;
+        float pitchDerivitive = (pitchError - previousPitchError) / Time.deltaTime;
+        previousPitchError = pitchError;
 
-        for(int i = 0; i < 4; i++)
+
+
+        float pitchShift = pitchP * pitchError + pitchI * pitchIntegral + pitchD * pitchDerivitive;
+
+
+
+        float rollError = desiredRoll - Mathf.Atan2(-transform.up.x, transform.up.y);
+
+        pitchIntegral += rollError * Time.deltaTime;
+
+        float rollDerivitive = (rollError - previousRollError) / Time.deltaTime;
+        previousRollError = rollError;
+
+        float rollShift = rollP * rollError + rollI * rollIntegral + rollD * rollDerivitive;
+
+
+
+        propellerPower[0] = basePower + pitchShift + rollShift;
+        propellerPower[1] = basePower + pitchShift - rollShift;
+        propellerPower[2] = basePower - pitchShift - rollShift;
+        propellerPower[3] = basePower - pitchShift + rollShift;
+
+
+        for (int i = 0; i < 4; i++)
         {
             propellerPower[i] = Mathf.Clamp(propellerPower[i], 0, maxPropellerPower);
         }
     }
 
-    float map(float a, float min, float max, float nMin, float nMax)
+    float map(float x, float min, float max, float nMin, float nMax)
     {
-        return (a / (max - min)) * (nMax - nMin);
+        return (x / (max - min)) * (nMax - nMin);
     }
 
     void OnDrawGizmos()
