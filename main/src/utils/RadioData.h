@@ -39,6 +39,6 @@ struct droneInfo {
     gyroscopeData gyroscope;
 };
 
-bool is_pressed(uint8_t &input, uint8_t &button);
+bool isPressed(uint8_t &input, uint8_t &button);
 
 #endif
