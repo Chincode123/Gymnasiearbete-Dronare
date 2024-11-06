@@ -5,7 +5,7 @@ PID::PID(float& initialTarget, float& p, float& i, float& d) {
        setConstants(p, i, d);
 }
 
-PID::calculate(float& inputValue, float& deltaTime) {
+PID::calculate(float& inputValue, double& deltaTime) {
     float error = targetValue - inputValue;
 
     float derivitive = (error - previousError) / deltaTime

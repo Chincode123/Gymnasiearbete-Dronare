@@ -1,7 +1,6 @@
 #ifndef MOTORS_H_
 #define MOTORS_H_
 
-#include "../utils/Vectors.h"
 #include "../utils/PIDController.h"
 
 class MotorController {
@@ -12,12 +11,9 @@ class MotorController {
     void setPitchConstants(float& p, float& i, float& d);
     void setRollConstants(float& p, float& i, float& d);
 
-    void calculatePower(vector& rotationalSpeed, vector& acceleration, float& deltaTime);
+    void calculatePower(float& velocity, float& pitch, float& roll, double& deltaTime);
 private:
-    vector velocity;
-    vector angles;
-
-    float& motorPower1, motorPower2, motorPower3, motorPower4;
+    float &motorPower1, &motorPower2, &motorPower3, &motorPower4;
 
     // PID controller for the vertical velocity of the drone
     PID velocityController(0, 0, 0, 0);

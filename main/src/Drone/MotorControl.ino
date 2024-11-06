@@ -25,12 +25,10 @@ MotorController::setRollConstants(float& p, float& i, float& d) {
     rollController.setConstants(p, i, d);
 }
 
-MotorController::calculatePower(vector& rotationalSpeed, vector& acceleration, float& deltaTime) {
-    // TODO: set velocity and rotation
-
-    float basePower = velocityController.calculate(velocity.y, deltaTime);
-    float pitchShift = pitchController.calculate(angles.x); // *not sure what axis gyroscope is aligned to
-    float rollShift = rollController.calculate(angles.z);
+MotorController::calculatePower(float& velocity, float& pitch, float& roll, double& deltaTime) {
+    float basePower = velocityController.calculate(velocity, deltaTime);
+    float pitchShift = pitchController.calculate(pitch); // *not sure what axis gyroscope is aligned to
+    float rollShift = rollController.calculate(roll);
 
     motorPower1 = basePower + pitchShift + rollShift;
     motorPower2 = basePower + pitchShift - rollShift;
