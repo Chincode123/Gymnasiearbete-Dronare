@@ -16,11 +16,11 @@ PID::calculate(float& inputValue, double& deltaTime) {
     return p * error + i * integral + d * derivitive;
 }
 
-void setTarget(float& targetValue) {
+PID::setTarget(float& targetValue) {
     this->targetValue = targetValue;
 }
 
-void setConstants(float& p, float& i, float& d) {
+PID::setConstants(float& p, float& i, float& d) {
     this->p = p;
     this->i = i;
     this->d = d;
