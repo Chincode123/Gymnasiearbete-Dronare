@@ -5,13 +5,22 @@
 #include "../utils/RadioData.h"
 #include "MotorControl.h"
 
-RF24 radio(/*SE pin*/, /*CSN pin*/)
+#define CE_PIN 6
+#define CSN_PIN 7
 
-gyroscopeData gyroscope;
+RF24 radio(CE_PIN, CSN_PIN);
 
-float motorPower1, motorPower2, motorPower3, motorPower4;
+
+// Motors
+#define MOTOR1_Pin 
+#define MOTOR2_Pin 
+#define MOTOR3_Pin 
+#define MOTOR4_Pin 
+uint8_t motorPower1, motorPower2, motorPower3, motorPower4;
 MotorController motorController(motorPower1, motorPower2, motorPower3, motorPower4);
 
+
+// PID-values
 float targetVelocity;
 float velocityP = 0; 
 float velocityI = 0; 
@@ -27,13 +36,15 @@ float rollP = 0;
 float rollI = 0; 
 float rollD = 0;
 
+// Delta time
 unsigned long previousTime
-double deltaTime;
-void setDeltaTime() {
-    unsigned long currentTime = micros();
-    deltaTime = (double)(currentTime - previousTime) / 1000000;
-    previusTime = currentTime;
-}
+float deltaTime;
+void setDeltaTime();
+
+// Spatial position
+vector velocity;
+vector angles; // x => pitch, y => roll, z => yaw;
+void setGyroscopeValues();
 
 void setup() {
     // Set up radio
@@ -47,10 +58,28 @@ void setup() {
     motorController.setPitchConstants(pitchP, pitchI, pitchD);
     motorController.setRollConstants(rollP, rollI, rollD);
 
-
+    pinMode(MOTOR1_Pin, OUTPUT);
+    pinMode(MOTOR2_Pin, OUTPUT);
+    pinMode(MOTOR3_Pin, OUTPUT);
+    pinMode(MOTOR4_Pin, OUTPUT);
+    
+    // Initial time
     previousTime = micros();
 }
 
 void loop() {
     setDeltaTime();
+    
+    setGyroscopeValues();
+    motorController.calculatePower(velocity.y, angles.x, angles.y, deltaTime);
+    analogWrite(MOTOR1_Pin, motorPower1);   
+    analogWrite(MOTOR2_Pin, motorPower2);   
+    analogWrite(MOTOR3_Pin, motorPower3);   
+    analogWrite(MOTOR4_Pin, motorPower4);
+}
+
+void setDeltaTime() {
+    unsigned long currentTime = micros();
+    deltaTime = (float)(currentTime - previousTime) / 1000000;
+    previusTime = currentTime;
 }

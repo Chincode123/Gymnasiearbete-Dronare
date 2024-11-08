@@ -4,7 +4,7 @@
 class PID {
     PID(float& initialTarget, float& p, float& i, float& d);
 
-    float calculate(float& inputValue, double& deltaTime);
+    float calculate(float& inputValue, float& deltaTime);
 
     void setTarget(float& targetValue);
 

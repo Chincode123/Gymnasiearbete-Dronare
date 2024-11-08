@@ -1,10 +1,10 @@
 #include "motorControl.h"
  
-MotorController::MotorController(float& motorPower1, float& motorPower2, float& motorPower3, float& motorPower4) {
-    this->motorPower1 = motorPower1;
-    this->motorPower2 = motorPower2;
-    this->motorPower3 = motorPower3;
-    this->motorPower4 = motorPower4;
+MotorController::MotorController(uint8_t& motorPowerTL, uint8_t& motorPowerTR, uint8_t& motorPowerBR, uint8_t& motorPowerBL) {
+    this->motorPowerTL = motorPowerTL;
+    this->motorPowerTR = motorPowerTR;
+    this->motorPowerBR = motorPowerBR;
+    this->motorPowerBL = motorPowerBL;
 }
 
 MotorController::setTargetValues(float& targetVelocity, float& targetPitch, float& targetRoll) {
@@ -25,13 +25,14 @@ MotorController::setRollConstants(float& p, float& i, float& d) {
     rollController.setConstants(p, i, d);
 }
 
-MotorController::calculatePower(float& velocity, float& pitch, float& roll, double& deltaTime) {
+MotorController::calculatePower(float& velocity, float& pitch, float& roll, float& deltaTime) {
     float basePower = velocityController.calculate(velocity, deltaTime);
-    float pitchShift = pitchController.calculate(pitch); // *not sure what axis gyroscope is aligned to
+    basePower = constrain(basePower, 0, 255);
+    float pitchShift = pitchController.calculate(pitch);
     float rollShift = rollController.calculate(roll);
 
-    motorPower1 = basePower + pitchShift + rollShift;
-    motorPower2 = basePower + pitchShift - rollShift;
-    motorPower3 = basePower - pitchShift - rollShift;
-    motorPower4 = basePower - pitchShift + rollShift;
+    motorPowerTL = (uint8_t)constrain((basePower + pitchShift + rollShift), 0, 255);
+    motorPowerTR = (uint8_t)constrain((basePower + pitchShift - rollShift), 0, 255);
+    motorPowerBR = (uint8_t)constrain((basePower - pitchShift - rollShift), 0, 255);
+    motorPowerBL = (uint8_t)constrain((basePower - pitchShift + rollShift), 0, 255);
 }

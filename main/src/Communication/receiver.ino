@@ -1,5 +1,3 @@
-#include "receiver.h"
-
 #include <Firmata.h>
 #include <SPI.h>
 #include <nRF24L01.h>

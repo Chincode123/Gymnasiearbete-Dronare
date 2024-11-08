@@ -12,19 +12,11 @@ struct controllerInstructions {
     // om det i framtiden implementeras att ge direkta positions instructionen för att flytta på drönaren hade det varit i en annan struct
     uint8_t msg_type; 
 
-    uint8_t
+    int8_t
         stick_LX, stick_LY,
-        stick_RX, stick_RY;
-
-    uint8_t trigger_L, trigger_R;
+        triggerValues;
 
     uint8_t button_input;
-};
-
-struct gyroscopeData{
-    uint8_t
-        gyro_X, gyro_Y, gyro_Z,
-        accel_X, accel_Y, accel_Z;
 };
 
 struct droneInfo {
