@@ -8,8 +8,10 @@
 #define CE_PIN 6
 #define CSN_PIN 7
 
+// Radio
 RF24 radio(CE_PIN, CSN_PIN);
-
+controllerInstructions controller;
+void getRadioData();
 
 // Motors
 #define MOTOR1_Pin 
@@ -25,16 +27,19 @@ float targetVelocity;
 float velocityP = 0; 
 float velocityI = 0; 
 float velocityD = 0;
+float maxVelocity;
 
 float targetPitch;
 float pitchP = 0; 
 float pitchI = 0; 
 float pitchD = 0;
+float maxPitch;
 
 float targetRoll;
 float rollP = 0; 
 float rollI = 0; 
 float rollD = 0;
+float maxRoll;
 
 // Delta time
 unsigned long previousTime
@@ -44,7 +49,7 @@ void setDeltaTime();
 // Spatial position
 vector velocity;
 vector angles; // x => pitch, y => roll, z => yaw;
-void setGyroscopeValues();
+void getGyroscopeValues();
 
 void setup() {
     // Set up radio
@@ -70,7 +75,14 @@ void setup() {
 void loop() {
     setDeltaTime();
     
-    setGyroscopeValues();
+    // input
+    getRadioData();
+    targetVelocity = maxVelocity * ((float)controller.triggerValues / 127);
+    targetPitch = maxPitch * ((float)controller.stick_LY / 127);
+    targetRoll = maxRoll * ((float)controller.stick_LX / 127);
+
+    // output
+    getGyroscopeValues();
     motorController.calculatePower(velocity.y, angles.x, angles.y, deltaTime);
     analogWrite(MOTOR1_Pin, motorPower1);   
     analogWrite(MOTOR2_Pin, motorPower2);   
