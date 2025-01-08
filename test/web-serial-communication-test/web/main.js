@@ -81,7 +81,7 @@ switchButtonActivation = (index) => {
 };
 
 // -1 <= x, y, power <= 1
-getControllerInstructions = (x, y, power) => {
+sendControllerInstructions = (x, y, power) => {
     const values = new Int8Array(3);
     values[0] = (x * 127) & 0x0000FF;
     values[1] = (y * 127) & 0x0000FF;
@@ -95,18 +95,19 @@ getControllerInstructions = (x, y, power) => {
     });
 
     const messageType = 0;
-    out = new Uint8Array(6)
-    out[0] = messageType;
-    out[1] = values[0];
-    out[2] = values[1];
-    out[3] = values[2];
-    out[4] = buttonValues;
-    out[5] = messageType;
+    out = new Uint8Array(7)
+    out[0] = 60;
+    out[1] = messageType;
+    out[2] = values[0];
+    out[3] = values[1];
+    out[4] = values[2];
+    out[5] = buttonValues;
+    out[6] = 62;
 
     return out;
 };
 
-getPIDInstructions = (p, i, d, module) => {
+sendPIDInstructions = (p, i, d, module) => {
     const floatValues = new Float32Array(3);
     floatValues[0] = p;
     floatValues[1] = i;
@@ -116,23 +117,24 @@ getPIDInstructions = (p, i, d, module) => {
 
     let messageType;
     if (module == "velocity"){
-        messageType = 1
+        messageType = 1;
     } 
     else if (module == "pitch") {
-        messageType = 2
+        messageType = 2;
     }
     else if (module == "roll") {
-        messageType = 3
+        messageType = 3;
     }
     else {
         throw {name: "PID-ModuleError", message:"PID moudule type does not exist"};
     }
 
-    out = new Uint8Array(14);
-    out[0] = messageType;
-    out[13] = messageType;
-    for (let i = 1; i < 13; i++){
-        out[i] = byteValues[i-1];
+    out = new Uint8Array(15);
+    out[0] = 60;
+    out[1] = messageType;
+    out[14] = 62;
+    for (let i = 2; i < 13; i++){
+        out[i] = byteValues[i-2];
     }
     return out;
-}
+};
