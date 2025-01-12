@@ -19,42 +19,12 @@
 
 // message length in bytes
 #define _MSG_LENGHT_CONTROLLER 4
-#define _MSG_LENGHT_PID_V 12
-#define _MSG_LENGHT_PID_P 12
-#define _MSG_LENGHT_PID_R 12
-
-class Message {
-    uint8_t type, length;
-    bool instatiated = false;
-public:
-    void set(uint8_t type) {
-        instatiated = true;
-        this->type = type;
-        switch (type) {
-            case _MSG_CONTROLLER_INPUT:
-                length = _MSG_LENGTH_CONTROLLER;
-            break;
-            case _MSG_SET_PID_V:
-                length = _MSG_LENGTH_PID_V;
-            break;
-            case _MSG_SET_PID_P:
-                length = _MSG_LENGTH_PID_P;
-            break;
-            case _MSG_SET_PID_R:
-                length = _MSG_LENGTH_PID_R;
-            break;
-        }
-    }
-
-    void reset() {
-        instatiated = false;
-    }
-}
+#define _MSG_LENGHT_PID 12
 
 struct controllerInstructions {
     // devide by 127
     int8_t
-        stick_LX, stick_LY,
+        stick_X, stick_Y,
         power;
 
     uint8_t button_input;
@@ -84,7 +54,7 @@ struct gyroscopeErrors{
 
 struct gyroscopeData{
     gyroscopeValues values;
-    gyroscopeError errors;
+    gyroscopeErrors errors;
 };
 
 struct droneInfo {
