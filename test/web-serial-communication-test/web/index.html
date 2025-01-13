@@ -35,12 +35,12 @@
             grid-template-columns: 20% 80%;
         }
 
-        #power {
+        #power-slider-container {
             display: flex;
             align-items: center;
         }
 
-        #power input {
+        #power {
             height: 80%;
             width: 100%;
             writing-mode: vertical-lr;
@@ -81,8 +81,8 @@
         <div id="input">
             <div id="values">
                 <div id="controller">
-                    <div id="power">
-                        <input type="range" value="0" max="1" min="-1" step="any" list="steps">
+                    <div id="power-slider-container">
+                        <input id="power" type="range" value="0" max="1" min="-1" step="any" list="steps">
                         <datalist id="steps">
                             <option value="-1"></option>
                             <option value="-.8"></option>
@@ -101,6 +101,11 @@
                     <div id="joystick">
                         <div id="joystick-area">
                             <div id="joystick-marker"></div>
+                        </div>
+
+                        <div id="controller-info">
+                            <p>Joystick: X=<span id="joystick-x-out">0</span>; Y=<span id="joystick-y-out">0</span></p>
+                            <p>Power: <span id="power-out">0</span></p> 
                         </div>
                     </div> 
                 </div>

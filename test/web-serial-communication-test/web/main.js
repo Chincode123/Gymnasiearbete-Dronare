@@ -144,6 +144,8 @@ let using_joystick = false;
 const joystick = {x: 0, y: 0}; 
 const joystick_area = document.getElementById('joystick-area');
 const joystick_marker = document.getElementById('joystick-marker');
+const joystick_out_x = document.getElementById('joystick-x-out');
+const joystick_out_y = document.getElementById('joystick-y-out');
 
 document.addEventListener('mousemove', (event) => {
     if (!using_joystick) {
@@ -160,6 +162,8 @@ document.addEventListener('mousemove', (event) => {
     joystick.x = Math.min(Math.max(joystick.x, -1), 1);
     joystick.y = Math.min(Math.max(joystick.y, -1), 1);
 
+    joystick_out_x.innerText = joystick.x.toFixed(2);
+    joystick_out_y.innerText = joystick.y.toFixed(2);
 
     joystick_marker.style.left = `${joystick.x*50}%`;
     joystick_marker.style.top = `${joystick.y*-50}%`;
@@ -178,4 +182,12 @@ document.addEventListener('mouseup', () => {
     joystick_marker.style.top = 0;
     joystick.x = 0;
     joystick.y = 0;
+    joystick_out_x.innerText = joystick.x.toFixed(2);
+    joystick_out_y.innerText = joystick.y.toFixed(2);
+})
+
+
+const power_out = document.getElementById("power-out");
+document.getElementById('power').addEventListener('input', (event) => {
+    power_out.innerText = parseFloat(event.target.value).toFixed(2);
 })
