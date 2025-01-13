@@ -4,27 +4,97 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Serial Communicator</title>
+    <style>
+
+        div {
+            background: gray;
+            border: solid black 1px;
+        }
+
+        #wrapper {
+            width: 100%;
+            height: 100vh;
+
+
+            display: grid;
+            grid-template-columns: 70% 30%;
+        }
+
+        #input {
+            display: grid;
+            grid-template-rows: 85% 15%;
+        }
+
+        #values {
+            display: grid;
+            grid-template-columns: 55% 45%;
+        }
+
+        #controller {
+            display: grid;
+            grid-template-columns: 20% 80%;
+        }
+
+        #power {
+            display: flex;
+            align-items: center;
+        }
+
+        #power input {
+            height: 80%;
+            width: 100%;
+            writing-mode: vertical-lr;
+            direction: rtl;
+        }
+
+    </style>
 </head>
 <body>
-    <button id="select-serial">Select Port</button>
-    <br>
-    <br>
-    <button id="open">Re-open</button>
-    <br>
-    <br>
+    <div id="wrapper">
+
+
+        <div id="input">
+            <div id="values">
+                <div id="controller">
+                    <div id="power">
+                        <input type="range" value="0" max="1" min="-1" step="any" list="steps">
+                        <datalist id="steps">
+                            <option value="-1"></option>
+                            <option value="-.8"></option>
+                            <option value="-.6"></option>
+                            <option value="-.4"></option>
+                            <option value=".2"></option>
+                            <option value="0"></option>
+                            <option value=".2"></option>
+                            <option value=".4"></option>
+                            <option value=".6"></option>
+                            <option value=".8"></option>
+                            <option value="1"></option>
+                        </datalist>
+                    </div>
+
+                    <div id="joystick">
+
+                    </div> 
+                </div>
+
+                <div id="pid">
+
+                </div>
+            </div>
+
+            <div id="buttons">
+                <button id="select-serial">Select Port</button>
+                <button id="open">Re-open</button>
+            </div>
+        </div>
+
+        <div id="info">
+            <span id="output" style="display:flex; flex-direction: column-reverse;">[NO DATA RECEIVED]<br></span>
+        </div>
+
     
-    <br>
-    <button id="write">Write</button>
-
-
-    <br>
-    <br>
-    <br>
-    <br>
-    <span id="output" style="display:flex; flex-direction: column-reverse;">[NO DATA RECEIVED]<br></span>
-    
-
-
+    </div>
 
     <script src="main.js"></script>
 </body>
