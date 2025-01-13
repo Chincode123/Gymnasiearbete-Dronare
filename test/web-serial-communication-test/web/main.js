@@ -81,7 +81,7 @@ switchButtonActivation = (index) => {
 };
 
 // -1 <= x, y, power <= 1
-sendControllerInstructions = (x, y, power) => {
+getControllerInstructions = (x, y, power) => {
     const values = new Int8Array(3);
     values[0] = (x * 127) & 0x0000FF;
     values[1] = (y * 127) & 0x0000FF;
@@ -107,7 +107,7 @@ sendControllerInstructions = (x, y, power) => {
     return out;
 };
 
-sendPIDInstructions = (p, i, d, module) => {
+getPIDInstructions = (p, i, d, module) => {
     const floatValues = new Float32Array(3);
     floatValues[0] = p;
     floatValues[1] = i;
@@ -136,6 +136,8 @@ sendPIDInstructions = (p, i, d, module) => {
     for (let i = 2; i < 13; i++){
         out[i] = byteValues[i-2];
     }
+
+    console.log(out);
     return out;
 };
 
@@ -195,4 +197,66 @@ document.addEventListener('mouseup', () => {
 const power_out = document.getElementById("power-out");
 document.getElementById('power').addEventListener('input', (event) => {
     power_out.innerText = parseFloat(event.target.value).toFixed(2);
+})
+
+document.getElementById('velocity').querySelector("button").addEventListener('click', () => {
+    const instructions = getPIDInstructions(
+        document.getElementById("pid-v-p").value,
+        document.getElementById("pid-v-i").value,
+        document.getElementById("pid-v-d").value,
+        "velocity"
+    );
+
+    write(instructions);
+})
+
+document.getElementById('pitch').querySelector("button").addEventListener('click', () => {
+    const instructions = getPIDInstructions(
+        document.getElementById("pid-p-p").value,
+        document.getElementById("pid-p-i").value,
+        document.getElementById("pid-p-d").value,
+        "pitch"
+    );
+
+    write(instructions);
+})
+
+document.getElementById('roll').querySelector("button").addEventListener('click', () => {
+    const instructions = getPIDInstructions(
+        document.getElementById("pid-r-p").value,
+        document.getElementById("pid-r-i").value,
+        document.getElementById("pid-r-d").value,
+        "roll"
+    );
+
+    write(instructions);
+})
+
+document.getElementById("write-all-pid").addEventListener('click', () => {
+    let instructions = getPIDInstructions(
+        document.getElementById("pid-v-p").value,
+        document.getElementById("pid-v-i").value,
+        document.getElementById("pid-v-d").value,
+        "velocity"
+    );
+
+    write(instructions);
+
+    instructions = getPIDInstructions(
+        document.getElementById("pid-p-p").value,
+        document.getElementById("pid-p-i").value,
+        document.getElementById("pid-p-d").value,
+        "pitch"
+    );
+
+    write(instructions);
+    
+    instructions = getPIDInstructions(
+        document.getElementById("pid-r-p").value,
+        document.getElementById("pid-r-i").value,
+        document.getElementById("pid-r-d").value,
+        "roll"
+    );
+
+    write(instructions);
 })
