@@ -158,9 +158,14 @@ document.addEventListener('mousemove', (event) => {
     joystick.x = (((event.clientX - joystick_area_size.right) / joystick_area_width) + 0.5) * 2;
     joystick.y = (((event.clientY - joystick_area_size.top)  / joystick_area_width) - 0.5) * -2;
 
-
     joystick.x = Math.min(Math.max(joystick.x, -1), 1);
     joystick.y = Math.min(Math.max(joystick.y, -1), 1);
+
+    const joystick_magnitude = Math.sqrt(joystick.x * joystick.x + joystick.y * joystick.y);
+    if (joystick_magnitude > 1) {
+        joystick.x /= joystick_magnitude;
+        joystick.y /= joystick_magnitude;
+    }
 
     joystick_out_x.innerText = joystick.x.toFixed(2);
     joystick_out_y.innerText = joystick.y.toFixed(2);
