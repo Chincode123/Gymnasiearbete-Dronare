@@ -47,6 +47,31 @@
             direction: rtl;
         }
 
+        #joystick {
+            padding: 5%;
+        }
+
+        #joystick-area {
+            aspect-ratio: 1 / 1;
+            width: 80%;
+            max-height: 80%;
+            /* border-radius: 50%; */
+            background: lightgrey;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #joystick-marker {
+            background: black;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+
+            position: relative;
+        }
+
     </style>
 </head>
 <body>
@@ -74,7 +99,9 @@
                     </div>
 
                     <div id="joystick">
-
+                        <div id="joystick-area">
+                            <div id="joystick-marker"></div>
+                        </div>
                     </div> 
                 </div>
 
@@ -86,6 +113,8 @@
             <div id="buttons">
                 <button id="select-serial">Select Port</button>
                 <button id="open">Re-open</button>
+                <button id="on">Activate Drone</button>
+                <button id="off">Deactivate Drone</button>
             </div>
         </div>
 

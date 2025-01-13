@@ -138,3 +138,44 @@ sendPIDInstructions = (p, i, d, module) => {
     }
     return out;
 };
+
+
+let using_joystick = false;
+const joystick = {x: 0, y: 0}; 
+const joystick_area = document.getElementById('joystick-area');
+const joystick_marker = document.getElementById('joystick-marker');
+
+document.addEventListener('mousemove', (event) => {
+    if (!using_joystick) {
+        return;
+    }
+
+    joystick_area_size = joystick_area.getBoundingClientRect();
+    joystick_area_width = joystick_area_size.right - joystick_area_size.left;
+ 
+    joystick.x = (((event.clientX - joystick_area_size.right) / joystick_area_width) + 0.5) * 2;
+    joystick.y = (((event.clientY - joystick_area_size.top)  / joystick_area_width) - 0.5) * -2;
+
+
+    joystick.x = Math.min(Math.max(joystick.x, -1), 1);
+    joystick.y = Math.min(Math.max(joystick.y, -1), 1);
+
+
+    joystick_marker.style.left = `${joystick.x*50}%`;
+    joystick_marker.style.top = `${joystick.y*-50}%`;
+})
+
+document.getElementById("joystick-area").addEventListener('mousedown', (event) => {
+    using_joystick = true;
+})
+
+document.addEventListener('mouseup', () => {
+    if (!using_joystick) {
+        return;
+    }
+    using_joystick = false;
+    joystick_marker.style.left = 0;
+    joystick_marker.style.top = 0;
+    joystick.x = 0;
+    joystick.y = 0;
+})
