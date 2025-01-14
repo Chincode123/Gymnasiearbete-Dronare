@@ -25,7 +25,7 @@ public:
     }
 };
 
-class InstructionReader
+class InstructionHandler
 {
     Message message;
     bool reading = false;
@@ -68,10 +68,29 @@ public:
     }
 
     // returns: message type
-    uint8_t getData(void *out)
+    uint8_t getData(uint8_t *out)
     {
         memcpy(out, readBuffer, message.length);
         return message.type;
+    }
+
+    void write(uint8_t* data, uint8_t type) {
+      Message outputMessage;
+      outputMessage.set(type);
+
+      uint8_t* output = malloc(outputMessage.length + 3);
+
+      *output = 60;
+      *(output + 1) = type;
+      *(output + outputMessage.length + 2) = 62;
+
+      for (int i = 0; i < outputMessage.length; i++) {
+        *(output + i + 2) = *(data + i);
+      }
+
+      Serial.write(output, outputMessage.length + 3);
+
+      free(output);
     }
     
     void reset() {
@@ -102,7 +121,7 @@ public:
     }
 };
 
-InstructionReader reader;
+InstructionHandler reader;
 
 void setup()
 {
@@ -122,6 +141,8 @@ void loop()
         case _MSG_CONTROLLER_INPUT:
             controllerInstructions controller;
             memcpy(&controller, dataBuffer, sizeof(controller));
+
+            reader.write((uint8_t*)&controller, _MSG_CONTROLLER_INPUT);
 
             Serial.println(controller.stick_X);
             Serial.println(controller.stick_Y);
