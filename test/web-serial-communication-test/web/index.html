@@ -72,7 +72,7 @@
             position: relative;
         }
 
-        #pid input {
+        #constants input {
             width: 50px;
         }
 
@@ -80,7 +80,6 @@
 </head>
 <body>
     <div id="wrapper">
-
 
         <div id="input">
             <div id="values">
@@ -114,11 +113,11 @@
                     </div> 
                 </div>
 
-                <div id="pid">
+                <div id="constants">
                     <div id="velocity">
                         <p>Velocity</p>
                         <p>
-                            K: <input type="number" value="0" id="pid-v-p" class="p"> 
+                            P: <input type="number" value="0" id="pid-v-p" class="p"> 
                             I: <input type="number" value="0" id="pid-v-i" class="i"> 
                             D: <input type="number" value="0" id="pid-v-d" class="d"> 
                             <button type="button">Write Values</button>
@@ -127,7 +126,7 @@
                     <div id="pitch">
                         <p>Pitch</p>
                         <p>
-                            K: <input type="number" value="0" id="pid-p-p" class="p"> 
+                            P: <input type="number" value="0" id="pid-p-p" class="p"> 
                             I: <input type="number" value="0" id="pid-p-i" class="i"> 
                             D: <input type="number" value="0" id="pid-p-d" class="d"> 
                             <button type="button">Write Values</button>
@@ -136,7 +135,7 @@
                     <div id="roll">
                         <p>Roll</p>
                         <p>
-                            K: <input type="number" value="0" id="pid-r-p" class="p"> 
+                            P: <input type="number" value="0" id="pid-r-p" class="p"> 
                             I: <input type="number" value="0" id="pid-r-i" class="i"> 
                             D: <input type="number" value="0" id="pid-r-d" class="d"> 
                             <button type="button">Write Values</button>
@@ -158,7 +157,6 @@
         <div id="drone-info">
         </div>
 
-    
     </div>
 
     <script src="main.js"></script>
