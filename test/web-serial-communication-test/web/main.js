@@ -3,6 +3,7 @@ let port;
 document.querySelector("#select-serial").addEventListener("click", async () => {
     port = await navigator.serial.requestPort();
     setInterval(read, 10);
+    setInterval(sendControllerInstructions);
 });
 
 let writing = false
@@ -137,7 +138,6 @@ getPIDInstructions = (p, i, d, module) => {
         out[i] = byteValues[i-2];
     }
 
-    console.log(out);
     return out;
 };
 
@@ -260,3 +260,12 @@ document.getElementById("write-all-pid").addEventListener('click', () => {
 
     write(instructions);
 })
+
+sendControllerInstructions = () => {
+    instructions = getControllerInstructions(
+        joystick.x,
+        joystick.y,
+        document.getElementById('power').value
+    );
+    write(instructions);
+}
