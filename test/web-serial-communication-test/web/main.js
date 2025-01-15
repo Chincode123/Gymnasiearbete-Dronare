@@ -105,6 +105,8 @@ getControllerInstructions = (x, y, power) => {
     out[5] = buttonValues;
     out[6] = 62;
 
+    console.log(out);
+
     return out;
 };
 
@@ -138,6 +140,8 @@ getPIDInstructions = (p, i, d, module) => {
         out[i] = byteValues[i-2];
     }
 
+    console.log(out);
+
     return out;
 };
 
@@ -168,12 +172,6 @@ document.addEventListener('mousemove', (event) => {
         joystick.x /= joystick_magnitude;
         joystick.y /= joystick_magnitude;
     }
-
-    joystick_out_x.innerText = joystick.x.toFixed(2);
-    joystick_out_y.innerText = joystick.y.toFixed(2);
-
-    joystick_marker.style.left = `${joystick.x*50}%`;
-    joystick_marker.style.top = `${joystick.y*-50}%`;
 })
 
 document.getElementById("joystick-area").addEventListener('mousedown', (event) => {
@@ -189,15 +187,49 @@ document.addEventListener('mouseup', () => {
     joystick_marker.style.top = 0;
     joystick.x = 0;
     joystick.y = 0;
+})
+
+
+let gamepad_index;
+window.addEventListener('gamepadconnected', (event) => {    
+    gamepad_index = event.gamepad.index;
+    setInterval(gamepadInputLoop);
+})
+
+gamepadInputLoop = () => {
+    const gamepad = navigator.getGamepads()[gamepad_index];
+
+    joystick.x = gamepad.axes[0];
+    joystick.y = -gamepad.axes[1];
+
+    power = -gamepad.buttons[6].value + gamepad.buttons[7].value;
+    power *= Math.abs(power);
+
+    console.log(joystick);
+    console.log(power);
+    
+}
+
+let power = 0;
+const power_out = document.getElementById("power-out");
+const power_slider = document.getElementById('power'); 
+power_slider.addEventListener('input', (event) => {
+    power = event.target.value;
+})
+
+updateUI = () => {
+    power_out.innerText = parseFloat(power).toFixed(2);
+
+    power_slider.value = power;
+
     joystick_out_x.innerText = joystick.x.toFixed(2);
     joystick_out_y.innerText = joystick.y.toFixed(2);
-})
 
+    joystick_marker.style.left = `${joystick.x*50}%`;
+    joystick_marker.style.top = `${joystick.y*-50}%`;
+} 
 
-const power_out = document.getElementById("power-out");
-document.getElementById('power').addEventListener('input', (event) => {
-    power_out.innerText = parseFloat(event.target.value).toFixed(2);
-})
+setInterval(updateUI);
 
 document.getElementById('velocity').querySelector("button").addEventListener('click', () => {
     const instructions = getPIDInstructions(
