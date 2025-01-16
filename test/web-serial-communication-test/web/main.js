@@ -224,7 +224,7 @@ power_slider.addEventListener('input', (event) => {
 })
 
 updateUI = () => {
-    power_out.innerText = parseFloat(power).toFixed(2);
+    power_out.innerText = (parseFloat(power) * 100).toFixed() + "%";
 
     power_slider.value = power;
 
