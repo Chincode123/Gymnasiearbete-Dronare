@@ -1,7 +1,7 @@
 #include "InstructionHandler.h"
 #include "RadioData.h"
 
-bool Message::set(uint8_t type) {
+bool Message::set(uint8_t& type) {
     initiated = true;
     this->type = type;
     switch (type) {
@@ -68,7 +68,7 @@ uint8_t InstructionReader::getData(uint8_t* out) {
     return messageType;
 }
 
-void InstructionWriter::write(uint8_t* data, uint8_t type) {
+void InstructionWriter::write(uint8_t* data, uint8_t& type) {
     message.set(type);
 
     uint8_t* output = malloc(message.length + 2);

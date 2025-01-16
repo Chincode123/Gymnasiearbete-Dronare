@@ -3,7 +3,7 @@ public:
     bool initiated = false;
     uint8_t type, length;
 
-    bool set(uint8_t type);
+    bool set(uint8_t& type);
 
     void reset();
 };
@@ -26,7 +26,7 @@ class InstructionWriter {
     Message message;
 
 public:
-    void write(uint8_t* data, uint8_t type);
+    void write(uint8_t* data, uint8_t& type);
 };
 
 class InstructionHandler {
