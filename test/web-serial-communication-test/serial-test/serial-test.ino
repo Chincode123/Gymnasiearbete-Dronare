@@ -32,8 +32,7 @@ class InstructionHandler
     bool acquiredData = false;
     uint8_t readIndex = 0;
     uint8_t readBuffer[32];
-    char startMarker = '<';
-    char endMarker = '>';
+    char startMarker = 33;
 
 public:
     bool read()
@@ -47,12 +46,13 @@ public:
                 {
                     message.set(receivedByte);
                 }
-                else if (receivedByte != endMarker)
+                else if (readIndex < message.length - 1)
                 {
                     readBuffer[readIndex++] = receivedByte;
                 }
                 else
                 {
+                    readBuffer[readIndex++] = receivedByte;
                     reading = false;
                     acquiredData = true;
                     return true;
@@ -71,36 +71,44 @@ public:
     uint8_t getData(uint8_t *out)
     {
         memcpy(out, readBuffer, message.length);
-        return message.type;
+        uint8_t messageType = message.type;
+
+        acquiredData = false;
+        readIndex = 0;
+        message.reset();
+        
+        return messageType;
     }
 
     void write(uint8_t* data, uint8_t type) {
       Message outputMessage;
       outputMessage.set(type);
 
-      uint8_t* output = malloc(outputMessage.length + 3);
+      uint8_t* output = malloc(outputMessage.length + 2);
 
-      *output = 60;
+      *output = 33;
       *(output + 1) = type;
-      *(output + outputMessage.length + 2) = 62;
 
       for (int i = 0; i < outputMessage.length; i++) {
         *(output + i + 2) = *(data + i);
       }
 
-      Serial.write(output, outputMessage.length + 3);
+      Serial.write(output, outputMessage.length + 2);
+      Serial.println("");
 
       free(output);
     }
     
     void reset() {
-      Serial.println("Reset");
+      return;
+      // Serial.println("Reset");
       acquiredData = false;
       readIndex = 0;
       message.reset();
     }
 
     void debug() {
+      return;
       Serial.println("Start Debug");
 
       Serial.print("R: ");
@@ -189,17 +197,17 @@ void loop()
 
             break;
         }
-        delay(3000);
+        // delay(3000);
 
 
         reader.debug();
         reader.reset();
         reader.debug();
-        delay(1000);
+        // delay(1000);
     }
     else {
       reader.debug();
     }
 
-    delay(1000);
+    // delay(1000);
 }

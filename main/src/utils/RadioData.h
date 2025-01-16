@@ -18,15 +18,13 @@
 #define _MSG_SET_PID_R 3
 
 // message length in bytes
-#define _MSG_LENGHT_0 4
-#define _MSG_LENGHT_1 12
-#define _MSG_LENGHT_2 12
-#define _MSG_LENGHT_3 12
+#define _MSG_LENGHT_CONTROLLER 4
+#define _MSG_LENGHT_PID 12
 
 struct controllerInstructions {
     // devide by 127
     int8_t
-        stick_LX, stick_LY,
+        stick_X, stick_Y,
         power;
 
     uint8_t button_input;
@@ -56,7 +54,7 @@ struct gyroscopeErrors{
 
 struct gyroscopeData{
     gyroscopeValues values;
-    gyroscopeError errors;
+    gyroscopeErrors errors;
 };
 
 struct droneInfo {

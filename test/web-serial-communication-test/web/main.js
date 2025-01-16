@@ -137,10 +137,9 @@ getPIDInstructions = (p, i, d, module) => {
 };
 
 toInstruction = (values, messageType) => {
-    out = new Uint8Array(values.length + 3)
-    out[0] = 60;
+    out = new Uint8Array(values.length + 2)
+    out[0] = 33;
     out[1] = messageType;
-    out[out.length-1] = 62;
     for (let i = 0; i < values.length; i++){
         out[i + 2] = values[i];
     }

@@ -3,7 +3,7 @@ public:
     bool initiated = false;
     uint8_t type, length;
 
-    void set(uint8_t type);
+    bool set(uint8_t type);
 
     void reset();
 };
@@ -14,8 +14,7 @@ class InstructionReader {
     bool acquiredData = false;
     uint8_t readIndex = 0;
     uint8_t readBuffer[32];
-    char startMarker = '<';
-    char endMarker = '>';
+    uint8_t startMarker = 33;
 
 public:
     bool read();
