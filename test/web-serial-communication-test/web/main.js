@@ -147,6 +147,10 @@ toInstruction = (values, messageType) => {
     return out;
 }
 
+readPIDInstruction = (buffer) => {
+    const floatValues = new Float32Array(buffer);
+    return {p: floatValues[0], i: floatValues[1], d: floatValues[2]};
+}
 
 let using_joystick = false;
 const joystick = {x: 0, y: 0}; 
