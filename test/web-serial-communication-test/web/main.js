@@ -94,16 +94,15 @@ getControllerInstructions = (x, y, power) => {
             buttonValues = buttonValues | button.value;
         }
     });
+    
+    uint8 = new Uint8Array(4)
+    uint8[0] = values[0];
+    uint8[1] = values[1];
+    uint8[2] = values[2];
+    uint8[3] = buttonValues;
 
     const messageType = 0;
-    out = new Uint8Array(7)
-    out[0] = 60;
-    out[1] = messageType;
-    out[2] = values[0];
-    out[3] = values[1];
-    out[4] = values[2];
-    out[5] = buttonValues;
-    out[6] = 62;
+    const out = toInstruction(uint8, messageType);
 
     console.log(out);
 
@@ -132,18 +131,21 @@ getPIDInstructions = (p, i, d, module) => {
         throw {name: "PID-ModuleError", message:"PID moudule type does not exist"};
     }
 
-    out = new Uint8Array(15);
-    out[0] = 60;
-    out[1] = messageType;
-    out[14] = 62;
-    for (let i = 2; i < 13; i++){
-        out[i] = byteValues[i-2];
-    }
-
-    console.log(out);
+    const out = toInstruction(byteValues, messageType);
 
     return out;
 };
+
+toInstruction = (values, messageType) => {
+    out = new Uint8Array(values.length + 3)
+    out[0] = 60;
+    out[1] = messageType;
+    out[out.length-1] = 62;
+    for (let i = 0; i < values.length; i++){
+        out[i + 2] = values[i];
+    }
+    return out;
+}
 
 
 let using_joystick = false;
