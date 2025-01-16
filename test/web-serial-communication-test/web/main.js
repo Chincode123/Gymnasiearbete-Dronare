@@ -40,6 +40,15 @@ read = async () => {
             }
             if (value) {
                 console.log(value);
+
+                for (const byte of value) {
+                    const result = serialReader.read(byte);
+
+                    if (result.done) {
+                        console.log(result.value);
+                    }
+                }
+
                 document.getElementById('output').innerHTML += new TextDecoder().decode(value);
             }
           }
@@ -151,7 +160,8 @@ class SerialMessage{
     type;
     length;
 
-    messageLengths = new Map([0, 4], [1, 12], [2, 12], [3, 12])
+    messageLengths = new Map([[0, 4], [1, 12], [2, 12], [3, 12]]);
+    messageTypes = new Map([[0, "controller-instructions"], [1, "pid-velocity"], [2, "pid-pitch"], [3, "pid-roll"]]);
 
     set = (type) => {
         if (this.messageLengths.has(type)) {
@@ -187,7 +197,7 @@ class SerialReader {
             else  {
                 this.data[this.data.length] = byte;
                 reading = false;
-                return {data: new Uint8Array(data), done: true, messageType: this.message.type};
+                return {data: new Uint8Array(data), done: true, messageType: this.message.messageTypes.get(this.message.type)};
             }
         }
         else if (byte == this.marker.start) {
@@ -204,6 +214,8 @@ class SerialReader {
         return {p: floatValues[0], i: floatValues[1], d: floatValues[2]};
     }
 }
+serialReader = new SerialReader();
+
 
 let using_joystick = false;
 const joystick = {x: 0, y: 0}; 
