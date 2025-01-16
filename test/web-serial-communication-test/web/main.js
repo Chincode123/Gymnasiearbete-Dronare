@@ -146,9 +146,63 @@ toInstruction = (values, messageType) => {
     return out;
 }
 
-readPIDInstruction = (buffer) => {
-    const floatValues = new Float32Array(buffer);
-    return {p: floatValues[0], i: floatValues[1], d: floatValues[2]};
+class SerialMessage{
+    initiated = false;
+    type;
+    length;
+
+    messageLengths = new Map([0, 4], [1, 12], [2, 12], [3, 12])
+
+    set = (type) => {
+        if (this.messageLengths.has(type)) {
+            this.initiated = true;
+            this.type = type;
+            this.length = this.messageLengths.get(type);
+            return true;
+        }
+        return false;
+    }
+
+    reset = () => {
+        this.initiated = false;
+    }
+}
+
+class SerialReader {
+    message = new SerialMessage();
+    data = [];
+    reading = false;
+    startMarker = 33;
+
+    read = (byte) => {
+        if (this.reading) {
+            if (!this.message.initiated) {
+                if (!this.message.set(byte)) {
+                    this.reading = false;
+                }
+            }
+            else if (this.data.length < this.message.length) {
+                this.data[this.data.length] = byte;
+            }
+            else  {
+                this.data[this.data.length] = byte;
+                reading = false;
+                return {data: new Uint8Array(data), done: true, messageType: this.message.type};
+            }
+        }
+        else if (byte == this.marker.start) {
+            reading = true
+        }
+
+        this.message.reset();
+
+        return {done: false};
+    }
+
+    readPIDInstruction = (data) => {
+        const floatValues = new Float32Array(data.buffer);
+        return {p: floatValues[0], i: floatValues[1], d: floatValues[2]};
+    }
 }
 
 let using_joystick = false;

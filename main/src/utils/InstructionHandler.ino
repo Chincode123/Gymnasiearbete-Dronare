@@ -43,7 +43,7 @@ bool InstructionReader::read() {
                 }
                 else
                 {
-                    readBuffer[readIndex++] = receivedByte;
+                    readBuffer[readIndex] = receivedByte;
                     reading = false;
                     acquiredData = true;
                     return true;
