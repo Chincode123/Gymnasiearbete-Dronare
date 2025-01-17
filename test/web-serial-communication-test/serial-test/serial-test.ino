@@ -161,6 +161,8 @@ void loop()
             PID_Instructions pid_v;
             memcpy(&pid_v, dataBuffer, sizeof(pid_v));
 
+            reader.write((uint8_t*)&pid_v, _MSG_SET_PID_V);
+
             Serial.println("Velocity");
             Serial.print("P: ");
             Serial.println(pid_v.k_p);
@@ -173,6 +175,8 @@ void loop()
         case _MSG_SET_PID_P:
             PID_Instructions pid_p;
             memcpy(&pid_p, dataBuffer, sizeof(pid_p));
+
+            reader.write((uint8_t*)&pid_p, _MSG_SET_PID_P);
 
             Serial.println("Pitch");
             Serial.print("P: ");
@@ -187,6 +191,8 @@ void loop()
             PID_Instructions pid_r;
             memcpy(&pid_r, dataBuffer, sizeof(pid_r));
             
+            reader.write((uint8_t*)&pid_r, _MSG_SET_PID_R);
+
             Serial.println("Roll");
             Serial.print("P: ");
             Serial.println(pid_r.k_p);
