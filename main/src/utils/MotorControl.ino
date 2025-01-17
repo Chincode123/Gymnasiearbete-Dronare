@@ -1,4 +1,4 @@
-#include "motorControl.h"
+#include "MotorControl.h"
  
 MotorController::MotorController(uint8_t& motorPowerTL, uint8_t& motorPowerTR, uint8_t& motorPowerBR, uint8_t& motorPowerBL) {
     this->motorPowerTL = motorPowerTL;

@@ -26,36 +26,31 @@ void Message::reset() {
 }
 
 bool InstructionReader::read() {
-    while (Serial.available() > 0 && !acquiredData)
-        {
+    while (Serial.available() > 0 && !acquiredData) {
             uint8_t receivedByte = Serial.read();
-            if (reading) 
-            {
-                if (!message.initiated)
-                {
+            if (reading) {
+                if (!message.initiated) {
                     if (!message.set(receivedByte)) {
+                        // Message is invalid
                         reading = false;
                     }
                 }
-                else if (readIndex < message.length - 1)
-                {
+                else if (readIndex < message.length - 1) {
                     readBuffer[readIndex++] = receivedByte;
                 }
-                else
-                {
+                else {
                     readBuffer[readIndex] = receivedByte;
                     reading = false;
                     acquiredData = true;
                     return true;
                 }
             }
-            else if (receivedByte == startMarker)
-            {
+            else if (receivedByte == startMarker) {
                 reading = true;
             }
-        }
+    }
 
-        return false;
+    return false;
 }
 
 uint8_t InstructionReader::getData(uint8_t* out) {
@@ -80,6 +75,7 @@ void InstructionWriter::write(uint8_t* data, uint8_t& type) {
         *(output + i + 2) = *(data + i);
     }
 
+    // temp
     Serial.write(output, message.length + 2);
 
     free(output);
