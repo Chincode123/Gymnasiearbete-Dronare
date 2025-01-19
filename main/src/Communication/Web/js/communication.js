@@ -8,12 +8,22 @@ class SerialMessage {
     [1, 12],
     [2, 12],
     [3, 12],
+    [4, 0],
+    [5, 0],
+    [6, 0],
+    [7, 12],
+    [8, 0]
   ]);
   messageTypes = new Map([
     [0, "controller-instructions"],
     [1, "pid-velocity"],
     [2, "pid-pitch"],
     [3, "pid-roll"],
+    [4, "request-pid-velocity"],
+    [5, "request-pid-pitch"],
+    [6, "request-pid-roll"],
+    [7, "target-ranges"],
+    [8, "request-target-ranges"]
   ]);
 
   set = (type) => {
@@ -68,6 +78,11 @@ class SerialReader {
   readPIDInstruction = (data) => {
     const floatValues = new Float32Array(data.buffer);
     return { p: floatValues[0], i: floatValues[1], d: floatValues[2] };
+  };
+
+  readTargetRanges = (data) => {
+    const floatValues = new Float32Array(data.buffer);
+    return { maxPitch: floatValues[0], maxRoll: floatValues[1], maxVerticalVelocity: floatValues[2] };
   };
 }
 serialReader = new SerialReader();
@@ -194,6 +209,21 @@ getPIDInstructions = (p, i, d, module) => {
       message: "PID moudule type does not exist",
     };
   }
+
+  const out = toInstruction(byteValues, messageType);
+
+  return out;
+};
+
+getTargetRangeInstructions = (maxPitch, maxRoll, maxVerticalVelocity) => {
+  const floatValues = new Float32Array(3);
+  floatValues[0] = maxPitch;
+  floatValues[1] = maxRoll;
+  floatValues[2] = maxVerticalVelocity;
+
+  const byteValues = new Uint8Array(floatValues.buffer);
+
+  const messageType = 7;
 
   const out = toInstruction(byteValues, messageType);
 

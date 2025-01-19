@@ -3,23 +3,29 @@
 
 #define PIPE_ADDRESSES {"00001", "00002"}
 
-#define BUTTON_0    0b00000001
-#define BUTTON_1    0b00000010
-#define BUTTON_2    0b00000100
-#define BUTTON_3    0b00001000
-#define BUTTON_4    0b00010000
-#define BUTTON_5    0b00100000
-#define BUTTON_6    0b01000000
-#define BUTTON_7    0b10000000
+#define BUTTON_ACTIVATE     0b00000001
+#define BUTTON_DEACTIVATE   0b00000010
+#define BUTTON_2            0b00000100
+#define BUTTON_3            0b00001000
+#define BUTTON_4            0b00010000
+#define BUTTON_5            0b00100000
+#define BUTTON_6            0b01000000
+#define BUTTON_7            0b10000000
 
 #define _MSG_CONTROLLER_INPUT 0
 #define _MSG_SET_PID_V 1
 #define _MSG_SET_PID_P 2
 #define _MSG_SET_PID_R 3
+#define _MSG_REQUEST_PID_V 4
+#define _MSG_REQUEST_PID_P 5
+#define _MSG_REQUEST_PID_R 6
+#define _MSG_SET_TARGET_RANGES 7
+#define _MSG_REQUEST_TARGET_RANGES 8
 
 // message length in bytes
 #define _MSG_LENGHT_CONTROLLER 4
 #define _MSG_LENGHT_PID 12
+#define _MSG_LENGTH_TARGET_RANGES 12
 
 struct controllerInstructions {
     // devide by 127
@@ -33,6 +39,10 @@ struct controllerInstructions {
 struct PID_Instructions {
     float k_p, k_i, k_d;
 };
+
+struct TargetRangeInstructions {
+    float pitchMax, rollMax, verticalVelocityMax;
+}
 
 struct gyroscopeValues {
     float   pitch,

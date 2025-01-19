@@ -12,8 +12,15 @@ bool Message::set(uint8_t& type) {
         case _MSG_SET_PID_P:
         case _MSG_SET_PID_R:
             length = _MSG_LENGHT_PID;
+        case _MSG_SET_TARGET_RANGES:
+            length = _MSG_LENGTH_TARGET_RANGES;
         break;
 
+        case _MSG_REQUEST_PID_V:
+        case _MSG_REQUEST_PID_P:
+        case _MSG_REQUEST_PID_R:
+        case _MSG_REQUEST_TARGET_RANGES:
+            length = 0;
         default:
             return false;
     }
