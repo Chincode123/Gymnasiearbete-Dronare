@@ -1,3 +1,4 @@
+// https://forum.arduino.cc/t/simple-nrf24l01-2-4ghz-transceiver-demo/405123
 // SimpleTx - the master or the transmitter
 
 #include <SPI.h>
@@ -9,6 +10,7 @@
 #define CSN_PIN  8
 
 const byte slaveAddress[5] = {'R','x','A','A','A'};
+const byte masterAddress[5] = {'T','X','a','a','a'};
 
 char debugBuffer[870] = {"\0"};
 
@@ -16,19 +18,20 @@ RF24 radio(CE_PIN, CSN_PIN, 4000000); // Create a Radio
 
 char dataToSend[10] = "Message 0";
 char txNum = '0';
+int dataReceived[2];
+bool newData = false;
 
 
 unsigned long currentMillis;
 unsigned long prevMillis;
-unsigned long txIntervalMillis = 1000; // send once per second
-
+unsigned long txIntervalMillis = 1000;
 
 void setup() {
 
     Serial.begin(9600);
     while (!Serial);
 
-    Serial.println("SimpleTx Starting");
+    Serial.println("Starting");
 
     if (!radio.begin()){
         Serial.println(F("radio hardware not responding!"));
@@ -44,8 +47,9 @@ void setup() {
     
     radio.setPALevel(RF24_PA_MAX, 1);
 
-    radio.setRetries(3,5); // delay, count
     radio.openWritingPipe(slaveAddress);
+    radio.openReadingPipe(1, masterAddress);
+    radio.setRetries(3,5); // delay, count
 
     uint16_t usedChars = radio.sprintfPrettyDetails(debugBuffer);
     Serial.println(debugBuffer);
@@ -60,6 +64,9 @@ void setup() {
       if (exit)
         break;
     }
+
+    send();
+    prevMillis = millis();
 }
 
 //====================
@@ -70,17 +77,19 @@ void loop() {
         send();
         prevMillis = millis();
     }
+    getData();
+    showData();
 }
 
 //====================
 
 void send() {
-
+    radio.stopListening();
     bool rslt;
     rslt = radio.write( &dataToSend, sizeof(dataToSend) );
         // Always use sizeof() as it gives the size as the number of bytes.
         // For example if dataToSend was an int sizeof() would correctly return 2
-
+    radio.startListening();
     Serial.print("Data Sent ");
     Serial.print(dataToSend);
     if (rslt) {
@@ -89,6 +98,25 @@ void send() {
     }
     else {
         Serial.println("  Tx failed");
+    }
+}
+
+void getData() {
+    if (radio.available()) {
+        radio.read(&dataReceived, sizeof(dataReceived));
+        newData = true;
+    }
+}
+
+void showData() {
+    if (newData) {
+        if (newData == true) {
+        Serial.print("Data received ");
+        Serial.print(dataReceived[0]);
+        Serial.print(", ");
+        Serial.println(dataReceived[1]);
+        newData = false;
+    }
     }
 }
 
