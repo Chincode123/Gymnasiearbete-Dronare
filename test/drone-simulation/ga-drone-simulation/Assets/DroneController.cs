@@ -155,6 +155,17 @@ public class DroneController : MonoBehaviour
         return (x / (max - min)) * (nMax - nMin);
     }
 
+    float calculateMotorPower(float x) {
+        if (x <= 0)
+            return 0;
+        
+        if (x > 1)
+            x = 1;
+        
+        // function generated from regression of provided motor powers (https://darwinfpv.com/products/darwin-1104-4300kv-brushless-motor) using Geogebra (https://www.geogebra.org/m/vqm62ynm)
+        return -2.7731729055258 * (x * x * x * x) + 4.2924375448958 * (x * x * x) - 0.9893438555883 * (x * x) + 0.9857510176391 * x - 0.0011584164738;
+    }
+
     void OnDrawGizmos()
     {
         // propeller forces
