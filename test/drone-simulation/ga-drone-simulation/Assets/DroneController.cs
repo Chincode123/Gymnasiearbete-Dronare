@@ -65,7 +65,7 @@ public class DroneController : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
-            rigidbody.AddForceAtPosition(transform.up * propellerPower[i], propellers[i].position);
+            rigidbody.AddForceAtPosition(transform.up * calculateMotorPower(propellerPower[i]), propellers[i].position);
         }
 
         UpdateGyroscopeValues(Time.fixedDeltaTime);
