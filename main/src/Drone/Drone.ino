@@ -11,7 +11,7 @@
 
 // Radio
 RF24 radio(CE_PIN, CSN_PIN, 4000000);
-controllerInstructions controller;
+uint8_t readBuffer[32];
 void getRadioData();
 
 
@@ -82,14 +82,31 @@ void loop() {
     setDeltaTime();
     
     // input
-    getRadioData();
-    targetVelocity = maxVelocity * ((float)controller.triggerValues / 127);
-    targetPitch = maxPitch * ((float)controller.stick_LY / 127);
-    targetRoll = maxRoll * ((float)controller.stick_LX / 127);
+    if (radio.available()) {
+        radio.read(&readBuffer, sizeof(readBuffer));
+
+        RadioMessage message;
+        memcpy(&message, &readBuffer, sizeof(message));
+
+        switch (message.type) {
+            case _MSG_CONTROLLER_INPUT:
+                controllerInstructions controller;
+                memcpy(&controller, &message.dataBuffer, sizeof(controller));
+                
+                targetVelocity = maxVelocity * ((float)controller.triggerValues / 127);
+                targetPitch = maxPitch * ((float)controller.stick_LY / 127);
+                targetRoll = maxRoll * ((float)controller.stick_LX / 127);
+                break;
+            // TODO: add all cases
+            default:
+                consoleLog("Error interpreting messageType");
+                break;
+        }
+    }
 
     // output
-    getGyroscopeValues();
-    motorController.calculatePower(velocity.y, angles.x, angles.y, deltaTime);
+    orientation.update(deltaTime);
+    motorController.calculatePower(orientation.velocity, orientation.angles.x, orientation.angles.y, deltaTime);
     analogWrite(MOTOR_TL_Pin, motorPowerTL);   
     analogWrite(MOTOR_TR_Pin, motorPowerTR);   
     analogWrite(MOTOR_BR_Pin, motorPowerBR);   
@@ -102,7 +119,7 @@ void setDeltaTime() {
     previusTime = currentTime;
 }
 
-bool sendRadio(uint8_t* data, uint8_t length) {
+bool sendWithRadio(uint8_t* data, uint8_t length) {
     radio.stopListening();
     bool result = radio.write(data, length);
     radio.startListening();
@@ -116,5 +133,5 @@ void consoleLog(const char* message) {
     uint8_t messageLength = strlen(message);
     messageLength = (messageLength < 31) ? messageLength : 31;
     memcpy(&logMessage.dataBuffer, &message, messageLength);
-    sendRadio(&logMessage, sizeof(logMessage));
+    sendWithRadio(&logMessage, sizeof(logMessage));
 }

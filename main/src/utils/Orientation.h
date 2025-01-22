@@ -32,6 +32,6 @@ public:
     vector acceleration;
     float velocity;
 
-    void update();
+    void update(float deltaTime);
 };
 #endif
