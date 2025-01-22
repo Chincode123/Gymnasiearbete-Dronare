@@ -1,6 +1,8 @@
 #include "InstructionHandler.h"
 #include "RadioData.h"
 
+Message::Message() {}
+
 Message::Message(uint8_t& type) {
     set(type);
 }
@@ -71,8 +73,6 @@ uint8_t InstructionHandler::getData(uint8_t* out) {
     acquiredData = false;
     readIndex = 0;
     message.reset();
-
-    write(nullptr, _MSG_ACKNOWLEDGE);
     
     return messageType;
 }
@@ -93,4 +93,8 @@ void InstructionHandler::write(uint8_t* data, uint8_t& type) {
     Serial.write(output, messageOut.length + 2);
 
     free(output);
+}
+
+void InstructionHandler::acknowledge() {
+    write(nullptr, _MSG_ACKNOWLEDGE);
 }

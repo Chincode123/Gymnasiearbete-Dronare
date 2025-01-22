@@ -1,17 +1,70 @@
-#include <Firmata.h>
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
-#include ".\RadioData.h"
+#include "../utils/RadioData.h"
+#include "../utils/RadioTransceiver.h"
+#include "../utils/InstructionHandler.h"
 
-RF24 radio(/*SE pin*/, /*CSN pin*/)
+#define CE_PIN 7
+#define CSN_PIN 8
 
-void setup() {
+RF24 radio(CE_PIN, CSN_PIN, 4000000);
+
+InstructionHandler instructionHandler;
+uint8_t readBuffer[31];
+
+RadioMessage messageOut, messageIn;
+
+void setup()
+{
+    Serial.begin(9600);
+    while (!Serial);
+
     radio.begin();
-    radio.openWritingPipe(PIPE_ADDRESSES[0]);
-    radio.openReadingPipe(1, PIPE_ADDRESSES[1]);
+    configureRadio(radio);
+    radio.openWritingPipe(RECEIVER_ADDRESS);
+    radio.openReadingPipe(1, DRONE_ADDRESS);
+    radio.startListening();
 }
 
-void loop() {
+void loop()
+{
+    if (instructionHandler.read())
+    {
+        uint8_t messageType = instructionHandler.getData(readBuffer);
+        switch (messageType)
+        {
+        case _MSG_CONTROLLER_INPUT:
+            Serial.println("[RECEIVER] Received controller input");
+            break;
+        default:
+            Serial.println("[RECEIVER] Received request");
+            break;
+        }
 
+        messageOut.messageType = messageType;
+        memcpy(&messageOut.dataBuffer, &readBuffer, sizeof(messageOut.dataBuffer));
+        send();
+    }
+
+    if (radio.available()) {
+        radio.read(&messageIn, sizeof(messageIn));
+        instructionHandler.write(&messageIn.dataBuffer, messageIn.messageType);
+    }
+}
+
+void send()
+{
+    radio.stopListening();
+    bool result = radio.write(messageOut, sizeof(messageOut));
+    radio.startListening();
+    if (result)
+    {
+        Serial.println("[RECEIVER] Radio acknowledgment received");
+        instructionHandler.acknowledge();
+    }
+    else
+    {
+        Serial.println("[RECEIVER] Radio acknowledgment not received");
+    }
 }

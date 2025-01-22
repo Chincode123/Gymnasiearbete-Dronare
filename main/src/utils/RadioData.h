@@ -1,7 +1,8 @@
 #ifndef RADIODATA_H_
 #define RADIODATA_H_
 
-#define PIPE_ADDRESSES {"00001", "00002"}
+#define DRONE_ADDRESS       (uint8_t*)"DRONE"  
+#define RECEIVER_ADDRESS    (uint8_t*)"RCEVR"
 
 #define BUTTON_ACTIVATE     0b00000001
 #define BUTTON_DEACTIVATE   0b00000010

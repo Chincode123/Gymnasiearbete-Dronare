@@ -4,10 +4,10 @@
 // substitute when uploading code
 #if DRONE
 
-#include "main/src/Drone/Drone.ino"
+#include "src/drone/Drone.ino"
 
 #else
 
-#include "main/src/Communication/receiver.ino"
+#include "src/Communication/Receiver.ino"
 
 #endif

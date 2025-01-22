@@ -4,12 +4,13 @@
 #include "../utils/RadioData.h"
 #include "../utils/MotorControl.h"
 #include "../utils/Vectors.h"
+#include "../utils/RadioTransceiver.h"
 
 #define CE_PIN 6
 #define CSN_PIN 7
 
 // Radio
-RF24 radio(CE_PIN, CSN_PIN);
+RF24 radio(CE_PIN, CSN_PIN, 4000000);
 controllerInstructions controller;
 void getRadioData();
 
@@ -54,9 +55,15 @@ void getGyroscopeValues();
 
 void setup() {
     // Set up radio
-    radio.begin();
-    radio.openWritingPipe(PIPE_ADDRESSES[1]);
-    radio.openReadingPipe(1, PIPE_ADDRESSES[0]);
+    if (!radio.begin()){
+        Serial.println(F("radio hardware not responding!"));
+        while (true);
+    }
+    if(!configureRadio(radio)) {
+        while (true);
+    }
+    radio.openWritingPipe(DRONE_ADDRESS);
+    radio.openReadingPipe(1, RECEIVER_ADDRESS);
 
     // Set up motor controller
     motorController.setTargetValues(targetVelocity, targetPitch, targetRoll);
