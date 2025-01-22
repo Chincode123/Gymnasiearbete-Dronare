@@ -1,35 +1,39 @@
 #include "Vectors.h"
 
-vector::operator+(vector& u){
-    return (vector){x + u.x, y + u.y, z + u.z};
+float vector::length(){
+    return sqrt((*this) * (*this));
 }
 
-vector::operator-(vector& u){
-    return (vector){x - u.x, y - u.y, z - u.z};
+vector operator+(vector& u, vector& v) {
+    return vector {u.x + v.x, u.y + v.y, u.z + v.z};
 }
 
-vector::operator*(vector& u){
-    return x * u.x + y * u.y + z * u.z;
+vector operator-(vector& u, vector& v) {
+    return vector {u.x - v.x, u.y - v.y, u.z - v.z};
 }
 
-vector operator*(float& a){
-    return (vector){x * a, y * a, z * a};
+float operator*(vector& u, vector& v) {
+    return u.x * v.x + u.y * v.y + u.z * v.z;
 }
 
-vector operator/(float& a){
-    return (vector){x / a, y / a, z / a};   
+vector operator*(vector& u, float a) {
+    return vector {u.x * a, u.y * a, u.z * a};
 }
 
-vector::length(){
-    return sqrt(this * this)
+vector operator*(float a, vector& u) {
+    return vector {u.x * a, u.y * a, u.z * a};
+}
+
+vector operator/(vector& u, float a) {
+    return vector {u.x / a, u.y / a, u.z / a};   
 }
 
 vector addVectors(vector& a, vector& b){
-    return (vector){a.x + b.x, a.y + b.y, a.z + b.z};
+    return vector {a.x + b.x, a.y + b.y, a.z + b.z};
 }
 
 vector subtractVectors(vector& a, vector&b){
-    return (vector){a.x - b.x, a.y - b.y, a.z - b.z};
+    return vector {a.x - b.x, a.y - b.y, a.z - b.z};
 }
 
 float dotProduct(vector& a, vector& b) {

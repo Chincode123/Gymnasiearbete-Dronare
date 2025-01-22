@@ -1,9 +1,9 @@
-#include "Drone.h"
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
 #include "../utils/RadioData.h"
-#include "MotorControl.h"
+#include "../utils/MotorControl.h"
+#include "../utils/Vectors.h"
 
 #define CE_PIN 6
 #define CSN_PIN 7
