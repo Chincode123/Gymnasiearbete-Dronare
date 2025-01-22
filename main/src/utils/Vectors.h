@@ -11,10 +11,12 @@ struct vector {
 // Add two vectors
 // return: u + v 
 vector operator+(vector& u, vector& v);
+vector operator+=(vector& u, vector& v);
 
 // Subtract two vectors
 // return: u - v 
 vector operator-(vector& u, vector& v);
+vector operator-=(vector& u, vector& v);
 
 // Dot product of two vectors
 // return: u *(dot) v 
@@ -23,15 +25,12 @@ float operator*(vector& u, vector& v);
 // Multiplies a vector with a scalar
 // return: (vector)u * (scalar)v 
 vector operator*(vector& u, float a);
-
-// Multiplies a vector with a scalar
-// return: (vector)u * (scalar)v 
-vector operator*(float a, vector& u);
+vector operator*=(vector& u, float a);
 
 // Devides a vector with a scalar
-// return: (vector)u * (scalar)a 
+// return: (vector)u / (scalar)a 
 vector operator/(vector& u, float a);
-
+vector operator/=(vector& u, float a);
 
 // Add vectors: a and b
 vector addVectors(vector& a, vector&b);

@@ -5,11 +5,19 @@ float vector::length(){
 }
 
 vector operator+(vector& u, vector& v) {
-    return vector {u.x + v.x, u.y + v.y, u.z + v.z};
+    return {u.x + v.x, u.y + v.y, u.z + v.z};
+}
+
+vector operator+=(vector& u, vector& v) {
+    u = u + v;
 }
 
 vector operator-(vector& u, vector& v) {
-    return vector {u.x - v.x, u.y - v.y, u.z - v.z};
+    return {u.x - v.x, u.y - v.y, u.z - v.z};
+}
+
+vector operator-=(vector& u, vector& v) {
+    u = u - v;
 }
 
 float operator*(vector& u, vector& v) {
@@ -17,23 +25,27 @@ float operator*(vector& u, vector& v) {
 }
 
 vector operator*(vector& u, float a) {
-    return vector {u.x * a, u.y * a, u.z * a};
+    return {u.x * a, u.y * a, u.z * a};
 }
 
-vector operator*(float a, vector& u) {
-    return vector {u.x * a, u.y * a, u.z * a};
+vector operator*=(vector& u, float a) {
+    u = u * a;
 }
 
 vector operator/(vector& u, float a) {
-    return vector {u.x / a, u.y / a, u.z / a};   
+    return {u.x / a, u.y / a, u.z / a};   
+}
+
+vector operator/=(vector& u, float a) {
+    u = u / a;
 }
 
 vector addVectors(vector& a, vector& b){
-    return vector {a.x + b.x, a.y + b.y, a.z + b.z};
+    return {a.x + b.x, a.y + b.y, a.z + b.z};
 }
 
 vector subtractVectors(vector& a, vector&b){
-    return vector {a.x - b.x, a.y - b.y, a.z - b.z};
+    return {a.x - b.x, a.y - b.y, a.z - b.z};
 }
 
 float dotProduct(vector& a, vector& b) {
