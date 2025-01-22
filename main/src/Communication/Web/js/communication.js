@@ -113,7 +113,6 @@ read = async () => {
       while (true) {
         const { value, done } = await reader.read();
         if (done) {
-          document.getElementById("output").innerHTML += "<br>";
           // Allow the serial port to be closed later.
           reader.releaseLock();
           break;
@@ -127,8 +126,9 @@ read = async () => {
             }
           }
 
+
           document.getElementById("output").innerHTML +=
-            new TextDecoder().decode(value);
+            new TextDecoder().decode(value).replace(/\n/g, '<br>');
           if (document.getElementById("output").innerHTML.length > 500) {
             document.getElementById("output").innerHTML = document
               .getElementById("output")
