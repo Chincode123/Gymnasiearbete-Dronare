@@ -111,6 +111,8 @@ bool sendRadio(uint8_t* data, uint8_t length) {
     return result;
 }
 
+#ifndef DRONE_LOG
+#define DRONE_LOG
 void consoleLog(const char* message) {
     RadioMessage logMessage;
     logMessage.messageType = _MSG_DRONE_LOG;
@@ -119,3 +121,4 @@ void consoleLog(const char* message) {
     memcpy(&logMessage.dataBuffer, &message, messageLength);
     sendRadio(&logMessage, sizeof(logMessage));
 }
+#endif
