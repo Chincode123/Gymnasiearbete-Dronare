@@ -1,8 +1,6 @@
-#include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
 #include "../utils/RadioData.h"
-#include "../utils/RadioTransceiver.h"
 #include "../utils/InstructionHandler.h"
 
 #define CE_PIN 7

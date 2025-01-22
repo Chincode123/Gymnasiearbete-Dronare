@@ -88,4 +88,8 @@ struct droneInfo {
 
 bool isPressed(uint8_t &input, uint8_t &button);
 
+#include <RF24.h>
+
+bool configureRadio(RF24& radio);
+
 #endif
