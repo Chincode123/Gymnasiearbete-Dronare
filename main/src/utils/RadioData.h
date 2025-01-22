@@ -21,6 +21,7 @@
 #define _MSG_REQUEST_PID_R 6
 #define _MSG_SET_TARGET_RANGES 7
 #define _MSG_REQUEST_TARGET_RANGES 8
+#define _MSG_ACKNOWLEDGE 9
 
 // message length in bytes
 #define _MSG_LENGHT_CONTROLLER 4
@@ -42,6 +43,11 @@ struct PID_Instructions {
 
 struct TargetRangeInstructions {
     float pitchMax, rollMax, verticalVelocityMax;
+}
+
+struct RadioMessage {
+    uint8_t messageType;
+    uint8_t dataBuffer[31];
 }
 
 struct gyroscopeValues {

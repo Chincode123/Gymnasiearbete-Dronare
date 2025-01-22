@@ -2,7 +2,7 @@
 #include "RadioData.h"
 
 Message::Message(uint8_t& type) {
-    (*this).set(type);
+    set(type);
 }
 
 bool Message::set(uint8_t& type) {
@@ -24,6 +24,7 @@ bool Message::set(uint8_t& type) {
         case _MSG_REQUEST_PID_P:
         case _MSG_REQUEST_PID_R:
         case _MSG_REQUEST_TARGET_RANGES:
+        case _MSG_ACKNOWLEDGE:
             length = 0;
         default:
             return false;
@@ -70,6 +71,8 @@ uint8_t InstructionHandler::getData(uint8_t* out) {
     acquiredData = false;
     readIndex = 0;
     message.reset();
+
+    write(nullptr, _MSG_ACKNOWLEDGE);
     
     return messageType;
 }

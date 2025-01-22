@@ -3,17 +3,6 @@ class SerialMessage {
   type;
   length;
 
-  messageLengths = new Map([
-    [0, 4],
-    [1, 12],
-    [2, 12],
-    [3, 12],
-    [4, 0],
-    [5, 0],
-    [6, 0],
-    [7, 12],
-    [8, 0]
-  ]);
   messageTypes = new Map([
     [0, "controller-instructions"],
     [1, "pid-velocity"],
@@ -23,7 +12,21 @@ class SerialMessage {
     [5, "request-pid-pitch"],
     [6, "request-pid-roll"],
     [7, "target-ranges"],
-    [8, "request-target-ranges"]
+    [8, "request-target-ranges"],
+    [9, "acknowledge"]
+  ]);
+
+  messageLengths = new Map([
+    [this.messageTypes.get("controller-instructions"), 4],
+    [this.messageTypes.get("pid-velocity"), 12],
+    [this.messageTypes.get("pid-pitch"), 12],
+    [this.messageTypes.get("pid-roll"), 12],
+    [this.messageTypes.get("request-pid-velocity"), 0],
+    [this.messageTypes.get("request-pid-pitch"), 0],
+    [this.messageTypes.get("request-pid-roll"), 0],
+    [this.messageTypes.get("target-ranges"), 12],
+    [this.messageTypes.get("request-target-ranges"), 0],
+    [this.messageTypes.get("acknowledge"), 0]
   ]);
 
   set = (type) => {
@@ -85,7 +88,7 @@ class SerialReader {
     return { maxPitch: floatValues[0], maxRoll: floatValues[1], maxVerticalVelocity: floatValues[2] };
   };
 }
-serialReader = new SerialReader();
+const serialReader = new SerialReader();
 
 const portSettings = { baudRate: 9600 };
 let port;
@@ -96,11 +99,16 @@ document.querySelector("#select-serial").addEventListener("click", async () => {
   setInterval(sendControllerInstructions, 20);
 });
 
-let writing = false;
+let hasAcknowledged = true;
 write = async (data) => {
+  if (!hasAcknowledged) {
+    return false;
+  }
+
   const writer = port.writable.getWriter();
 
   await writer.write(data);
+  hasAcknowledged = false;
 
   // Allow the serial port to be closed later.
   writer.releaseLock();
@@ -123,6 +131,11 @@ read = async () => {
 
             if (result.done) {
               console.log(result.value);
+
+              if (result.messageType == "acknowledge") {
+                hasAcknowledged = true;
+                continue; 
+              }
             }
           }
 
