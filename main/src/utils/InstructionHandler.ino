@@ -1,6 +1,10 @@
 #include "InstructionHandler.h"
 #include "RadioData.h"
 
+Message::Message(uint8_t& type) {
+    (*this).set(type);
+}
+
 bool Message::set(uint8_t& type) {
     initiated = true;
     this->type = type;
@@ -32,7 +36,7 @@ void Message::reset() {
     initiated = false;
 }
 
-bool InstructionReader::read() {
+bool InstructionHandler::read() {
     while (Serial.available() > 0 && !acquiredData) {
             uint8_t receivedByte = Serial.read();
             if (reading) {
@@ -60,7 +64,7 @@ bool InstructionReader::read() {
     return false;
 }
 
-uint8_t InstructionReader::getData(uint8_t* out) {
+uint8_t InstructionHandler::getData(uint8_t* out) {
     memcpy(out, readBuffer, message.length);
     uint8_t messageType = message.type;
     acquiredData = false;
@@ -70,20 +74,20 @@ uint8_t InstructionReader::getData(uint8_t* out) {
     return messageType;
 }
 
-void InstructionWriter::write(uint8_t* data, uint8_t& type) {
-    message.set(type);
+void InstructionHandler::write(uint8_t* data, uint8_t& type) {
+    Message messageOut(type);
 
-    uint8_t* output = malloc(message.length + 2);
+    uint8_t* output = malloc(messageOut.length + 2);
 
     *output = 33;
     *(output + 1) = type;
 
-    for (int i = 0; i < message.length; i++) {
+    for (int i = 0; i < messageOut.length; i++) {
         *(output + i + 2) = *(data + i);
     }
 
     // temp
-    Serial.write(output, message.length + 2);
+    Serial.write(output, messageOut.length + 2);
 
     free(output);
 }

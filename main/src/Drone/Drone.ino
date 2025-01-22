@@ -13,6 +13,7 @@ RF24 radio(CE_PIN, CSN_PIN);
 controllerInstructions controller;
 void getRadioData();
 
+
 // Motors
 #define MOTOR1_Pin 
 #define MOTOR2_Pin 
@@ -69,7 +70,7 @@ void setup() {
     pinMode(MOTOR4_Pin, OUTPUT);
     
     // Initial time
-    previousTime = micros();
+    previousTime = millis();
 }
 
 void loop() {
@@ -91,7 +92,7 @@ void loop() {
 }
 
 void setDeltaTime() {
-    unsigned long currentTime = micros();
-    deltaTime = (float)(currentTime - previousTime) / 1000000;
+    unsigned long currentTime = millis();
+    deltaTime = (float)(currentTime - previousTime) / 1000;
     previusTime = currentTime;
 }

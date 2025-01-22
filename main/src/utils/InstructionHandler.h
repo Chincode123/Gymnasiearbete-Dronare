@@ -4,6 +4,8 @@ public:
     uint8_t type, length;
 
     // Initiate message with a type
+    Message(uint8_t& type);
+
     // sets type and length, and initiated = true
     bool set(uint8_t& type);
 
@@ -12,7 +14,7 @@ public:
     void reset();
 };
 
-class InstructionReader {
+class InstructionHandler {
     Message message;
     bool reading = false;
     bool acquiredData = false;
@@ -21,25 +23,7 @@ class InstructionReader {
     uint8_t startMarker = 33;
 
 public:
-    // Read from serial port
-    // Returns true if a message is ready, else false
     bool read();
-
-    // Get data after read returns true
-    // Returns message type
     uint8_t getData(uint8_t* out);
-};
-
-class InstructionWriter {
-    Message message;
-
-public:
-    // Writes "data" as a message with the type "type"
     void write(uint8_t* data, uint8_t& type);
-};
-
-class InstructionHandler {
-public:
-    InstructionReader reader;
-    InstructionWriter writer;
 };
