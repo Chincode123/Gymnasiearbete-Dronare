@@ -103,3 +103,19 @@ void setDeltaTime() {
     deltaTime = (float)(currentTime - previousTime) / 1000;
     previusTime = currentTime;
 }
+
+bool sendRadio(uint8_t* data, uint8_t length) {
+    radio.stopListening();
+    bool result = radio.write(data, length);
+    radio.startListening();
+    return result;
+}
+
+void consoleLog(const char* message) {
+    RadioMessage logMessage;
+    logMessage.messageType = _MSG_DRONE_LOG;
+    uint8_t messageLength = strlen(message);
+    messageLength = (messageLength < 31) ? messageLength : 31;
+    memccpy(&logMessage.dataBuffer, message, messageLength);
+    sendRadio(&logMessage, sizeof(logMessage));
+}

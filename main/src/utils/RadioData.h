@@ -23,11 +23,13 @@
 #define _MSG_SET_TARGET_RANGES 7
 #define _MSG_REQUEST_TARGET_RANGES 8
 #define _MSG_ACKNOWLEDGE 9
+#define _MSG_DRONE_LOG 10
 
 // message length in bytes
 #define _MSG_LENGHT_CONTROLLER 4
 #define _MSG_LENGHT_PID 12
 #define _MSG_LENGTH_TARGET_RANGES 12
+#define _MSG_LENGTH_DRONE_LOG 31
 
 struct controllerInstructions {
     // devide by 127
