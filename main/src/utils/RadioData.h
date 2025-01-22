@@ -29,6 +29,7 @@
 #define _MSG_LENGHT_CONTROLLER 4
 #define _MSG_LENGHT_PID 12
 #define _MSG_LENGTH_TARGET_RANGES 12
+#define _MSG_LENGTH_RADIO_MESSAGE 32
 #define _MSG_LENGTH_DRONE_LOG 31
 
 struct controllerInstructions {

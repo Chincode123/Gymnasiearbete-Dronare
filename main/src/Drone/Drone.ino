@@ -116,6 +116,6 @@ void consoleLog(const char* message) {
     logMessage.messageType = _MSG_DRONE_LOG;
     uint8_t messageLength = strlen(message);
     messageLength = (messageLength < 31) ? messageLength : 31;
-    memccpy(&logMessage.dataBuffer, message, messageLength);
+    memcpy(&logMessage.dataBuffer, &message, messageLength);
     sendRadio(&logMessage, sizeof(logMessage));
 }
