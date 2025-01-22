@@ -18,8 +18,13 @@ void setup()
     Serial.begin(9600);
     while (!Serial);
 
-    radio.begin();
-    configureRadio(radio);
+    if (!radio.begin()){
+        Serial.println(F("radio hardware not responding!"));
+        while (true);
+    }
+    if(!configureRadio(radio)) {
+        while (true);
+    }
     radio.openWritingPipe(RECEIVER_ADDRESS);
     radio.openReadingPipe(1, DRONE_ADDRESS);
     radio.startListening();
