@@ -7,29 +7,29 @@ MotorController::MotorController(uint8_t& motorPowerTL, uint8_t& motorPowerTR, u
     this->motorPowerBL = motorPowerBL;
 }
 
-MotorController::setTargetValues(float& targetVelocity, float& targetPitch, float& targetRoll) {
+void MotorController::setTargetValues(float& targetVelocity, float& targetPitch, float& targetRoll) {
     velocityController.setTarget(targetVelocity);
     pitchController.setTarget(targetPitch);
     rollController.setTarget(targetRoll);
 }
 
-MotorController::setVelocityConstants(float& p, float& i, float& d) {
+void MotorController::setVelocityConstants(float& p, float& i, float& d) {
     velocityController.setConstants(p, i, d);
 }
 
-MotorController::setPitchConstants(float& p, float& i, float& d) {
+void MotorController::setPitchConstants(float& p, float& i, float& d) {
     pitchController.setConstants(p, i, d);
 }
 
-MotorController::setRollConstants(float& p, float& i, float& d) {
+void MotorController::setRollConstants(float& p, float& i, float& d) {
     rollController.setConstants(p, i, d);
 }
 
-MotorController::calculatePower(float& velocity, float& pitch, float& roll, float& deltaTime) {
+void MotorController::calculatePower(float& velocity, float& pitch, float& roll, float& deltaTime) {
     float basePower = velocityController.calculate(velocity, deltaTime);
     basePower = constrain(basePower, 0, 255);
-    float pitchShift = pitchController.calculate(pitch);
-    float rollShift = rollController.calculate(roll);
+    float pitchShift = pitchController.calculate(pitch, deltaTime);
+    float rollShift = rollController.calculate(roll, deltaTime);
 
     motorPowerTL = (uint8_t)constrain((basePower + pitchShift + rollShift), 0, 255);
     motorPowerTR = (uint8_t)constrain((basePower + pitchShift - rollShift), 0, 255);

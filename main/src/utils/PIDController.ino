@@ -1,10 +1,5 @@
 #include "PIDController.h"
 
-PID::PID(float& initialTarget, float& p, float& i, float& d) {
-       setTarget(targetValue);
-       setConstants(p, i, d);
-}
-
 float PID::calculate(float& inputValue, float& deltaTime) {
     float error = targetValue - inputValue;
 

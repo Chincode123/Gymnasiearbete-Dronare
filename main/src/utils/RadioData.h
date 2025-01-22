@@ -1,6 +1,8 @@
 #ifndef RADIODATA_H_
 #define RADIODATA_H_
 
+#include <RF24.h>
+
 #define DRONE_ADDRESS       (uint8_t*)"DRONE"  
 #define RECEIVER_ADDRESS    (uint8_t*)"RCEVR"
 
@@ -90,8 +92,6 @@ struct droneInfo {
 };
 
 bool isPressed(uint8_t &input, uint8_t &button);
-
-#include <RF24.h>
 
 bool configureRadio(RF24& radio);
 

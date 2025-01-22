@@ -4,7 +4,7 @@
 #include "../utils/RadioData.h"
 #include "../utils/MotorControl.h"
 #include "../utils/Vectors.h"
-#include "../utils/RadioTransceiver.h"
+#include "../utils/Orientation.h"
 
 #define CE_PIN 6
 #define CSN_PIN 7
@@ -16,12 +16,12 @@ void getRadioData();
 
 
 // Motors
-#define MOTOR1_Pin 
-#define MOTOR2_Pin 
-#define MOTOR3_Pin 
-#define MOTOR4_Pin 
-uint8_t motorPower1, motorPower2, motorPower3, motorPower4;
-MotorController motorController(motorPower1, motorPower2, motorPower3, motorPower4);
+#define MOTOR_TL_Pin 5
+#define MOTOR_TR_Pin 4
+#define MOTOR_BR_Pin 3
+#define MOTOR_BL_Pin 2
+uint8_t motorPowerTL, motorPowerTR, motorPowerBR, motorPowerBL;
+MotorController motorController(motorPowerTL, motorPowerTR, motorPowerBR, motorPowerBL);
 
 
 // PID-values
@@ -48,10 +48,8 @@ unsigned long previousTime
 float deltaTime;
 void setDeltaTime();
 
-// Spatial position
-vector velocity;
-vector angles; // x => pitch, y => roll, z => yaw;
-void getGyroscopeValues();
+// Spatial orientation/acceleration/velocity
+Orientation orientation;
 
 void setup() {
     // Set up radio
@@ -71,10 +69,10 @@ void setup() {
     motorController.setPitchConstants(pitchP, pitchI, pitchD);
     motorController.setRollConstants(rollP, rollI, rollD);
 
-    pinMode(MOTOR1_Pin, OUTPUT);
-    pinMode(MOTOR2_Pin, OUTPUT);
-    pinMode(MOTOR3_Pin, OUTPUT);
-    pinMode(MOTOR4_Pin, OUTPUT);
+    pinMode(MOTOR_TL_Pin, OUTPUT);
+    pinMode(MOTOR_TR_Pin, OUTPUT);
+    pinMode(MOTOR_BR_Pin, OUTPUT);
+    pinMode(MOTOR_BL_Pin, OUTPUT);
     
     // Initial time
     previousTime = millis();
@@ -92,10 +90,10 @@ void loop() {
     // output
     getGyroscopeValues();
     motorController.calculatePower(velocity.y, angles.x, angles.y, deltaTime);
-    analogWrite(MOTOR1_Pin, motorPower1);   
-    analogWrite(MOTOR2_Pin, motorPower2);   
-    analogWrite(MOTOR3_Pin, motorPower3);   
-    analogWrite(MOTOR4_Pin, motorPower4);
+    analogWrite(MOTOR_TL_Pin, motorPowerTL);   
+    analogWrite(MOTOR_TR_Pin, motorPowerTR);   
+    analogWrite(MOTOR_BR_Pin, motorPowerBR);   
+    analogWrite(MOTOR_BL_Pin, motorPowerBL);
 }
 
 void setDeltaTime() {
@@ -111,9 +109,8 @@ bool sendRadio(uint8_t* data, uint8_t length) {
     return result;
 }
 
-#ifndef DRONE_LOG
-#define DRONE_LOG
 void consoleLog(const char* message) {
+    #define DRONE_LOG
     RadioMessage logMessage;
     logMessage.messageType = _MSG_DRONE_LOG;
     uint8_t messageLength = strlen(message);
@@ -121,4 +118,3 @@ void consoleLog(const char* message) {
     memcpy(&logMessage.dataBuffer, &message, messageLength);
     sendRadio(&logMessage, sizeof(logMessage));
 }
-#endif

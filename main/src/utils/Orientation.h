@@ -3,10 +3,6 @@
 
 #include "Vectors.h"
 
-//TEMP
-#define uint8_t unsigned char
-#define uint16_t uint8_t
-
 class Orientation {
     uint8_t MPU;
 

@@ -16,11 +16,11 @@ private:
     uint8_t &motorPowerTL, &motorPowerTR, &motorPowerBR, &motorPowerBL;
 
     // PID controller for the vertical velocity of the drone
-    PID velocityController(0, 0, 0, 0);
+    PID velocityController;
     // PID controller for the pitch of the drone
-    PID pitchController(0, 0, 0, 0);
+    PID pitchController;
     // PID controller for the roll of the drone
-    PID rollController(0, 0, 0, 0);
+    PID rollController;
 };
 
 #endif
