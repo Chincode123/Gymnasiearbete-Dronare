@@ -1,6 +1,6 @@
 #include "Vectors.h"
 
-float vector::length(){
+float vector::magnitude(){
     return sqrt((*this) * (*this));
 }
 
@@ -52,7 +52,7 @@ float dotProduct(vector& a, vector& b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-float vectorLength(vector& a) {
+float vectorMagnitude(vector& a) {
     return sqrt(a * a);
 }
 

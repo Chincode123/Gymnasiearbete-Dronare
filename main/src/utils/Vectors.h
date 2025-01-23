@@ -5,7 +5,7 @@
 struct vector {
     float x, y, z;
 
-    float length();
+    float magnitude();
 };
 
 // Add two vectors
@@ -41,7 +41,7 @@ vector subtractVectors(vector& a, vector&b);
 // Dot product of vectors: a and b
 float dotProduct(vector &a, vector &b);
 
-float vectorLength(vector &a);
+float vectorMagnitude(vector &a);
 
 // Projects vector: a on vector: b
 vector projectVector(vector& a, vector& b);
