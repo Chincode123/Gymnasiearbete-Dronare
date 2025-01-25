@@ -28,19 +28,16 @@
 #define _MSG_DRONE_LOG 10
 
 // message length in bytes
-#define _MSG_LENGHT_CONTROLLER 4
+#define _MSG_LENGHT_CONTROLLER 3
 #define _MSG_LENGHT_PID 12
 #define _MSG_LENGTH_TARGET_RANGES 12
 #define _MSG_LENGTH_RADIO_MESSAGE 32
 #define _MSG_LENGTH_DRONE_LOG 31
 
 struct controllerInstructions {
-    // devide by 127
-    int8_t
-        stick_X, stick_Y,
-        power;
-
-    uint8_t button_input;
+    int8_t stick_X;
+    int8_t stick_Y;
+    int8_t power;
 };
 
 struct PID_Instructions {
@@ -91,8 +88,5 @@ struct droneInfo {
     gyroscopeData gyroscope;
 };
 
-bool isPressed(uint8_t &input, uint8_t &button);
-
 bool configureRadio(RF24& radio);
-
 #endif

@@ -17,7 +17,7 @@ class SerialMessage {
   ]);
 
   messageLengths = new Map([
-    [this.messageTypes.get("controller-instructions"), 4],
+    [this.messageTypes.get("controller-instructions"), 3],
     [this.messageTypes.get("pid-velocity"), 12],
     [this.messageTypes.get("pid-pitch"), 12],
     [this.messageTypes.get("pid-roll"), 12],
@@ -182,20 +182,12 @@ getControllerInstructions = (x, y, power) => {
   values[1] = (y * 127) & 0x0000ff;
   values[2] = (power * 127) & 0x0000ff;
 
-  let buttonValues;
-  buttons.forEach((button) => {
-    if (button.activated) {
-      buttonValues = buttonValues | button.value;
-    }
-  });
-
-  uint8 = new Uint8Array(4);
+  uint8 = new Uint8Array(SerialMessage.messageLengths.get("controller-instructions"));
   uint8[0] = values[0];
   uint8[1] = values[1];
   uint8[2] = values[2];
-  uint8[3] = buttonValues;
 
-  const messageType = 0;
+  const messageType = SerialMessage.messageTypes("controller-instructions");
   const out = toInstruction(uint8, messageType);
 
   return out;
@@ -209,20 +201,7 @@ getPIDInstructions = (p, i, d, module) => {
 
   const byteValues = new Uint8Array(floatValues.buffer);
 
-  let messageType;
-  if (module == "velocity") {
-    messageType = 1;
-  } else if (module == "pitch") {
-    messageType = 2;
-  } else if (module == "roll") {
-    messageType = 3;
-  } else {
-    throw {
-      name: "PID-ModuleError",
-      message: "PID moudule type does not exist",
-    };
-  }
-
+  const messageType = SerialMessage.messageTypes("pid-" + module);
   const out = toInstruction(byteValues, messageType);
 
   return out;

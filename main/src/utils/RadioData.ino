@@ -2,10 +2,6 @@
 #include <RF24.h>
 #include <nRF24L01.h>
 
-bool isPressed(uint8_t &input, uint8_t &button) {
-    return (bool)(input & button);
-}
-
 bool configureRadio(RF24& radio) {
     if (!radio.setDataRate( RF24_250KBPS )) {
       Serial.println("DataRate error");

@@ -1,23 +1,3 @@
-class buttonType {
-  activated;
-  value;
-}
-
-const buttons = new Array(8);
-// populate
-let buttonActivationValue = 1;
-for (let i = 0; i < 8; i++) {
-  buttons[i] = new buttonType();
-  buttons[i].value = buttonActivationValue;
-  buttons[i].activated = false;
-  buttonActivationValue = buttonActivationValue << 1;
-}
-
-switchButtonActivation = (index) => {
-  console.log("set: " + index);
-  buttons[index].activated = !buttons[index].activated;
-};
-
 let using_joystick = false;
 const joystick = { x: 0, y: 0 };
 const joystick_area = document.getElementById("joystick-area");
