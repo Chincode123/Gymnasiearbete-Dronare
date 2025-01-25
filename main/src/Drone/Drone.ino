@@ -44,13 +44,19 @@ float rollI = 0;
 float rollD = 0;
 float maxRoll;
 
+
 // Delta time
 unsigned long previousTime
 float deltaTime;
 void setDeltaTime();
 
+
 // Spatial orientation/acceleration/velocity
 Orientation orientation;
+
+
+bool activated = false;
+
 
 void setup() {
     // Set up radio
@@ -78,13 +84,13 @@ void setup() {
     // Initial time
     previousTime = millis();
 
-    consoleLog("Initiated", true);
+    consoleLog("Connected", true);
 }
 
 void loop() {
     setDeltaTime();
     
-    // input
+    // Radio read
     if (radio.available()) {
         radio.read(&readBuffer, sizeof(readBuffer));
 
@@ -96,24 +102,80 @@ void loop() {
                 controllerInstructions controller;
                 memcpy(&controller, &message.dataBuffer, sizeof(controller));
                 
-                targetVelocity = maxVelocity * ((float)controller.power / 127);
+                targetVelocity = maxVelocity * (0.5 + (float)controller.power / 255);
                 targetPitch = maxPitch * ((float)controller.stick_X / 127);
                 targetRoll = maxRoll * ((float)controller.stick_Y / 127);
                 break;
+            case _MSG_ACTIVATE:
+                if (activated) break;
+                activated = true;
+
+                orientation.begin(500);
+
+                // Ramp up motors to 50%
+                uint8_t power = 0;
+                float time = 0;
+                while (time < 1) {
+                    setDeltaTime();
+                    analogWrite(MOTOR_TL_Pin, power);
+                    analogWrite(MOTOR_TR_Pin, power);
+                    analogWrite(MOTOR_BR_Pin, power);
+                    analogWrite(MOTOR_BL_Pin, power);
+
+                    time += deltaTime;
+                    power = 128 * time;
+                }
+                
+                consoleLog("Activation complete", true);
+                break;
+            case _MSG_DEACTIVATE:
+                if (!activated) break;
+                activated = false;
+
+                orientation.end();
+
+                // Ramp down motors to 0%
+                uint8_t power = 0;
+                float time = 0;
+                while (time < 1) {
+                    setDeltaTime();
+                    analogWrite(MOTOR_TL_Pin, power);
+                    analogWrite(MOTOR_TR_Pin, power);
+                    analogWrite(MOTOR_BR_Pin, power);
+                    analogWrite(MOTOR_BL_Pin, power);
+
+                    time += deltaTime;
+                    power = 128 * (1 - time);
+                }
+                digitalWrite(MOTOR_TL_Pin, LOW);
+                digitalWrite(MOTOR_TR_Pin, LOW);
+                digitalWrite(MOTOR_BR_Pin, LOW);
+                digitalWrite(MOTOR_BL_Pin, LOW);
+
+                consoleLog("Deactivated");
+                break;
             // TODO: add all cases
             default:
-                consoleLog("Error interpreting messageType");
+                consoleLog("Error interpreting messageType", false);
                 break;
         }
     }
 
-    // output
-    orientation.update(deltaTime);
-    motorController.calculatePower(orientation.velocity, orientation.angles.x, orientation.angles.y, deltaTime);
-    analogWrite(MOTOR_TL_Pin, motorPowerTL);   
-    analogWrite(MOTOR_TR_Pin, motorPowerTR);   
-    analogWrite(MOTOR_BR_Pin, motorPowerBR);   
-    analogWrite(MOTOR_BL_Pin, motorPowerBL);
+    if (activated) {
+
+
+        orientation.update(deltaTime);
+        motorController.calculatePower(orientation.velocity, orientation.angles.x, orientation.angles.y, deltaTime);
+        analogWrite(MOTOR_TL_Pin, motorPowerTL);   
+        analogWrite(MOTOR_TR_Pin, motorPowerTR);   
+        analogWrite(MOTOR_BR_Pin, motorPowerBR);   
+        analogWrite(MOTOR_BL_Pin, motorPowerBL);
+    }
+    else {
+        if (millis() % 5000 == 0) {
+            consoleLog("Waiting for activation");
+        }
+    }
 
     // Output
     sendRadio();

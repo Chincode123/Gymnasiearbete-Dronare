@@ -13,7 +13,10 @@ class SerialMessage {
     [6, "request-pid-roll"],
     [7, "target-ranges"],
     [8, "request-target-ranges"],
-    [9, "acknowledge"]
+    [9, "acknowledge"],
+    [10, "drone-log"],
+    [11, "activate"],
+    [12, "deactivate"]
   ]);
 
   messageLengths = new Map([
@@ -26,7 +29,10 @@ class SerialMessage {
     [this.messageTypes.get("request-pid-roll"), 0],
     [this.messageTypes.get("target-ranges"), 12],
     [this.messageTypes.get("request-target-ranges"), 0],
-    [this.messageTypes.get("acknowledge"), 0]
+    [this.messageTypes.get("acknowledge"), 0],
+    [this.messageTypes.get("drone-log"), 31],
+    [this.messageTypes.get("activate"), 0],
+    [this.messageTypes.get("deactivate"), 0]
   ]);
 
   set = (type) => {

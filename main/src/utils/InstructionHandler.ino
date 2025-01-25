@@ -27,6 +27,8 @@ bool Message::set(uint8_t& type) {
         case _MSG_REQUEST_PID_R:
         case _MSG_REQUEST_TARGET_RANGES:
         case _MSG_ACKNOWLEDGE:
+        case _MSG_ACTIVATE:
+        case _MSG_DEACTIVATE:
             length = 0;
         default:
             return false;

@@ -26,6 +26,8 @@
 #define _MSG_REQUEST_TARGET_RANGES 8
 #define _MSG_ACKNOWLEDGE 9
 #define _MSG_DRONE_LOG 10
+#define _MSG_ACTIVATE 11
+#define _MSG_DEACTIVATE 12
 
 // message length in bytes
 #define _MSG_LENGHT_CONTROLLER 3
