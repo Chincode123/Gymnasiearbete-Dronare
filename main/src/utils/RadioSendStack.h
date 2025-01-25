@@ -9,23 +9,23 @@ struct radioStackElement {
 
 class RadioSendStack {
     radioStackElement *firstElement, *lastElement;
-    uint8_t count;
 
     radioStackElement* create(void* data, uint8_t size);
-    void removeAt(uint8_t index);
+    bool removeAt(uint8_t index);
 
     radioStackElement* get(uint8_t index);
     radioStackElement* get(radioStackElement* currentElement, uint8_t curentIndex, uint8_t targetIndex);
 public:
+    uint8_t count;
+
     void push(void* data, uint8_t size);
     void queue(void* data, uint8_t size);
 
-    void pop();
-    void pop(uint8_t index);
+    radioStackElement* pop();
+    radioStackElement* pop(uint8_t index);
     void pop(void* buffer);
     void pop(uint8_t index, void* buffer);
 
     void clear();
 };
-
 #endif

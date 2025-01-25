@@ -20,20 +20,26 @@ radioStackElement* RadioSendStack::create(void* data, uint8_t size) {
     return element;
 }
 
-void RadioSendStack::removeAt(uint8_t index) {
+bool RadioSendStack::removeAt(uint8_t index) {
     count--;
     if (index == 0) {
         radioStackElement* newFirst = firstElement->next;
         free(firstElement);
         firstElement = newFirst;
     }
-    else if (index == count) {
+    else if (index == count - 1) {
+        radioStackElement* newLast = get(count - 2);
         free(lastElement);
+        lastElement = newLast;
+    }
+    else if (index >= count) {
+        return false;
     }
 
     radioStackElement* previousElement = get(index - 1);
     previousElement->next = previousElement->next->next;
     free(previousElement->next);
+    return true;
 }
 
 void RadioSendStack::push(void* data, uint8_t size) {
@@ -48,12 +54,14 @@ void RadioSendStack::queue(void* data, uint8_t size) {
     lastElement = element;
 }
 
-void RadioSendStack::pop() {
+radioStackElement* RadioSendStack::pop() {
     pop(0);
 }
 
-void RadioSendStack::pop(uint8_t index) {
-    pop(index, nullptr);
+radioStackElement* RadioSendStack::pop(uint8_t index) {
+    radioStackElement* value = get(index);
+    removeAt(index);
+    return value;
 }
 
 void RadioSendStack::pop(void* buffer) {

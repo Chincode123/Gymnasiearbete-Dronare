@@ -15,7 +15,7 @@ void Orientation::begin() {
     calculateOffsets(300);
 
     #ifdef DRONE_LOG
-    consoleLog("Initiated orientation");
+    consoleLog("Initiated orientation", true);
     #endif
 }
 
@@ -29,7 +29,7 @@ void Orientation::begin(uint16_t cycles) {
     calculateOffsets(cycles);
 
     #ifdef DRONE_LOG
-    consoleLog("Initiated orientation");
+    consoleLog("Initiated orientation", true);
     #endif
 }
 

@@ -5,6 +5,7 @@
 #include "../utils/MotorControl.h"
 #include "../utils/Vectors.h"
 #include "../utils/Orientation.h"
+#include "../utils/RadioSendStack.h"
 
 #define CE_PIN 6
 #define CSN_PIN 7
@@ -12,7 +13,7 @@
 // Radio
 RF24 radio(CE_PIN, CSN_PIN, 4000000);
 uint8_t readBuffer[32];
-void getRadioData();
+RadioSendStack sendStack;
 
 
 // Motors
@@ -76,6 +77,8 @@ void setup() {
     
     // Initial time
     previousTime = millis();
+
+    consoleLog("Initiated", true);
 }
 
 void loop() {
@@ -93,9 +96,9 @@ void loop() {
                 controllerInstructions controller;
                 memcpy(&controller, &message.dataBuffer, sizeof(controller));
                 
-                targetVelocity = maxVelocity * ((float)controller.triggerValues / 127);
-                targetPitch = maxPitch * ((float)controller.stick_LY / 127);
-                targetRoll = maxRoll * ((float)controller.stick_LX / 127);
+                targetVelocity = maxVelocity * ((float)controller.power / 127);
+                targetPitch = maxPitch * ((float)controller.stick_X / 127);
+                targetRoll = maxRoll * ((float)controller.stick_Y / 127);
                 break;
             // TODO: add all cases
             default:
@@ -111,6 +114,9 @@ void loop() {
     analogWrite(MOTOR_TR_Pin, motorPowerTR);   
     analogWrite(MOTOR_BR_Pin, motorPowerBR);   
     analogWrite(MOTOR_BL_Pin, motorPowerBL);
+
+    // Output
+    sendRadio();
 }
 
 void setDeltaTime() {
@@ -119,19 +125,30 @@ void setDeltaTime() {
     previusTime = currentTime;
 }
 
-bool sendWithRadio(uint8_t* data, uint8_t length) {
-    radio.stopListening();
-    bool result = radio.write(data, length);
-    radio.startListening();
-    return result;
+void sendRadio() {
+    while (sendStack.count > 0 && !radio.available()) {
+        radio.stopListening();
+        radioStackElement* data = sendStack.pop();
+        bool result = radio.write(data->value, data->size);
+        radio.startListening();
+
+        if (!result){
+            sendStack.push(data->value, data->size);
+            break;
+        }
+    }
 }
 
-void consoleLog(const char* message) {
+void consoleLog(const char* message, bool important) {
     #define DRONE_LOG
     RadioMessage logMessage;
     logMessage.messageType = _MSG_DRONE_LOG;
     uint8_t messageLength = strlen(message);
     messageLength = (messageLength < 31) ? messageLength : 31;
     memcpy(&logMessage.dataBuffer, &message, messageLength);
-    sendWithRadio(&logMessage, sizeof(logMessage));
+    
+    if (impotrant)
+        sendStack.push(&logMessage, sizeof(logMessage));
+    else
+        sendStack.queue(&logMessage, sizeof(logMessage));
 }
