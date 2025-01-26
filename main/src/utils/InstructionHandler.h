@@ -10,10 +10,10 @@ public:
     Message();
 
     // Initiate message with a type
-    Message(uint8_t& type);
+    Message(uint8_t type);
 
     // sets type and length, and initiated = true
-    bool set(uint8_t& type);
+    bool set(uint8_t type);
 
     // Resets messege
     // initiated = false.
@@ -30,8 +30,8 @@ class InstructionHandler {
 
 public:
     bool read();
-    uint8_t getData(uint8_t* out);
-    void write(uint8_t* data, uint8_t& type);
+    uint8_t getData(void* out);
+    void write(void* data, uint8_t type);
     void acknowledge();
 };
 

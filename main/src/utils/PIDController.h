@@ -3,13 +3,13 @@
 
 class PID {
     float p, i, d;
-    float& targetValue;
+    float targetValue;
     float previousError;
     float integral;
 public:
-    float calculate(float& inputValue, float& deltaTime);
-    void setTarget(float& targetValue);
-    void setConstants(float& p, float& i, float& d);
+    float calculate(float inputValue, float deltaTime);
+    void setTarget(float targetValue);
+    void setConstants(float p, float i, float d);
 };
 
 #endif

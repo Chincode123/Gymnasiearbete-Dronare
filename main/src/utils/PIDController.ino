@@ -1,6 +1,6 @@
 #include "PIDController.h"
 
-float PID::calculate(float& inputValue, float& deltaTime) {
+float PID::calculate(float inputValue, float deltaTime) {
     float error = targetValue - inputValue;
 
     float derivitive = (error - previousError) / deltaTime;
@@ -11,11 +11,11 @@ float PID::calculate(float& inputValue, float& deltaTime) {
     return p * error + i * integral + d * derivitive;
 }
 
-void PID::setTarget(float& targetValue) {
+void PID::setTarget(float targetValue) {
     this->targetValue = targetValue;
 }
 
-void PID::setConstants(float& p, float& i, float& d) {
+void PID::setConstants(float p, float i, float d) {
     this->p = p;
     this->i = i;
     this->d = d;

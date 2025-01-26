@@ -65,14 +65,19 @@ void Orientation::readFromIMU(bool applyOffset) {
 }
 
 vector Orientation::calculateAccelerationAngles(vector& acceleration) {
-    return {(atan(acceleration.y / sqrt(pow(acceleration.x, 2) + pow(acceleration.z, 2))) * 180 / PI)
-            (atan(-1 * acceleration.x / sqrt(pow(acceleration.y, 2) + pow(acceleration.z, 2))) * 180 / PI),
+    return {(atan2(acceleration.y, sqrt(pow(acceleration.x, 2) + pow(acceleration.z, 2))) * 180 / PI)
+            (atan2(-1 * acceleration.x, sqrt(pow(acceleration.y, 2) + pow(acceleration.z, 2))) * 180 / PI),
             0};
 }
 
 void Orientation::update(float deltaTime) {
-    readFromIMU(true);
+    readFromIMU(acceleration, angularVelocity);
 
+    calculateAngles(deltaTime);    
+    calculateVerticalVelocity(deltaTime);
+}
+
+void Orientation::calculateAngles(float deltaTime) {
     vector accelerationAngles = calculateAccelerationAngles(acceleration) - accelerationAngleOffset;
 
     float rateOfChange = 0.1;
@@ -80,6 +85,30 @@ void Orientation::update(float deltaTime) {
 
     accelerationError += (accelerationAngles - angles) * deltaTime;
     angleError =  accelerationAngles + accelerationError - angles;
+}
+
+void Orientation::calculateVerticalVelocity(float deltaTime) {
+    float sinPitch = sin(angles.x);
+    float sinRoll = sin(angles.y);
+    float cosPitch = cos(angles.x);
+    float cosRoll = cos(angles.y);
+    
+    /*
+        Acording to ChatGPT, this rotational matrix transforms the acceleration values to the world frame
+        |cos(pitch)             0               -sin(pitch)     |
+        |sin(roll)sin(pitch)    cos(roll)   sin(roll)cos(pitch) |
+        |cos(roll)sin(pitch)    -sin(roll)  cos(roll)cos(pitch) |
+        
+        Looks reasonable but haven't checked
+    */
+
+    vector adjustedAcceleration = {
+        acceleration.x * cosPitch + acceleration.z * -sinPitch,
+        acceleration.x * sinRoll * sinPitch + acceleration.y * cosRoll + acceleration.z * sinRoll * cosPitch,
+        acceleration.x * cosRoll * sinPitch + acceleration.y * -sinRoll + acceleration.z * cosRoll * cosPitch
+    }
+
+    verticalVelocity += adjustedAcceleration.z * deltaTime;
 }
 
 void Orientation::calculateOffsets(uint16_t cycles) {

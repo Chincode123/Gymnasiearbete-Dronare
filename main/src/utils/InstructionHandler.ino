@@ -3,11 +3,11 @@
 
 Message::Message() {}
 
-Message::Message(uint8_t& type) {
+Message::Message(uint8_t type) {
     set(type);
 }
 
-bool Message::set(uint8_t& type) {
+bool Message::set(uint8_t type) {
     initiated = true;
     this->type = type;
     switch (type) {
@@ -69,7 +69,7 @@ bool InstructionHandler::read() {
     return false;
 }
 
-uint8_t InstructionHandler::getData(uint8_t* out) {
+uint8_t InstructionHandler::getData(void* out) {
     memcpy(out, readBuffer, message.length);
     uint8_t messageType = message.type;
     acquiredData = false;
@@ -79,10 +79,10 @@ uint8_t InstructionHandler::getData(uint8_t* out) {
     return messageType;
 }
 
-void InstructionHandler::write(uint8_t* data, uint8_t& type) {
+void InstructionHandler::write(void* data, uint8_t& type) {
     Message messageOut(type);
 
-    uint8_t* output = malloc(messageOut.length + 2);
+    void* output = malloc(messageOut.length + 2);
 
     *output = 33;
     *(output + 1) = type;

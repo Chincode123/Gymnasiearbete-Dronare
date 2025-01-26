@@ -19,6 +19,9 @@ class Orientation {
     void calculateOffsets(uint16_t cycles);
 
     vector calculateAccelerationAngles(vector& acceleration);
+
+    void calculateAngles(float deltaTime);
+    void calculateVerticalVelocity(float deltaTime);
 public:
     Orientation(uint8_t MPU);
 
@@ -30,7 +33,7 @@ public:
     vector angles;
 
     vector acceleration;
-    float velocity;
+    float verticalVelocity;
 
     void update(float deltaTime);
 };

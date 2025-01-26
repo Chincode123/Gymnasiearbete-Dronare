@@ -165,7 +165,7 @@ void loop() {
 
 
         orientation.update(deltaTime);
-        motorController.calculatePower(orientation.velocity, orientation.angles.x, orientation.angles.y, deltaTime);
+        motorController.calculatePower(orientation.verticalVelocity, orientation.angles.x, orientation.angles.y, deltaTime);
         analogWrite(MOTOR_TL_Pin, motorPowerTL);   
         analogWrite(MOTOR_TR_Pin, motorPowerTR);   
         analogWrite(MOTOR_BR_Pin, motorPowerBR);   
