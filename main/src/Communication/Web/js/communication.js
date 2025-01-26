@@ -146,13 +146,7 @@ read = async () => {
           }
 
 
-          document.getElementById("output").innerHTML +=
-            new TextDecoder().decode(value).replace(/\n/g, '<br>');
-          if (document.getElementById("output").innerHTML.length > 500) {
-            document.getElementById("output").innerHTML = document
-              .getElementById("output")
-              .innerHTML.substring(10);
-          }
+          new TextDecoder().decode(value).split("\n").forEach((str) => addToTerminal(str));
         }
       }
     } catch (error) {
@@ -270,7 +264,10 @@ document
     write(instructions);
   });
 
-document.getElementById("write-all-pid").addEventListener("click", () => {
+document.getElementById("write-all").addEventListener("click", () => {
+addToTerminal("test");
+  return
+  
   let instructions = getPIDInstructions(
     document.getElementById("pid-v-p").value,
     document.getElementById("pid-v-i").value,
@@ -307,3 +304,18 @@ sendControllerInstructions = () => {
   );
   write(instructions);
 };
+
+let previousLog = "";
+addToTerminal = (log) => {
+  const output = document.getElementById("output");
+  if (log == previousLog) {
+    output.children[0].children[0].innerText = parseInt(output.children[0].children[0].innerText) + 1;
+    return;
+  }
+
+  output.innerHTML = `<div><span>1</span><span> | </span>${log}</div>` + output.innerHTML;
+  previousLog = log;
+  if (output.children.length > 40) {
+    output.removeChild(output.lastChild);
+  }
+}
