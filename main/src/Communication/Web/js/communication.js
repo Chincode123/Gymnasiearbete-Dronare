@@ -136,17 +136,43 @@ read = async () => {
             const result = serialReader.read(byte);
 
             if (result.done) {
-              console.log(result.value);
+              console.log(result);
 
               if (result.messageType == "acknowledge") {
                 hasAcknowledged = true;
-                continue; 
+              }
+
+              // pid
+              else if (result.messageType == "pid-velocity") {
+                const pid = readPIDInstruction(result.value);
+                document.getElementById("pid-v-p").value = pid.p;
+                document.getElementById("pid-v-i").value = pid.i;
+                document.getElementById("pid-v-d").value = pid.d;
+              }
+              else if (result.messageType == "pid-pitch") {
+                const pid = readPIDInstruction(result.value);
+                document.getElementById("pid-p-p").value = pid.p;
+                document.getElementById("pid-p-i").value = pid.i;
+                document.getElementById("pid-p-d").value = pid.d;
+              }
+              else if (result.messageType == "pid-roll") {
+                const pid = readPIDInstruction(result.value);
+                document.getElementById("pid-r-p").value = pid.p;
+                document.getElementById("pid-r-i").value = pid.i;
+                document.getElementById("pid-r-d").value = pid.d;
+              }
+
+              // target values
+              else if (result.messageType == "target-ranges") {
+                const ranges = readTargetRanges(result.value);
+                document.getElementById("terget-ranges-velocity").value = ranges.maxVerticalVelocity;
+                document.getElementById("terget-ranges-pitch").value = ranges.maxPitch;
+                document.getElementById("terget-ranges-roll").value = ranges.maxRoll;
               }
             }
           }
 
-
-          new TextDecoder().decode(value).split("\n").forEach((str) => addToTerminal(str));
+          TextDecoder().decode(value).split("\n").forEach((str) => addToTerminal(str));
         }
       }
     } catch (error) {
@@ -264,10 +290,7 @@ document
     write(instructions);
   });
 
-document.getElementById("write-all").addEventListener("click", () => {
-addToTerminal("test");
-  return
-  
+document.getElementById("write-all").addEventListener("click", async () => {
   let instructions = getPIDInstructions(
     document.getElementById("pid-v-p").value,
     document.getElementById("pid-v-i").value,
@@ -275,7 +298,7 @@ addToTerminal("test");
     "velocity"
   );
 
-  write(instructions);
+  while (!write(instructions));
 
   instructions = getPIDInstructions(
     document.getElementById("pid-p-p").value,
@@ -284,7 +307,7 @@ addToTerminal("test");
     "pitch"
   );
 
-  write(instructions);
+  while (!write(instructions));
 
   instructions = getPIDInstructions(
     document.getElementById("pid-r-p").value,
@@ -293,7 +316,7 @@ addToTerminal("test");
     "roll"
   );
 
-  write(instructions);
+  while (!write(instructions));
 });
 
 sendControllerInstructions = () => {
