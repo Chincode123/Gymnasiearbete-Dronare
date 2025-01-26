@@ -44,6 +44,7 @@ float rollI = 0;
 float rollD = 0;
 float maxRoll;
 
+PID_Instructions pidIn, pidOut;
 
 // Delta time
 unsigned long previousTime
@@ -60,10 +61,7 @@ bool activated = false;
 
 void setup() {
     // Set up radio
-    if (!radio.begin()){
-        Serial.println(F("radio hardware not responding!"));
-        while (true);
-    }
+    while(!radio.begin());
     if(!configureRadio(radio)) {
         while (true);
     }
@@ -94,13 +92,13 @@ void loop() {
     if (radio.available()) {
         radio.read(&readBuffer, sizeof(readBuffer));
 
-        RadioMessage message;
-        memcpy(&message, &readBuffer, sizeof(message));
+        RadioMessage messageIn, messageOut;
+        memcpy(&messageIn, &readBuffer, sizeof(messageIn));
 
-        switch (message.type) {
+        switch (messageIn.type) {
             case _MSG_CONTROLLER_INPUT:
                 controllerInstructions controller;
-                memcpy(&controller, &message.dataBuffer, sizeof(controller));
+                memcpy(&controller, &messageIn.dataBuffer, sizeof(controller));
                 
                 targetVelocity = maxVelocity * (0.5 + (float)controller.power / 255);
                 targetPitch = maxPitch * ((float)controller.stick_X / 127);
@@ -154,7 +152,57 @@ void loop() {
 
                 consoleLog("Deactivated");
                 break;
-            // TODO: add all cases
+            case _MSG_SET_PID_V:
+                memcpy(&pidIn, &messageIn.dataBuffer, sizeof(pidIn));
+                velocityP = pidIn.k_p;
+                velocityI = pidIn.k_i;
+                velocityD = pidIn.k_d;
+                break;
+            case _MSG_SET_PID_P:
+                memcpy(&pidIN, &messageIn.dataBuffer, sizeof(pidIn));
+                pitchP = pidIn.k_p;
+                pitchI = pidIn.k_i;
+                pitchD = pidIn.k_d;
+                break;
+            case _MSG_SET_PID_R:
+                memcpy(&pidIn, &messageIn.dataBuffer, sizeof(pidIn));
+                rollP = pidIn.k_p;
+                rollI = pidIn.k_i;
+                rollD = pidIn.k_d;
+                break;
+            case _MSG_REQUEST_PID_V:
+                pidOut.k_p = velocityP;
+                pidOut.k_i = velocityI;
+                pidOut.k_d = velocityD;
+                memcpy(&messageOut.dataBuffer, pidOut, sizeof(pidOut));
+                sendStack.push(&messageOut, sizeof(messageOut));
+                break;
+            case _MSG_REQUEST_PID_P:
+                pidOut.k_p = pitchP;
+                pidOut.k_i = pitchI;
+                pidOut.k_d = pitchD;
+                memcpy(&messageOut.dataBuffer, pidOut, sizeof(pidOut));
+                sendStack.push(&messageOut, sizeof(messageOut));
+                break;
+            case _MSG_REQUEST_PID_R:
+                pidOut.k_p = rollP;
+                pidOut.k_i = rollI;
+                pidOut.k_d = rollD;
+                memcpy(&messageOut.dataBuffer, pidOut, sizeof(pidOut));
+                sendStack.push(&messageOut, sizeof(messageOut));
+                break;
+            case _MSG_SET_TARGET_RANGES:
+                TargetRangeInstructions targetRanges;
+                memcpy(&targetRanges, &messageIn.dataBuffer, sizeof(targetRanges));
+                maxVelocity = targetRanges.verticalVelocityMax;
+                maxPitch = targetRanges.pitchMax;
+                maxRoll = targetRanges.rollMax;
+                break;
+            case _MSG_REQUEST_TARGET_RANGES:
+                TargetRangeInstructions targetRanges = {maxPitch, maxRoll, maxVelocity};
+                memcpy(&messageOut.dataBuffer, targetRanges, sizeof(targetRanges));
+                sendStack.push(&messageOut, sizeof(messageOut));
+                break;
             default:
                 consoleLog("Error interpreting messageType", false);
                 break;

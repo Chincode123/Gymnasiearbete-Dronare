@@ -33,6 +33,10 @@ void Orientation::begin(uint16_t cycles) {
     #endif
 }
 
+void Orientation::end() {
+    // TODO
+}
+
 void Orientation::readFromIMU(vector& acceleration, vector& angularVelocity) {
     // Acceleration
     Wire.beginTransmission(MPU);

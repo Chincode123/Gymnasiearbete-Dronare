@@ -40,13 +40,14 @@ void loop()
         case _MSG_CONTROLLER_INPUT:
             Serial.println("[RECEIVER] Received controller input");
             break;
+        // TODO: Add other messages
         case _MSG_DRONE_LOG:
             memcpy(&messageIn, &readBuffer, sizeof(messageIn));
 
             Serial.print("[DRONE] ");
             Serial.println((const char*)messageIn.dataBuffer);
         default:
-            Serial.println("[RECEIVER] Received request");
+            Serial.println("[RECEIVER] Received");
             break;
         }
 
