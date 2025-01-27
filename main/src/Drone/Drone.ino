@@ -100,7 +100,7 @@ void loop() {
                 controllerInstructions controller;
                 memcpy(&controller, &messageIn.dataBuffer, sizeof(controller));
                 
-                targetVelocity = maxVelocity * (0.5 + (float)controller.power / 255);
+                targetVelocity = maxVelocity * (float)controller.power / 127;
                 targetPitch = maxPitch * ((float)controller.stick_X / 127);
                 targetRoll = maxRoll * ((float)controller.stick_Y / 127);
                 break;
