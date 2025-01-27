@@ -19,7 +19,7 @@ void setup()
     while (!Serial);
 
     if (!radio.begin()){
-        Serial.println(F("radio hardware not responding!"));
+        Serial.println(F("Radio hardware not responding!"));
         while (true);
     }
     if(!configureRadio(radio)) {
@@ -35,25 +35,74 @@ void loop()
     if (instructionHandler.read())
     {
         uint8_t messageType = instructionHandler.getData(readBuffer);
-        switch (messageType)
-        {
-        case _MSG_CONTROLLER_INPUT:
-            Serial.println("[RECEIVER] Received controller input");
-            break;
-        // TODO: Add other messages
-        case _MSG_DRONE_LOG:
-            memcpy(&messageIn, &readBuffer, sizeof(messageIn));
-
-            Serial.print("[DRONE] ");
-            Serial.println((const char*)messageIn.dataBuffer);
-        default:
-            Serial.println("[RECEIVER] Received");
-            break;
-        }
-
         messageOut.messageType = messageType;
         memcpy(messageOut.dataBuffer, &readBuffer, sizeof(messageOut.dataBuffer));
-        send();
+        bool result = send();
+
+        switch (messageType) {
+        case _MSG_DRONE_LOG:
+            memcpy(&messageIn, &readBuffer, sizeof(messageIn));
+            dronePrint((const char*)messageIn.dataBuffer);
+            break;
+        case _MSG_CONTROLLER_INPUT:
+            if (result)
+              receiverPrint("Sent: controller input");
+            else
+              receiverPrint("Faild to send: controller input");
+            break;
+        case _MSG_SET_PID_V:
+            if (result)
+              receiverPrint("Sent: PID-Velocity");
+            else
+              receiverPrint("Failed to send: PID-Velocity");
+          break;
+        case _MSG_SET_PID_P:
+          if (result)
+              receiverPrint("Sent: PID-Pitch");
+            else
+              receiverPrint("Failed to send: PID-Pitch");
+          break;
+        case _MSG_SET_PID_R:
+            if (result)
+              receiverPrint("Sent: PID-Roll");
+            else
+              receiverPrint("Failed to send: PID-Roll");
+          break;
+        case _MSG_SET_TARGET_RANGES:
+          if (result)
+              receiverPrint("Sent: Target ranges");
+            else
+              receiverPrint("Failed to send: Target ranges");
+          break;
+        case _MSG_ACTIVATE:
+          if (result)
+            receiverPrint("Sent: activation request");
+          else 
+            receiverPrint("Failed to send: activation request");
+          break;
+        case _MSG_DEACTIVATE:
+          if (result)
+            receiverPrint("Sent: deactivation request");
+          else 
+            receiverPrint("Failed to send: deactivation request");
+          break;
+        case _MSG_REQUEST_PID_V:
+        case _MSG_REQUEST_PID_P:
+        case _MSG_REQUEST_PID_R:
+        case _MSG_REQUEST_TARGET_RANGES:
+          if (result)
+            receiverPrint("Sent: request");
+          else
+            receiverPrint("Failed to send: request");
+          break;
+        // TODO: Add other messages
+        default:
+            if (result)
+              receiverPrint("Sent: TYPE=UNKNOWN");
+            else
+              receiverPrint("Failed to send: TYPE=UNKNOWN");
+            break;
+        }
     }
 
     if (radio.available()) {
@@ -62,18 +111,24 @@ void loop()
     }
 }
 
-void send()
+bool send()
 {
     radio.stopListening();
     bool result = radio.write(messageOut.dataBuffer, sizeof(messageOut));
     radio.startListening();
     if (result)
     {
-        Serial.println("[RECEIVER] Radio acknowledgment received");
         instructionHandler.acknowledge();
     }
-    else
-    {
-        Serial.println("[RECEIVER] Radio acknowledgment not received");
-    }
+    return result;
+}
+
+void receiverPrint(const char* message) {
+  Serial.print("[Receiver] ");
+  Serial.println(message);
+}
+
+void dronePrint(const char* message) {
+  Serial.print("[Drone] ");
+  Serial.println(message);
 }
