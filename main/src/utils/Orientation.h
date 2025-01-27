@@ -21,7 +21,7 @@ class Orientation {
     vector calculateAccelerationAngles(vector& acceleration);
 
     void calculateAngles(float deltaTime);
-    void calculateVerticalVelocity(float deltaTime);
+    void calculateVelocity(float deltaTime);
 public:
     Orientation(uint8_t MPU);
 
@@ -33,7 +33,7 @@ public:
     vector angles;
 
     vector acceleration;
-    float verticalVelocity;
+    vector velocity;
 
     void update(float deltaTime);
 };

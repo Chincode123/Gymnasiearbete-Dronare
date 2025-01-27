@@ -28,6 +28,10 @@
 #define _MSG_DRONE_LOG 10
 #define _MSG_ACTIVATE 11
 #define _MSG_DEACTIVATE 12
+#define _MSG_DRONE_VELOCITY 13
+#define _MSG_DRONE_ACCELERATION 14
+#define _MSG_DRONE_ANGULAR_VELOCITY 15
+#define _MSG_DRONE_ANGLES 16
 
 // message length in bytes
 #define _MSG_LENGHT_CONTROLLER 3
@@ -35,6 +39,10 @@
 #define _MSG_LENGTH_TARGET_RANGES 12
 #define _MSG_LENGTH_RADIO_MESSAGE 32
 #define _MSG_LENGTH_DRONE_LOG 31
+#define _MSG_LENGTH_VELOCITY 12
+#define _MSG_LENGTH_ACCELERATION 12
+#define _MSG_LENGTH_ANGULAR_VELOCITY 12
+#define _MSG_LENGTH_ANGLES 12
 
 struct controllerInstructions {
     int8_t stick_X;
@@ -55,40 +63,7 @@ struct RadioMessage {
     uint8_t dataBuffer[31];
 }
 
-struct gyroscopeValues {
-    float   pitch,
-            roll,
-            yaw;
 
-    float   accX,
-            accY,
-            accZ;
-};
-
-struct gyroscopeErrors{
-    float   accErrorX, 
-            accErrorY, 
-            gyroErrorX, 
-            gyroErrorY, 
-            gyroErrorZ;
-};
-
-struct gyroscopeData{
-    gyroscopeValues values;
-    gyroscopeErrors errors;
-};
-
-struct droneInfo {
-    uint8_t state;
-
-    uint8_t 
-        power_NE,
-        power_SE,
-        power_SW,
-        power_NW;
-
-    gyroscopeData gyroscope;
-};
 
 bool configureRadio(RF24& radio);
 #endif

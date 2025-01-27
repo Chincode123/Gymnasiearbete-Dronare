@@ -44,48 +44,59 @@
                     </div>
                 </div>
 
-                <div id="constants">
-                    <div id="pid">
-                        <div id="velocity">
-                            <p>Velocity</p>
+                <div>
+                    <div id="constants">
+                        <div id="pid">
+                            <div id="velocity">
+                                <p>Velocity</p>
+                                <p>
+                                    P: <input type="number" value="0" id="pid-v-p" class="p">
+                                    I: <input type="number" value="0" id="pid-v-i" class="i">
+                                    D: <input type="number" value="0" id="pid-v-d" class="d">
+                                    <button type="button">Write Values</button>
+                                </p>
+                            </div>
+                            <div id="pitch">
+                                <p>Pitch</p>
+                                <p>
+                                    P: <input type="number" value="0" id="pid-p-p" class="p">
+                                    I: <input type="number" value="0" id="pid-p-i" class="i">
+                                    D: <input type="number" value="0" id="pid-p-d" class="d">
+                                    <button type="button">Write Values</button>
+                                </p>
+                            </div>
+                            <div id="roll">
+                                <p>Roll</p>
+                                <p>
+                                    P: <input type="number" value="0" id="pid-r-p" class="p">
+                                    I: <input type="number" value="0" id="pid-r-i" class="i">
+                                    D: <input type="number" value="0" id="pid-r-d" class="d">
+                                    <button type="button">Write Values</button>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="target-ranges">
+                            <p>Target Ranges (+-)</p>
                             <p>
-                                P: <input type="number" value="0" id="pid-v-p" class="p">
-                                I: <input type="number" value="0" id="pid-v-i" class="i">
-                                D: <input type="number" value="0" id="pid-v-d" class="d">
+                                Max Vertical Velocity: <input type="number" value="0" id="target-ranges-velocity" class="p">m/s
+                                Max Pitch: <input type="number" value="0" id="target-ranges-pitch" class="i">deg
+                                Max Roll: <input type="number" value="0" id="target-ranges-roll" class="d">deg
                                 <button type="button">Write Values</button>
                             </p>
                         </div>
-                        <div id="pitch">
-                            <p>Pitch</p>
-                            <p>
-                                P: <input type="number" value="0" id="pid-p-p" class="p">
-                                I: <input type="number" value="0" id="pid-p-i" class="i">
-                                D: <input type="number" value="0" id="pid-p-d" class="d">
-                                <button type="button">Write Values</button>
-                            </p>
-                        </div>
-                        <div id="roll">
-                            <p>Roll</p>
-                            <p>
-                                P: <input type="number" value="0" id="pid-r-p" class="p">
-                                I: <input type="number" value="0" id="pid-r-i" class="i">
-                                D: <input type="number" value="0" id="pid-r-d" class="d">
-                                <button type="button">Write Values</button>
-                            </p>
+
+                        <button id="write-all" type="button">Write All Values</button>
+                    </div>
+                    
+                    <div id="drone">
+                        <div>
+                            <p>Acceleration x: <span id="acc-x">0.00</span>m/s² y: <span id="acc-y">0.00</span>m/s² z: <span id="acc-z">0.00</span>m/s²</p>
+                            <p>Velocity x: <span id="vel-x">0.00</span>m/s y: <span id="vel-y">0.00</span>m/s z: <span id="vel-z">0.00</span>m/s</p>
+                            <p>Angular velocity x: <span id="angular-vel-x">0.00</span>deg/s y: <span id="angular-vel-y">0.00</span>deg/s z: <span id="angular-vel-z">0.00</span>deg/s</p>
+                            <p>Pitch <span id="pitch-value">0.00</span>deg   Roll <span id="roll-value">0.00</span>deg   Yaw <span id="yaw-value">0.00</span>deg</p>
                         </div>
                     </div>
-
-                    <div id="target-ranges">
-                        <p>Target Ranges (+-)</p>
-                        <p>
-                            Max Vertical Velocity: <input type="number" value="0" id="target-ranges-velocity" class="p">m/s
-                            Max Pitch: <input type="number" value="0" id="target-ranges-pitch" class="i">deg
-                            Max Roll: <input type="number" value="0" id="target-ranges-roll" class="d">deg
-                            <button type="button">Write Values</button>
-                        </p>
-                    </div>
-
-                    <button id="write-all" type="button">Write All Values</button>
                 </div>
             </div>
 
@@ -97,8 +108,7 @@
             </div>
         </div>
 
-            <div id="output">
-            </div>
+        <div id="output"></div>
     </div>
 
     <script src="js/communication.js"></script>

@@ -78,7 +78,7 @@ void Orientation::update(float deltaTime) {
     readFromIMU(acceleration, angularVelocity);
 
     calculateAngles(deltaTime);    
-    calculateVerticalVelocity(deltaTime);
+    calculateVelocity(deltaTime);
 }
 
 void Orientation::calculateAngles(float deltaTime) {
@@ -91,7 +91,7 @@ void Orientation::calculateAngles(float deltaTime) {
     angleError =  accelerationAngles + accelerationError - angles;
 }
 
-void Orientation::calculateVerticalVelocity(float deltaTime) {
+void Orientation::calculateVelocity(float deltaTime) {
     float sinPitch = sin(angles.x);
     float sinRoll = sin(angles.y);
     float cosPitch = cos(angles.x);
@@ -112,7 +112,7 @@ void Orientation::calculateVerticalVelocity(float deltaTime) {
         acceleration.x * cosRoll * sinPitch + acceleration.y * -sinRoll + acceleration.z * cosRoll * cosPitch
     }
 
-    verticalVelocity += adjustedAcceleration.z * deltaTime;
+    velocity += adjustedAcceleration * deltaTime;
 }
 
 void Orientation::calculateOffsets(uint16_t cycles) {

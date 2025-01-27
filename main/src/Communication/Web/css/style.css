@@ -79,3 +79,11 @@ div {
     flex-direction: column-reverse; 
     overflow: hidden;
 }
+
+#drone {
+    font-size: 18px;
+}
+
+#drone span {
+    font-size: 20px;
+}
