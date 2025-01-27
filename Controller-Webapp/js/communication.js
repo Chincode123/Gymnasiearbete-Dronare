@@ -139,6 +139,8 @@ document.querySelector("#select-serial").addEventListener("click", async () => {
 });
 
 let hasAcknowledged = true;
+let acknowledgeAttempts = 0;
+let maxAcknowledgeAttempts = 5;
 write = async (data) => {
   if (!hasAcknowledged) {
     return false;
@@ -170,6 +172,14 @@ read = async () => {
 
             if (result.done) {
               console.log(result);
+
+              if (!hasAcknowledged){
+                acknowledgeAttempts++;
+                if (acknowledgeAttempts >= maxAcknowledgeAttempts) {
+                  hasAcknowledged = true;
+                  acknowledgeAttempts = 0;
+                }
+              }
 
               if (result.messageType == "acknowledge") {
                 hasAcknowledged = true;
@@ -315,7 +325,7 @@ getRequestInstruction = (type) => {
 document
   .getElementById("velocity")
   .querySelector(".send")
-  .addEventListener("click", () => {
+  .addEventListener("click", async () => {
     const instructions = getPIDInstructions(
       document.getElementById("pid-v-p").value,
       document.getElementById("pid-v-i").value,
@@ -323,13 +333,13 @@ document
       "velocity"
     );
 
-    write(instructions);
+    while(!write(instructions));
   });
 
 document
   .getElementById("pitch")
   .querySelector(".send")
-  .addEventListener("click", () => {
+  .addEventListener("click", async () => {
     const instructions = getPIDInstructions(
       document.getElementById("pid-p-p").value,
       document.getElementById("pid-p-i").value,
@@ -337,13 +347,13 @@ document
       "pitch"
     );
 
-    write(instructions);
+    while(!write(instructions));
   });
 
 document
   .getElementById("roll")
   .querySelector(".send")
-  .addEventListener("click", () => {
+  .addEventListener("click", async () => {
     const instructions = getPIDInstructions(
       document.getElementById("pid-r-p").value,
       document.getElementById("pid-r-i").value,
@@ -351,66 +361,66 @@ document
       "roll"
     );
 
-    write(instructions);
+    while(!write(instructions));
   });
 
 document
   .getElementById("target-ranges")
   .querySelector(".send")
-  .addEventListener("click", () => {
+  .addEventListener("click", async () => {
     const instructions = getTargetRangeInstructions(
       document.getElementById("arget-ranges-pitch").value,
       document.getElementById("target-ranges-roll").value,
       document.getElementById("target-ranges-velocity").value
     );
 
-    write(instructions);
+    while(!write(instructions));
   });
 
 document
   .getElementById("velocity")
   .querySelector(".get")
-  .addEventListener("click", () => {
+  .addEventListener("click", async () => {
     const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-pid-velocity"));
-    write(instructions);
+    while(!write(instructions));
   });
 
 document
   .getElementById("pitch")
   .querySelector(".get")
-  .addEventListener("click", () => {
+  .addEventListener("click", async () => {
     const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-pid-pitch"));
-    write(instructions);
+    while(!write(instructions));
   });
 
 document
   .getElementById("roll")
   .querySelector(".get")
-  .addEventListener("click", () => {
+  .addEventListener("click", async () => {
     const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-pid-roll"));
-    write(instructions);
+    while(!write(instructions));
   });
 
 document
   .getElementById("target-ranges")
   .querySelector(".get")
-  .addEventListener("click", () => {
+  .addEventListener("click", async () => {
     const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-target-ranges"));
-    write(instructions);
+    while(!write(instructions));
   });
 
 document
   .getElementById("on")
-  .addEventListener("click", () => {
+  .addEventListener("click", async () => {
     const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("activate"));
-    write(instructions);
+    while(!write(instructions));
   });
 
 document
   .getElementById("off")
-  .addEventListener("click", () => {
+  .addEventListener("click", async () => {
     const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("deactivate"));
-    write(instructions);
+    while(!write(instructions));
   });
 
 sendControllerInstructions = () => {
