@@ -24,7 +24,20 @@ void Orientation::begin(uint16_t cycles) {
 }
 
 void Orientation::end() {
-    // TODO
+    Wire.beginTransmission(MPU);
+    Wire.write(0x6B);
+    Wire.write(1 << 6);
+    Wire.endTransmission(true);
+
+    angularVelocityOffset = {0, 0 ,0};
+    accelerationOffset = {0, 0 ,0};
+    accelerationAngleOffset = {0, 0 ,0};
+    angleError = {0, 0 ,0};
+    accelerationError = {0, 0 ,0};
+    angularVelocity = {0, 0 ,0};
+    angles = {0, 0 ,0};
+    acceleration = {0, 0 ,0};
+    velocity = {0, 0 ,0};
 }
 
 void Orientation::readFromIMU(vector& acceleration, vector& angularVelocity) {
