@@ -354,7 +354,7 @@ document
     write(instructions);
   });
 
-  document
+document
   .getElementById("target-ranges")
   .querySelector(".send")
   .addEventListener("click", () => {
@@ -391,11 +391,25 @@ document
     write(instructions);
   });
 
-  document
+document
   .getElementById("target-ranges")
   .querySelector(".get")
   .addEventListener("click", () => {
     const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-target-ranges"));
+    write(instructions);
+  });
+
+document
+  .getElementById("on")
+  .addEventListener("click", () => {
+    const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("activate"));
+    write(instructions);
+  });
+
+document
+  .getElementById("off")
+  .addEventListener("click", () => {
+    const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("deactivate"));
     write(instructions);
   });
 
