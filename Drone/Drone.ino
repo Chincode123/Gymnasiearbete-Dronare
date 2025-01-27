@@ -1,11 +1,11 @@
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
-#include "../utils/RadioData.h"
-#include "../utils/MotorControl.h"
-#include "../utils/Vectors.h"
-#include "../utils/Orientation.h"
-#include "../utils/RadioSendStack.h"
+#include "RadioData.h"
+#include "MotorControl.h"
+#include "Vectors.h"
+#include "Orientation.h"
+#include "RadioSendStack.h"
 
 #define CE_PIN 6
 #define CSN_PIN 7
