@@ -9,7 +9,7 @@ void Orientation::begin() {
     Wire.begin();
     Wire.beginTransmission(MPU);
     Wire.write(0x6B);
-    wire.wrie(0x00);
+    Wire.write(0x00);
     Wire.endTransmission(true);
 
     calculateOffsets(300);
@@ -23,7 +23,7 @@ void Orientation::begin(uint16_t cycles) {
     Wire.begin();
     Wire.beginTransmission(MPU);
     Wire.write(0x6B);
-    wire.wrie(0x00);
+    Wire.write(0x00);
     Wire.endTransmission(true);
 
     calculateOffsets(cycles);
@@ -68,9 +68,9 @@ void Orientation::readFromIMU(bool applyOffset) {
     }
 }
 
-vector Orientation::calculateAccelerationAngles(vector& acceleration) {
-    return {(atan2(acceleration.y, sqrt(pow(acceleration.x, 2) + pow(acceleration.z, 2))) * 180 / PI)
-            (atan2(-1 * acceleration.x, sqrt(pow(acceleration.y, 2) + pow(acceleration.z, 2))) * 180 / PI),
+vector Orientation::calculateAccelerationAngles(const vector& acceleration) {
+    return {atan2(acceleration.y, sqrt(pow(acceleration.x, 2) + pow(acceleration.z, 2))) * 180 / PI,
+            atan2(-1 * acceleration.x, sqrt(pow(acceleration.y, 2) + pow(acceleration.z, 2))) * 180 / PI,
             0};
 }
 
@@ -110,7 +110,7 @@ void Orientation::calculateVelocity(float deltaTime) {
         acceleration.x * cosPitch + acceleration.z * -sinPitch,
         acceleration.x * sinRoll * sinPitch + acceleration.y * cosRoll + acceleration.z * sinRoll * cosPitch,
         acceleration.x * cosRoll * sinPitch + acceleration.y * -sinRoll + acceleration.z * cosRoll * cosPitch
-    }
+    };
 
     velocity += adjustedAcceleration * deltaTime;
 }
@@ -136,7 +136,7 @@ void Orientation::calculateOffsets(uint16_t cycles) {
     for (int i = 0; i < cycles; i++) {
         readFromIMU(acceleration, angularVelocity);
 
-        accelerationAngleOffset += calculateAccelerationAngles(acceleration + accelerationOffset);
+        accelerationAngleOffset += calculateAccelerationAngles((vector)(acceleration + accelerationOffset));
     }
 
     accelerationAngleOffset /= cycles;

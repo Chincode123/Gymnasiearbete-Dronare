@@ -55,7 +55,7 @@ void RadioSendStack::queue(void* data, uint8_t size) {
 }
 
 radioStackElement* RadioSendStack::pop() {
-    pop(0);
+    return pop((uint8_t)0);
 }
 
 radioStackElement* RadioSendStack::pop(uint8_t index) {

@@ -2,6 +2,7 @@
 #define ORIENTATION_H_
 
 #include "Vectors.h"
+#include <Arduino.h>
 
 class Orientation {
     uint8_t MPU;
@@ -18,7 +19,7 @@ class Orientation {
 
     void calculateOffsets(uint16_t cycles);
 
-    vector calculateAccelerationAngles(vector& acceleration);
+    vector calculateAccelerationAngles(const vector& acceleration);
 
     void calculateAngles(float deltaTime);
     void calculateVelocity(float deltaTime);

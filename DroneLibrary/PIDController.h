@@ -1,6 +1,8 @@
 #ifndef PIDCONTROLLER_H_
 #define PIDCONTROLLER_H_
 
+#include <Arduino.h>
+
 class PID {
     float p, i, d;
     float targetValue;

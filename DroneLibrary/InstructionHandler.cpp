@@ -79,10 +79,10 @@ uint8_t InstructionHandler::getData(void* out) {
     return messageType;
 }
 
-void InstructionHandler::write(void* data, uint8_t& type) {
+void InstructionHandler::write(uint8_t* data, uint8_t type) {
     Message messageOut(type);
 
-    void* output = malloc(messageOut.length + 2);
+    uint8_t* output = (uint8_t*)malloc(messageOut.length + 2);
 
     *output = 33;
     *(output + 1) = type;

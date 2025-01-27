@@ -1,11 +1,11 @@
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
-#include "RadioData.h"
-#include "MotorControl.h"
-#include "Vectors.h"
-#include "Orientation.h"
-#include "RadioSendStack.h"
+#include <RadioData.h>
+#include <MotorControl.h>
+#include <Vectors.h>
+#include <Orientation.h>
+#include <RadioSendStack.h>
 
 #define CE_PIN 6
 #define CSN_PIN 7
@@ -21,7 +21,7 @@ RadioSendStack sendStack;
 #define MOTOR_TR_Pin 4
 #define MOTOR_BR_Pin 3
 #define MOTOR_BL_Pin 2
-uint8_t motorPowerTL, motorPowerTR, motorPowerBR, motorPowerBL;
+uint8_t motorPowerTL = 0, motorPowerTR = 0, motorPowerBR = 0, motorPowerBL = 0;
 MotorController motorController(motorPowerTL, motorPowerTR, motorPowerBR, motorPowerBL);
 
 
@@ -47,13 +47,14 @@ float maxRoll;
 PID_Instructions pidIn, pidOut;
 
 // Delta time
-unsigned long previousTime
+unsigned long previousTime;
 float deltaTime;
 void setDeltaTime();
 
 
 // Spatial orientation/acceleration/velocity
-Orientation orientation;
+const int MPU = 0x68;
+Orientation orientation(MPU);
 
 
 bool activated = false;
@@ -90,12 +91,17 @@ void loop() {
     
     // Radio read
     if (radio.available()) {
+        // scope variables
+        TargetRangeInstructions targetRanges;
+        uint8_t power;
+        float time;
+        
         radio.read(&readBuffer, sizeof(readBuffer));
 
         RadioMessage messageIn, messageOut;
         memcpy(&messageIn, &readBuffer, sizeof(messageIn));
 
-        switch (messageIn.type) {
+        switch (messageIn.messageType) {
             case _MSG_CONTROLLER_INPUT:
                 controllerInstructions controller;
                 memcpy(&controller, &messageIn.dataBuffer, sizeof(controller));
@@ -111,8 +117,8 @@ void loop() {
                 orientation.begin(500);
 
                 // Ramp up motors to 50%
-                uint8_t power = 0;
-                float time = 0;
+                power = 0;
+                time = 0;
                 while (time < 1) {
                     setDeltaTime();
                     analogWrite(MOTOR_TL_Pin, power);
@@ -133,8 +139,8 @@ void loop() {
                 orientation.end();
 
                 // Ramp down motors to 0%
-                uint8_t power = 0;
-                float time = 0;
+                power = 0;
+                time = 0;
                 while (time < 1) {
                     setDeltaTime();
                     analogWrite(MOTOR_TL_Pin, power);
@@ -150,7 +156,7 @@ void loop() {
                 digitalWrite(MOTOR_BR_Pin, LOW);
                 digitalWrite(MOTOR_BL_Pin, LOW);
 
-                consoleLog("Deactivated");
+                consoleLog("Deactivated", true);
                 break;
             case _MSG_SET_PID_V:
                 memcpy(&pidIn, &messageIn.dataBuffer, sizeof(pidIn));
@@ -159,7 +165,7 @@ void loop() {
                 velocityD = pidIn.k_d;
                 break;
             case _MSG_SET_PID_P:
-                memcpy(&pidIN, &messageIn.dataBuffer, sizeof(pidIn));
+                memcpy(&pidIn, &messageIn.dataBuffer, sizeof(pidIn));
                 pitchP = pidIn.k_p;
                 pitchI = pidIn.k_i;
                 pitchD = pidIn.k_d;
@@ -174,33 +180,32 @@ void loop() {
                 pidOut.k_p = velocityP;
                 pidOut.k_i = velocityI;
                 pidOut.k_d = velocityD;
-                memcpy(&messageOut.dataBuffer, pidOut, sizeof(pidOut));
+                memcpy(&messageOut.dataBuffer, &pidOut, sizeof(pidOut));
                 sendStack.push(&messageOut, sizeof(messageOut));
                 break;
             case _MSG_REQUEST_PID_P:
                 pidOut.k_p = pitchP;
                 pidOut.k_i = pitchI;
                 pidOut.k_d = pitchD;
-                memcpy(&messageOut.dataBuffer, pidOut, sizeof(pidOut));
+                memcpy(&messageOut.dataBuffer, &pidOut, sizeof(pidOut));
                 sendStack.push(&messageOut, sizeof(messageOut));
                 break;
             case _MSG_REQUEST_PID_R:
                 pidOut.k_p = rollP;
                 pidOut.k_i = rollI;
                 pidOut.k_d = rollD;
-                memcpy(&messageOut.dataBuffer, pidOut, sizeof(pidOut));
+                memcpy(&messageOut.dataBuffer, &pidOut, sizeof(pidOut));
                 sendStack.push(&messageOut, sizeof(messageOut));
                 break;
             case _MSG_SET_TARGET_RANGES:
-                TargetRangeInstructions targetRanges;
                 memcpy(&targetRanges, &messageIn.dataBuffer, sizeof(targetRanges));
                 maxVelocity = targetRanges.verticalVelocityMax;
                 maxPitch = targetRanges.pitchMax;
                 maxRoll = targetRanges.rollMax;
                 break;
             case _MSG_REQUEST_TARGET_RANGES:
-                TargetRangeInstructions targetRanges = {maxPitch, maxRoll, maxVelocity};
-                memcpy(&messageOut.dataBuffer, targetRanges, sizeof(targetRanges));
+                targetRanges = {maxPitch, maxRoll, maxVelocity};
+                memcpy(&messageOut.dataBuffer, &targetRanges, sizeof(targetRanges));
                 sendStack.push(&messageOut, sizeof(messageOut));
                 break;
             default:
@@ -219,7 +224,7 @@ void loop() {
     }
     else {
         if (millis() % 5000 == 0) {
-            consoleLog("Waiting for activation");
+            consoleLog("Waiting for activation", true);
         }
     }
 
@@ -230,7 +235,7 @@ void loop() {
 void setDeltaTime() {
     unsigned long currentTime = millis();
     deltaTime = (float)(currentTime - previousTime) / 1000;
-    previusTime = currentTime;
+    previousTime = currentTime;
 }
 
 void sendRadio() {
@@ -255,7 +260,7 @@ void consoleLog(const char* message, bool important) {
     messageLength = (messageLength < 31) ? messageLength : 31;
     memcpy(&logMessage.dataBuffer, &message, messageLength);
     
-    if (impotrant)
+    if (important)
         sendStack.push(&logMessage, sizeof(logMessage));
     else
         sendStack.queue(&logMessage, sizeof(logMessage));

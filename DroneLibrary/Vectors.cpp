@@ -4,58 +4,66 @@ float vector::magnitude(){
     return sqrt((*this) * (*this));
 }
 
-vector operator+(vector& u, vector& v) {
+vector operator+(const vector& u, const vector& v) {
     return {u.x + v.x, u.y + v.y, u.z + v.z};
 }
 
-vector operator+=(vector& u, vector& v) {
+vector operator+=(vector& u, const vector& v) {
     u = u + v;
+    return u;
 }
 
-vector operator-(vector& u, vector& v) {
+vector operator-(const vector& u, const vector& v) {
     return {u.x - v.x, u.y - v.y, u.z - v.z};
 }
 
-vector operator-=(vector& u, vector& v) {
+vector operator-=(vector& u, const vector& v) {
     u = u - v;
+    return u;
 }
 
-float operator*(vector& u, vector& v) {
+float operator*(const vector& u, const vector& v) {
     return u.x * v.x + u.y * v.y + u.z * v.z;
 }
 
-vector operator*(vector& u, float a) {
+vector operator*(const vector& u, float a) {
     return {u.x * a, u.y * a, u.z * a};
 }
 
 vector operator*=(vector& u, float a) {
     u = u * a;
+    return u;
 }
 
-vector operator/(vector& u, float a) {
+vector operator/(const vector& u, float a) {
+    if (a == 0)
+        return {0, 0, 0};
     return {u.x / a, u.y / a, u.z / a};   
 }
 
 vector operator/=(vector& u, float a) {
+    if (a == 0)
+        return {0, 0, 0};
     u = u / a;
+    return u;
 }
 
-vector addVectors(vector& a, vector& b){
+vector addVectors(const vector& a, const vector& b) {
     return {a.x + b.x, a.y + b.y, a.z + b.z};
 }
 
-vector subtractVectors(vector& a, vector&b){
+vector subtractVectors(const vector& a, const vector&b) {
     return {a.x - b.x, a.y - b.y, a.z - b.z};
 }
 
-float dotProduct(vector& a, vector& b) {
+float dotProduct(const vector& a, const vector& b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-float vectorMagnitude(vector& a) {
+float vectorMagnitude(const vector& a) {
     return sqrt(a * a);
 }
 
-vector projectVector(vector& a, vector& b){
+vector projectVector(const vector& a, const vector& b) {
     return b * ((a * b) / (b * b));
 }

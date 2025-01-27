@@ -2,6 +2,7 @@
 #define RADIODATA_H_
 
 #include <RF24.h>
+#include <Arduino.h>
 
 #define DRONE_ADDRESS       (uint8_t*)"DRONE"  
 #define RECEIVER_ADDRESS    (uint8_t*)"RCEVR"
@@ -56,14 +57,12 @@ struct PID_Instructions {
 
 struct TargetRangeInstructions {
     float pitchMax, rollMax, verticalVelocityMax;
-}
+};
 
 struct RadioMessage {
     uint8_t messageType;
     uint8_t dataBuffer[31];
-}
-
-
+};
 
 bool configureRadio(RF24& radio);
 #endif

@@ -1,7 +1,8 @@
 #ifndef MOTORCONTROL_H_
 #define MOTORCONTROL_H_
 
-#include "../utils/PIDController.h"
+#include "PIDController.h"
+#include <Arduino.h>
 
 class MotorController {
 public:    

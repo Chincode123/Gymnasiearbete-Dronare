@@ -1,11 +1,7 @@
 #include "MotorControl.h"
  
-MotorController::MotorController(uint8_t& motorPowerTL, uint8_t& motorPowerTR, uint8_t& motorPowerBR, uint8_t& motorPowerBL) {
-    this->motorPowerTL = motorPowerTL;
-    this->motorPowerTR = motorPowerTR;
-    this->motorPowerBR = motorPowerBR;
-    this->motorPowerBL = motorPowerBL;
-}
+MotorController::MotorController(uint8_t& motorPowerTL, uint8_t& motorPowerTR, uint8_t& motorPowerBR, uint8_t& motorPowerBL)
+ : motorPowerTL(motorPowerTL), motorPowerTR(motorPowerTR), motorPowerBR(motorPowerBR), motorPowerBL(motorPowerBL) {}
 
 void MotorController::setTargetValues(float targetVelocity, float targetPitch, float targetRoll) {
     velocityController.setTarget(targetVelocity);

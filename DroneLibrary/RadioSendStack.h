@@ -1,6 +1,8 @@
 #ifndef RADIO_SEND_STACK_H_
 #define RADIO_SEND_STACK_H_
 
+#include <Arduino.h>
+
 struct radioStackElement {
     void* value;
     uint8_t size;

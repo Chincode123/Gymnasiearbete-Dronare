@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "*.erb": "erb",
+        "vector": "cpp",
+        "ostream": "cpp",
+        "algorithm": "cpp",
+        "chrono": "cpp",
+        "optional": "cpp",
+        "system_error": "cpp",
+        "type_traits": "cpp",
+        "xlocmon": "cpp",
+        "xtr1common": "cpp",
+        "xutility": "cpp"
+    }
+}

@@ -13,5 +13,5 @@ bool configureRadio(RF24& radio) {
     radio.setAddressWidth(5);
     radio.setPayloadSize(32);
 
-    return true
+    return true;
 }

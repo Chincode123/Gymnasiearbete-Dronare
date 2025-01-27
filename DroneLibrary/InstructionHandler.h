@@ -1,6 +1,8 @@
 #ifndef INSTRUCTION_HANDLER_H_
 #define INSTRUCTION_HANDLER_H_
 
+#include <Arduino.h>
+
 class Message {
 public:
     bool initiated = false;
@@ -31,7 +33,7 @@ class InstructionHandler {
 public:
     bool read();
     uint8_t getData(void* out);
-    void write(void* data, uint8_t type);
+    void write(uint8_t* data, uint8_t type);
     void acknowledge();
 };
 

@@ -1,7 +1,7 @@
 #include <nRF24L01.h>
 #include <RF24.h>
-#include "../utils/RadioData.h"
-#include "../utils/InstructionHandler.h"
+#include <RadioData.h>
+#include <InstructionHandler.h>
 
 #define CE_PIN 7
 #define CSN_PIN 8
@@ -52,20 +52,20 @@ void loop()
         }
 
         messageOut.messageType = messageType;
-        memcpy(&messageOut.dataBuffer, &readBuffer, sizeof(messageOut.dataBuffer));
+        memcpy(messageOut.dataBuffer, &readBuffer, sizeof(messageOut.dataBuffer));
         send();
     }
 
     if (radio.available()) {
         radio.read(&messageIn, sizeof(messageIn));
-        instructionHandler.write(&messageIn.dataBuffer, messageIn.messageType);
+        instructionHandler.write(messageIn.dataBuffer, messageIn.messageType);
     }
 }
 
 void send()
 {
     radio.stopListening();
-    bool result = radio.write(messageOut, sizeof(messageOut));
+    bool result = radio.write(messageOut.dataBuffer, sizeof(messageOut));
     radio.startListening();
     if (result)
     {
