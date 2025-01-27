@@ -362,43 +362,6 @@ document
     write(instructions);
   });
 
-document.getElementById("write-all").addEventListener("click", async () => {
-  let instructions = getPIDInstructions(
-    document.getElementById("pid-v-p").value,
-    document.getElementById("pid-v-i").value,
-    document.getElementById("pid-v-d").value,
-    "velocity"
-  );
-
-  while (!write(instructions));
-
-  instructions = getPIDInstructions(
-    document.getElementById("pid-p-p").value,
-    document.getElementById("pid-p-i").value,
-    document.getElementById("pid-p-d").value,
-    "pitch"
-  );
-
-  while (!write(instructions));
-
-  instructions = getPIDInstructions(
-    document.getElementById("pid-r-p").value,
-    document.getElementById("pid-r-i").value,
-    document.getElementById("pid-r-d").value,
-    "roll"
-  );
-
-  while (!write(instructions));
-
-  instructions = getTargetRangeInstructions(
-    document.getElementById("target-ranges-pitch").value,
-    document.getElementById("target-ranges-roll").value,
-    document.getElementById("target-ranges-velocity").value
-  );
-
-  while (!write(instructions));
-});
-
 sendControllerInstructions = () => {
   instructions = getControllerInstructions(
     joystick.x,
