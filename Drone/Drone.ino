@@ -14,7 +14,7 @@
 RF24 radio(CE_PIN, CSN_PIN, 4000000);
 uint8_t readBuffer[32];
 RadioSendStack sendStack;
-
+RadioMessage messageIn, messageOut;
 
 // Motors
 #define MOTOR_TL_Pin 5
@@ -59,7 +59,6 @@ Orientation orientation(MPU);
 
 bool activated = false;
 
-
 void setup() {
     // Set up radio
     while(!radio.begin());
@@ -97,14 +96,12 @@ void loop() {
         float time;
         
         radio.read(&readBuffer, sizeof(readBuffer));
-
-        RadioMessage messageIn, messageOut;
         memcpy(&messageIn, &readBuffer, sizeof(messageIn));
 
         switch (messageIn.messageType) {
             case _MSG_CONTROLLER_INPUT:
                 controllerInstructions controller;
-                memcpy(&controller, &messageIn.dataBuffer, sizeof(controller));
+                memcpy(&controller, messageIn.dataBuffer, sizeof(controller));
                 
                 targetVelocity = maxVelocity * (float)controller.power / 127;
                 targetPitch = maxPitch * ((float)controller.stick_X / 127);
@@ -159,19 +156,19 @@ void loop() {
                 consoleLog("Deactivated", true);
                 break;
             case _MSG_SET_PID_V:
-                memcpy(&pidIn, &messageIn.dataBuffer, sizeof(pidIn));
+                memcpy(&pidIn, messageIn.dataBuffer, sizeof(pidIn));
                 velocityP = pidIn.k_p;
                 velocityI = pidIn.k_i;
                 velocityD = pidIn.k_d;
                 break;
             case _MSG_SET_PID_P:
-                memcpy(&pidIn, &messageIn.dataBuffer, sizeof(pidIn));
+                memcpy(&pidIn, messageIn.dataBuffer, sizeof(pidIn));
                 pitchP = pidIn.k_p;
                 pitchI = pidIn.k_i;
                 pitchD = pidIn.k_d;
                 break;
             case _MSG_SET_PID_R:
-                memcpy(&pidIn, &messageIn.dataBuffer, sizeof(pidIn));
+                memcpy(&pidIn, messageIn.dataBuffer, sizeof(pidIn));
                 rollP = pidIn.k_p;
                 rollI = pidIn.k_i;
                 rollD = pidIn.k_d;
@@ -180,32 +177,32 @@ void loop() {
                 pidOut.k_p = velocityP;
                 pidOut.k_i = velocityI;
                 pidOut.k_d = velocityD;
-                memcpy(&messageOut.dataBuffer, &pidOut, sizeof(pidOut));
+                memcpy(messageOut.dataBuffer, &pidOut, sizeof(pidOut));
                 sendStack.push(&messageOut, sizeof(messageOut));
                 break;
             case _MSG_REQUEST_PID_P:
                 pidOut.k_p = pitchP;
                 pidOut.k_i = pitchI;
                 pidOut.k_d = pitchD;
-                memcpy(&messageOut.dataBuffer, &pidOut, sizeof(pidOut));
+                memcpy(messageOut.dataBuffer, &pidOut, sizeof(pidOut));
                 sendStack.push(&messageOut, sizeof(messageOut));
                 break;
             case _MSG_REQUEST_PID_R:
                 pidOut.k_p = rollP;
                 pidOut.k_i = rollI;
                 pidOut.k_d = rollD;
-                memcpy(&messageOut.dataBuffer, &pidOut, sizeof(pidOut));
+                memcpy(messageOut.dataBuffer, &pidOut, sizeof(pidOut));
                 sendStack.push(&messageOut, sizeof(messageOut));
                 break;
             case _MSG_SET_TARGET_RANGES:
-                memcpy(&targetRanges, &messageIn.dataBuffer, sizeof(targetRanges));
+                memcpy(&targetRanges, messageIn.dataBuffer, sizeof(targetRanges));
                 maxVelocity = targetRanges.verticalVelocityMax;
                 maxPitch = targetRanges.pitchMax;
                 maxRoll = targetRanges.rollMax;
                 break;
             case _MSG_REQUEST_TARGET_RANGES:
                 targetRanges = {maxPitch, maxRoll, maxVelocity};
-                memcpy(&messageOut.dataBuffer, &targetRanges, sizeof(targetRanges));
+                memcpy(messageOut.dataBuffer, &targetRanges, sizeof(targetRanges));
                 sendStack.push(&messageOut, sizeof(messageOut));
                 break;
             default:
@@ -230,6 +227,24 @@ void loop() {
 
     // Output
     sendRadio();
+
+    if (sendStack.count <= 0) {
+        messageOut.messageType = _MSG_DRONE_ACCELERATION;
+        memcpy(messageOut.dataBuffer, &orientation.acceleration, sizeof(orientation.acceleration));
+        sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
+
+        messageOut.messageType = _MSG_DRONE_VELOCITY;
+        memcpy(messageOut.dataBuffer, &orientation.velocity, sizeof(orientation.velocity));
+        sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
+
+        messageOut.messageType = _MSG_DRONE_ANGULAR_VELOCITY;
+        memcpy(messageOut.dataBuffer, &orientation.angularVelocity, sizeof(orientation.angularVelocity));
+        sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
+
+        messageOut.messageType = _MSG_DRONE_ANGLES;
+        memcpy(messageOut.dataBuffer, &orientation.angles, sizeof(orientation.angles));
+        sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
+    }
 }
 
 void setDeltaTime() {
@@ -258,7 +273,7 @@ void consoleLog(const char* message, bool important) {
     logMessage.messageType = _MSG_DRONE_LOG;
     uint8_t messageLength = strlen(message);
     messageLength = (messageLength < 31) ? messageLength : 31;
-    memcpy(&logMessage.dataBuffer, &message, messageLength);
+    memcpy(logMessage.dataBuffer, message, messageLength);
     
     if (important)
         sendStack.push(&logMessage, sizeof(logMessage));

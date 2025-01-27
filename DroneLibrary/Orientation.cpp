@@ -6,17 +6,7 @@ Orientation::Orientation(uint8_t MPU) {
 }
 
 void Orientation::begin() {
-    Wire.begin();
-    Wire.beginTransmission(MPU);
-    Wire.write(0x6B);
-    Wire.write(0x00);
-    Wire.endTransmission(true);
-
-    calculateOffsets(300);
-
-    #ifdef DRONE_LOG
-    consoleLog("Initiated orientation", true);
-    #endif
+    begin(300);
 }
 
 void Orientation::begin(uint16_t cycles) {
@@ -82,13 +72,13 @@ void Orientation::update(float deltaTime) {
 }
 
 void Orientation::calculateAngles(float deltaTime) {
-    vector accelerationAngles = calculateAccelerationAngles(acceleration) - accelerationAngleOffset;
+    vector accelerationAngles = (calculateAccelerationAngles(acceleration) - accelerationAngleOffset);
 
     float rateOfChange = 0.1;
-    angles += ((angularVelocity * deltaTime) + angleError) * rateOfChange;
+    angles += (((angularVelocity * deltaTime) + angleError) * rateOfChange);
 
-    accelerationError += (accelerationAngles - angles) * deltaTime;
-    angleError =  accelerationAngles + accelerationError - angles;
+    accelerationError += ((accelerationAngles - angles) * deltaTime);
+    angleError =  (accelerationAngles + accelerationError - angles);
 }
 
 void Orientation::calculateVelocity(float deltaTime) {
@@ -112,7 +102,7 @@ void Orientation::calculateVelocity(float deltaTime) {
         acceleration.x * cosRoll * sinPitch + acceleration.y * -sinRoll + acceleration.z * cosRoll * cosPitch
     };
 
-    velocity += adjustedAcceleration * deltaTime;
+    velocity += (adjustedAcceleration * deltaTime);
 }
 
 void Orientation::calculateOffsets(uint16_t cycles) {
