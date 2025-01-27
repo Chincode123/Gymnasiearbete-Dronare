@@ -3,21 +3,21 @@
 MotorController::MotorController(uint8_t& motorPowerTL, uint8_t& motorPowerTR, uint8_t& motorPowerBR, uint8_t& motorPowerBL)
  : motorPowerTL(motorPowerTL), motorPowerTR(motorPowerTR), motorPowerBR(motorPowerBR), motorPowerBL(motorPowerBL) {}
 
-void MotorController::setTargetValues(float targetVelocity, float targetPitch, float targetRoll) {
+void MotorController::setTargetValues(float *targetVelocity, float *targetPitch, float *targetRoll) {
     velocityController.setTarget(targetVelocity);
     pitchController.setTarget(targetPitch);
     rollController.setTarget(targetRoll);
 }
 
-void MotorController::setVelocityConstants(float p, float i, float d) {
+void MotorController::setVelocityConstants(float *p, float *i, float *d) {
     velocityController.setConstants(p, i, d);
 }
 
-void MotorController::setPitchConstants(float p, float i, float d) {
+void MotorController::setPitchConstants(float *p, float *i, float *d) {
     pitchController.setConstants(p, i, d);
 }
 
-void MotorController::setRollConstants(float p, float i, float d) {
+void MotorController::setRollConstants(float *p, float *i, float *d) {
     rollController.setConstants(p, i, d);
 }
 

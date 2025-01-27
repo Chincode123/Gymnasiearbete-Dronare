@@ -69,10 +69,10 @@ void setup() {
     radio.openReadingPipe(1, RECEIVER_ADDRESS);
 
     // Set up motor controller
-    motorController.setTargetValues(targetVelocity, targetPitch, targetRoll);
-    motorController.setVelocityConstants(velocityP, velocityI, velocityD);
-    motorController.setPitchConstants(pitchP, pitchI, pitchD);
-    motorController.setRollConstants(rollP, rollI, rollD);
+    motorController.setTargetValues(&targetVelocity, &targetPitch, &targetRoll);
+    motorController.setVelocityConstants(&velocityP, &velocityI, &velocityD);
+    motorController.setPitchConstants(&pitchP, &pitchI, &pitchD);
+    motorController.setRollConstants(&rollP, &rollI, &rollD);
 
     pinMode(MOTOR_TL_Pin, OUTPUT);
     pinMode(MOTOR_TR_Pin, OUTPUT);
