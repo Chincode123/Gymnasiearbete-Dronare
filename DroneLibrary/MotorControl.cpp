@@ -23,12 +23,12 @@ void MotorController::setRollConstants(float *p, float *i, float *d) {
 
 void MotorController::calculatePower(float velocity, float pitch, float roll, float deltaTime) {
     float basePower = velocityController.calculate(velocity, deltaTime);
-    basePower = constrain(basePower, 0, 255);
+    basePower = constrain(basePower, -127, 127);
     float pitchShift = pitchController.calculate(pitch, deltaTime);
     float rollShift = rollController.calculate(roll, deltaTime);
 
-    motorPowerTL = (uint8_t)constrain((basePower + pitchShift + rollShift), 0, 255);
-    motorPowerTR = (uint8_t)constrain((basePower + pitchShift - rollShift), 0, 255);
-    motorPowerBR = (uint8_t)constrain((basePower - pitchShift - rollShift), 0, 255);
-    motorPowerBL = (uint8_t)constrain((basePower - pitchShift + rollShift), 0, 255);
+    motorPowerTL = (uint8_t)(constrain((basePower + pitchShift + rollShift), -127, 127) + 127);
+    motorPowerTR = (uint8_t)(constrain((basePower + pitchShift - rollShift), -127, 127) + 127);
+    motorPowerBR = (uint8_t)(constrain((basePower - pitchShift - rollShift), -127, 127) + 127);
+    motorPowerBL = (uint8_t)(constrain((basePower - pitchShift + rollShift), -127, 127) + 127);
 }

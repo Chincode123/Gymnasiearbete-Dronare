@@ -214,10 +214,10 @@ void loop() {
     if (activated) {
         orientation.update(deltaTime);
         motorController.calculatePower(orientation.velocity.z, orientation.angles.x, orientation.angles.y, deltaTime);
-        analogWrite(MOTOR_TL_Pin, motorPowerTL);   
-        analogWrite(MOTOR_TR_Pin, motorPowerTR);   
-        analogWrite(MOTOR_BR_Pin, motorPowerBR);   
-        analogWrite(MOTOR_BL_Pin, motorPowerBL);
+        analogWrite(MOTOR_TL_Pin, 128 + (motorPowerTL / 2));   
+        analogWrite(MOTOR_TR_Pin, 128 + (motorPowerTR / 2));   
+        analogWrite(MOTOR_BR_Pin, 128 + (motorPowerBR / 2));   
+        analogWrite(MOTOR_BL_Pin, 128 + (motorPowerBL / 2));
     }
     else {
         if (millis() % 5000 == 0) {
