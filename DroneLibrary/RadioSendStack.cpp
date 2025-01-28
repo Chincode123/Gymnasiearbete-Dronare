@@ -34,15 +34,19 @@ bool RadioSendStack::removeAt(uint8_t index) {
     if (index == 0) {
         radioStackElement* newFirst = firstElement->next;
         free(firstElement->value);
+        free(firstElement->value);
         free(firstElement);
         firstElement = newFirst;
+        return true;
         return true;
     }
     else if (index == count - 1) {
         radioStackElement* newLast = get(count - 2);
         free(lastElement->value);
+        free(lastElement->value);
         free(lastElement);
         lastElement = newLast;
+        return true;
         return true;
     }
     else if (index >= count) {
@@ -51,6 +55,7 @@ bool RadioSendStack::removeAt(uint8_t index) {
 
     radioStackElement* previousElement = get(index - 1);
     previousElement->next = previousElement->next->next;
+    free(previousElement->next->value);
     free(previousElement->next->value);
     free(previousElement->next);
     return true;
