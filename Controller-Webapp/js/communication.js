@@ -225,12 +225,12 @@ read = async () => {
               }
 
               // drone info
-              else if (result.messageType == "drone-velocity"){
+              else if (result.messageType == "drone-velocity") {
                 const velocity = serialReader.readVector(result.value);
                 document.getElementById("vel-x").innerHTML = velocity.x.toFixed(2);
                 document.getElementById("vel-y").innerHTML = velocity.y.toFixed(2);
                 document.getElementById("vel-z").innerHTML = velocity.z.toFixed(2);
-              }innerHTML
+              }
               else if (result.messageType == "drone-acceleration") {
                 const acceleration = serialReader.readVector(result.value);
                 document.getElementById("acc-x").innerHTML = acceleration.x.toFixed(2);
