@@ -15,6 +15,11 @@ radioStackElement* RadioSendStack::get(radioStackElement* currentElement, uint8_
 radioStackElement* RadioSendStack::create(void* data, uint8_t size) {
     count++;
     radioStackElement* element = (radioStackElement*)malloc(size + sizeof(radioStackElement) - 1);
+    
+    if (element == NULL) {
+        // Handle allocation error
+    }
+
     element->size = size;
     memcpy(element->value, data, size);
     return element;
@@ -24,13 +29,17 @@ bool RadioSendStack::removeAt(uint8_t index) {
     count--;
     if (index == 0) {
         radioStackElement* newFirst = firstElement->next;
+        free(firstElement->value);
         free(firstElement);
         firstElement = newFirst;
+        return true;
     }
     else if (index == count - 1) {
         radioStackElement* newLast = get(count - 2);
+        free(lastElement->value);
         free(lastElement);
         lastElement = newLast;
+        return true;
     }
     else if (index >= count) {
         return false;
@@ -38,6 +47,7 @@ bool RadioSendStack::removeAt(uint8_t index) {
 
     radioStackElement* previousElement = get(index - 1);
     previousElement->next = previousElement->next->next;
+    free(previousElement->next->value);
     free(previousElement->next);
     return true;
 }
