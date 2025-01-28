@@ -34,6 +34,9 @@ public class DroneController : MonoBehaviour
 
     [SerializeField] float angleP, angleI, angleD;
 
+    [SerializeFeild] float velocityRange, pitchRange, rollRange;
+    [SerializeFeild] float currentPitch, currentRoll;
+
     Vector3 rotation;
 
     [SerializeField] new Rigidbody rigidbody;
@@ -51,10 +54,12 @@ public class DroneController : MonoBehaviour
 
     void Update()
     {
-        desiredVelocity = 10 * Input.GetAxisRaw("Triggers") * Mathf.Abs(Input.GetAxisRaw("Triggers"));
-        desiredPitch = (-Mathf.PI / 12) * Input.GetAxisRaw("Vertical");
-        desiredRoll = (-Mathf.PI / 6) * Input.GetAxisRaw("Horizontal");
+        desiredVelocity = velocityRange * Input.GetAxisRaw("Triggers") * Mathf.Abs(Input.GetAxisRaw("Triggers"));
+        desiredPitch = pitchRange * Input.GetAxisRaw("Vertical");
+        desiredRoll = rollRange * Input.GetAxisRaw("Horizontal");
 
+        currentPitch = Mathf.Atan2(-transform.up.z, transform.up.y) * Mathf.Rad2Deg;
+        currentRoll = Mathf.Atan2(-transform.up.x, transform.up.y)  * Mathf.Rad2Deg;
 
         ShiftPropellerPower();
 
@@ -65,7 +70,8 @@ public class DroneController : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
-            rigidbody.AddForceAtPosition(transform.up * calculateMotorPower(propellerPower[i]), propellers[i].position);
+                                                        // -0.5 <= (power / 255) <= 0.5
+            rigidbody.AddForceAtPosition(transform.up * calculateMotorPower((propellerPower[i] / 255) + 0.5f), propellers[i].position);
         }
 
         UpdateGyroscopeValues(Time.fixedDeltaTime);
@@ -102,7 +108,7 @@ public class DroneController : MonoBehaviour
 
     void ShiftPropellerPower()
     {
-        float velocityErorr = desiredVelocity - Vector3.Project(rigidbody.velocity, Vector3.up).y;
+        float velocityErorr = desiredVelocity - rigidbody.velocity.y;
 
         velocityIntegral += velocityErorr * Time.deltaTime;
 
@@ -110,11 +116,11 @@ public class DroneController : MonoBehaviour
         previousVelocityError = velocityErorr;
 
         float basePower = velocityP * velocityErorr + velocityI * velocityIntegral + velocityD * velocityDerivitive;
-        basePower = Mathf.Clamp(basePower, 0, maxPropellerPower);
+        basePower = Mathf.Clamp(basePower, -127, 127);
 
 
 
-        float pitchError = desiredPitch - Mathf.Atan2(-transform.up.z, transform.up.y);
+        float pitchError = desiredPitch - currentPitch;
 
         pitchIntegral += pitchError * Time.deltaTime;
 
@@ -127,7 +133,7 @@ public class DroneController : MonoBehaviour
 
 
 
-        float rollError = desiredRoll - Mathf.Atan2(-transform.up.x, transform.up.y);
+        float rollError = desiredRoll - currentRoll;
 
         pitchIntegral += rollError * Time.deltaTime;
 
@@ -146,7 +152,7 @@ public class DroneController : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
-            propellerPower[i] = Mathf.Clamp(propellerPower[i], 0, maxPropellerPower);
+            propellerPower[i] = Mathf.Clamp(propellerPower[i], -127, 127);
         }
     }
 
@@ -155,9 +161,8 @@ public class DroneController : MonoBehaviour
         return (x / (max - min)) * (nMax - nMin);
     }
 
-    float calculateMotorPower(float _x) {
-        float x = (_x - 127) / 255;
-        
+    // 0 <= x <= 1
+    float calculateMotorPower(float x) {
         if (x <= 0)
             return 0;
         
