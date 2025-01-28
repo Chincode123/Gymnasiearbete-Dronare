@@ -13,6 +13,8 @@ uint8_t readBuffer[31];
 
 RadioMessage messageOut, messageIn;
 
+long previousTime;
+
 void setup()
 {
     Serial.begin(9600);
@@ -28,10 +30,15 @@ void setup()
     radio.openWritingPipe(RECEIVER_ADDRESS);
     radio.openReadingPipe(1, DRONE_ADDRESS);
     radio.startListening();
+
+    previousTime = millis();
 }
 
 void loop()
 {
+    float deltaTime = (float)(millis() - previousTime) / 1000;
+    previousTime = millis();
+
     if (instructionHandler.read())
     {
         uint8_t messageType = instructionHandler.getData(readBuffer);
@@ -109,6 +116,10 @@ void loop()
         radio.read(&messageIn, sizeof(messageIn));
         instructionHandler.write(messageIn.dataBuffer, messageIn.messageType);
     }
+
+    messageOut.messageType = _MSG_RECEIVER_DELTATIME;
+    memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));
+    send();
 }
 
 bool send()

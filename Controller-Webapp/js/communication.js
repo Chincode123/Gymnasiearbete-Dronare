@@ -20,7 +20,9 @@ class SerialMessage {
     [13, "drone-velocity"],
     [14, "drone-acceleration"],
     [15, "drone-angular-velocity"],
-    [16, "drone-angles"]
+    [16, "drone-angles"],
+    [17, "drone-delta-time"],
+    [18, "receiver-delta-time"]
   ]);
 
   messageTypeFromName = new Map([
@@ -40,7 +42,9 @@ class SerialMessage {
     ["drone-velocity", 13],
     ["drone-acceleration", 14],
     ["drone-angular-velocity", 15],
-    ["drone-angles", 16]
+    ["drone-angles", 16],
+    ["drone-delta-time", 17],
+    ["receiver-delta-time", 18]
   ]);
 
   messageLengths = new Map([
@@ -60,7 +64,9 @@ class SerialMessage {
     [this.messageTypeFromName.get("drone-velocity"), 12],
     [this.messageTypeFromName.get("drone-acceleration"), 12],
     [this.messageTypeFromName.get("drone-angular-velocity"), 12],
-    [this.messageTypeFromName.get("drone-angles"), 12]
+    [this.messageTypeFromName.get("drone-angles"), 12],
+    [this.messageTypeFromName.get("drone-delta-time"), 4],
+    [this.messageTypeFromName.get("receiver-delta-time"), 4]
   ]);
 
   set = (type) => {
@@ -126,6 +132,11 @@ class SerialReader {
     const floatValues = new Float32Array(data.buffer);
     return { x: floatValues[0], y: floatValues[1], z: floatValues[2] };
   };
+
+  readDeltaTime = (data) =>  {
+    const floatValues = new Float32Array(data.buffer);
+    return floatValues[0];
+  }
 }
 const serialReader = new SerialReader();
 
@@ -216,27 +227,35 @@ read = async () => {
               // drone info
               else if (result.messageType == "drone-velocity"){
                 const velocity = serialReader.readVector(result.value);
-                document.getElementById("vel-x").value = velocity.x.toFixed(2);
-                document.getElementById("vel-y").value = velocity.y.toFixed(2);
-                document.getElementById("vel-z").value = velocity.z.toFixed(2);
-              }
+                document.getElementById("vel-x").innerHTML = velocity.x.toFixed(2);
+                document.getElementById("vel-y").innerHTML = velocity.y.toFixed(2);
+                document.getElementById("vel-z").innerHTML = velocity.z.toFixed(2);
+              }innerHTML
               else if (result.messageType == "drone-acceleration") {
                 const acceleration = serialReader.readVector(result.value);
-                document.getElementById("acc-x").value = acceleration.x.toFixed(2);
-                document.getElementById("acc-y").value = acceleration.y.toFixed(2);
-                document.getElementById("acc-z").value = acceleration.z.toFixed(2);
+                document.getElementById("acc-x").innerHTML = acceleration.x.toFixed(2);
+                document.getElementById("acc-y").innerHTML = acceleration.y.toFixed(2);
+                document.getElementById("acc-z").innerHTML = acceleration.z.toFixed(2);
               }
               else if (result.messageType == "drone-angular-velocity") {
                 const angular_velocity = serialReader.readVector(result.value);
-                document.getElementById("angular-vel-x").value = angular_velocity.x.toFixed(2);
-                document.getElementById("angular-vel-y").value = angular_velocity.y.toFixed(2);
-                document.getElementById("angular-vel-z").value = angular_velocity.z.toFixed(2);
+                document.getElementById("angular-vel-x").innerHTML = angular_velocity.x.toFixed(2);
+                document.getElementById("angular-vel-y").innerHTML = angular_velocity.y.toFixed(2);
+                document.getElementById("angular-vel-z").innerHTML = angular_velocity.z.toFixed(2);
               } 
               else if (result.messageType == "drone-angles") {
                 const angles = serialReader.readVector(result.value);
-                document.getElementById("pitch-value").value = angles.x.toFixed(2);
-                document.getElementById("roll-value").value = angles.y.toFixed(2);
-                document.getElementById("yaw-value").value = angles.z.toFixed(2);
+                document.getElementById("pitch-value").innerHTML = angles.x.toFixed(2);
+                document.getElementById("roll-value").innerHTML = angles.y.toFixed(2);
+                document.getElementById("yaw-value").innerHTML = angles.z.toFixed(2);
+              }
+              else if(result.messageType == "drone-delta-time") {
+                const updateRate = 1 / SerialReader.readDeltaTime(result.value);
+                document.getElementById("drone-update").innerHTML = updateRate.toFixed(0);
+              }
+              else if(result.messageType == "receiver-delta-time") {
+                const updateRate = 1 / SerialReader.readDeltaTime(result.value);
+                document.getElementById("receiver-update").innerHTML = updateRate.toFixed(0);
               }
             }
           }

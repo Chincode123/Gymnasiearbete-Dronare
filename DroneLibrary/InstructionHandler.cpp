@@ -13,15 +13,35 @@ bool Message::set(uint8_t type) {
     switch (type) {
         case _MSG_CONTROLLER_INPUT:
             length = _MSG_LENGHT_CONTROLLER;
-        break;
+            break;
         case _MSG_SET_PID_V:
         case _MSG_SET_PID_P:
         case _MSG_SET_PID_R:
             length = _MSG_LENGHT_PID;
+            break;
         case _MSG_SET_TARGET_RANGES:
             length = _MSG_LENGTH_TARGET_RANGES;
+            break;
         break;
-
+        case _MSG_DRONE_VELOCITY:
+            length = _MSG_LENGTH_VELOCITY;
+            break;
+        case _MSG_DRONE_ACCELERATION:
+            length = _MSG_LENGTH_ACCELERATION;
+            break;
+        case _MSG_DRONE_ANGULAR_VELOCITY:
+            length = _MSG_LENGTH_ANGULAR_VELOCITY;
+            break;
+        case _MSG_DRONE_ANGLES:
+            length = _MSG_LENGTH_ANGLES;
+            break;
+        case _MSG_DRONE_LOG:
+            length = _MSG_LENGTH_DRONE_LOG;
+            break;
+        case _MSG_DRONE_DELTATIME:
+        case _MSG_RECEIVER_DELTATIME:
+            length = _MSG_LENGTH_DELTATIME;
+            break;
         case _MSG_REQUEST_PID_V:
         case _MSG_REQUEST_PID_P:
         case _MSG_REQUEST_PID_R:

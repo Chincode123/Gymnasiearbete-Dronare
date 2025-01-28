@@ -33,6 +33,8 @@
 #define _MSG_DRONE_ACCELERATION 14
 #define _MSG_DRONE_ANGULAR_VELOCITY 15
 #define _MSG_DRONE_ANGLES 16
+#define _MSG_DRONE_DELTATIME 17
+#define _MSG_RECEIVER_DELTATIME 18
 
 // message length in bytes
 #define _MSG_LENGHT_CONTROLLER 3
@@ -44,6 +46,7 @@
 #define _MSG_LENGTH_ACCELERATION 12
 #define _MSG_LENGTH_ANGULAR_VELOCITY 12
 #define _MSG_LENGTH_ANGLES 12
+#define _MSG_LENGTH_DELTATIME 4
 
 struct controllerInstructions {
     int8_t stick_X;

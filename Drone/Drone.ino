@@ -244,6 +244,10 @@ void loop() {
         messageOut.messageType = _MSG_DRONE_ANGLES;
         memcpy(messageOut.dataBuffer, &orientation.angles, sizeof(orientation.angles));
         sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
+
+        messageOut.messageType = _MSG_DRONE_DELTATIME;
+        memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));
+        sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
     }
 }
 
