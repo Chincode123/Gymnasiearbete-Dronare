@@ -62,7 +62,7 @@ void Orientation::readFromIMU(vector& acceleration, vector& angularVelocity) {
     angularVelocity.z = (Wire.read() << 8 | Wire.read()) / 131.0;
 }
 
-void Orientation::readFromIMU(bool applyOffset) {
+void Orientation::readFromIMU() {
     readFromIMU(acceleration, angularVelocity);
     
     if (applyOffset) {
@@ -78,7 +78,7 @@ vector Orientation::calculateAccelerationAngles(const vector& acceleration) {
 }
 
 void Orientation::update(float deltaTime) {
-    readFromIMU(acceleration, angularVelocity);
+    readFromIMU();
 
     calculateAngles(deltaTime);    
     calculateVelocity(deltaTime);

@@ -15,7 +15,7 @@ class Orientation {
     vector accelerationError;
 
     void readFromIMU(vector& acceleration, vector& angularVelocity);
-    void readFromIMU(bool applyOffsets);
+    void readFromIMU();
 
     void calculateOffsets(uint16_t cycles);
 
