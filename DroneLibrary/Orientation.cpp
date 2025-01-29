@@ -74,7 +74,7 @@ void Orientation::readFromIMU() {
 vector Orientation::calculateAccelerationAngles(const vector& acceleration) {
     return {atan2(acceleration.y, sqrt(pow(acceleration.x, 2) + pow(acceleration.z, 2))) * 180 / PI,
             atan2(-1 * acceleration.x, sqrt(pow(acceleration.y, 2) + pow(acceleration.z, 2))) * 180 / PI,
-            0};
+            atan2(acceleration.y, acceleration.x) * 180 / PI};
 }
 
 void Orientation::update(float deltaTime) {
