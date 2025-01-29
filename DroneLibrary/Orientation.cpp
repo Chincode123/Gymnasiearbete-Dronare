@@ -97,22 +97,36 @@ void Orientation::calculateAngles(float deltaTime) {
 void Orientation::calculateVelocity(float deltaTime) {
     float sinPitch = sin(angles.x);
     float sinRoll = sin(angles.y);
+    float sinYaw = sin(angles.z);
     float cosPitch = cos(angles.x);
     float cosRoll = cos(angles.y);
+    float cosYaw = cos(angles.z);
     
     /*
         Acording to ChatGPT, this rotational matrix transforms the acceleration values to the world frame
-        |cos(pitch)             0               -sin(pitch)     |
-        |sin(roll)sin(pitch)    cos(roll)   sin(roll)cos(pitch) |
-        |cos(roll)sin(pitch)    -sin(roll)  cos(roll)cos(pitch) |
-        
-        Looks reasonable but haven't checked
+
+        |cos(yaw)cos(pitch)     cos(yaw)sin(pitch)sin(roll)−sin(yaw)cos(roll)    cos(yaw)sin(pitch)cos(roll)+sin(yaw)sin(roll)|
+​        |sin(yaw)cos(pitch)     sin(yaw)sin(pitch)sin(roll)+cos(yaw)cos(roll)   sin(yaw)sin(pitch)cos(roll)−cos(yaw)sin(roll) |
+​        |−sin(pitch)                       cos(pitch)sin(roll)                             cos(pitch)cos(roll)                |
+​
+        Looks reasonable, but haven't made sure
     */
 
     vector adjustedAcceleration = {
-        acceleration.x * cosPitch + acceleration.z * -sinPitch,
-        acceleration.x * sinRoll * sinPitch + acceleration.y * cosRoll + acceleration.z * sinRoll * cosPitch,
-        acceleration.x * cosRoll * sinPitch + acceleration.y * -sinRoll + acceleration.z * cosRoll * cosPitch
+        // x'
+        acceleration.x * (cosYaw * cosPitch) +
+        acceleration.y * ((cosYaw * sinPitch * sinRoll) - (sinYaw * cosRoll)) +
+        acceleration.z * ((cosYaw * sinPitch * cosRoll) + (sinYaw * sinRoll)),
+        
+        // y'
+        acceleration.x * (sinYaw * cosPitch) +
+        acceleration.y * ((sinYaw * sinPitch * sinRoll) + (cosYaw * cosRoll)) +
+        acceleration.z * ((sinYaw * sinPitch * cosRoll) - (cosYaw * sinRoll)),
+
+        // z'
+        acceleration.x * (-sinPitch) +
+        acceleration.y * (cosPitch * sinRoll) +
+        acceleration.z * (cosPitch * cosRoll)
     };
 
     velocity += (adjustedAcceleration * deltaTime);
