@@ -17,11 +17,13 @@ radioStackElement* RadioSendStack::create(void* data, uint8_t size) {
     radioStackElement* element = (radioStackElement*)malloc(sizeof(radioStackElement));
     if (element == NULL) {
         // Handle allocation error
+        return nullptr;
     }
     
     element->value = malloc(size);
     if (element-> value == NULL) {
         // Handle allocation error
+        return nullptr;
     }
 
     element->size = size;
@@ -61,36 +63,40 @@ bool RadioSendStack::removeAt(uint8_t index) {
     return true;
 }
 
-void RadioSendStack::push(void* data, uint8_t size) {
+bool RadioSendStack::push(void* data, uint8_t size) {
     radioStackElement* element = create(data, size);
+
+    if (element == nullptr) {
+        return false;
+    }
+
     element->next = firstElement;
     firstElement = element;
+    return true;
 }
 
-void RadioSendStack::queue(void* data, uint8_t size) {
+bool RadioSendStack::queue(void* data, uint8_t size) {
     radioStackElement* element = create(data, size);
+
+    if (element == nullptr) {
+        return false;
+    }
+
     lastElement->next = element;
     lastElement = element;
+    return true;
 }
 
-radioStackElement* RadioSendStack::pop() {
-    return pop((uint8_t)0);
-}
-
-radioStackElement* RadioSendStack::pop(uint8_t index) {
-    radioStackElement* value = get(index);
-    removeAt(index);
-    return value;
-}
-
-void RadioSendStack::pop(void* buffer) {
+uint8_t RadioSendStack::pop(void* buffer) {
     pop(0, buffer);
 }
 
-void RadioSendStack::pop(uint8_t index, void* buffer) {
+uint8_t RadioSendStack::pop(uint8_t index, void* buffer) {
     radioStackElement* element = get(index);
-    memcpy(buffer, element->value, element->size);
+    uint8_t size = element->size;
+    memcpy(buffer, element->value, size);
     removeAt(index);
+    return size;
 }
 
 void RadioSendStack::clear() {

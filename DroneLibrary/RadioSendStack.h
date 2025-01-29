@@ -20,13 +20,11 @@ class RadioSendStack {
 public:
     uint8_t count;
 
-    void push(void* data, uint8_t size);
-    void queue(void* data, uint8_t size);
+    bool push(void* data, uint8_t size);
+    bool queue(void* data, uint8_t size);
 
-    radioStackElement* pop();
-    radioStackElement* pop(uint8_t index);
-    void pop(void* buffer);
-    void pop(uint8_t index, void* buffer);
+    uint8_t pop(void* buffer);
+    uint8_t pop(uint8_t index, void* buffer);
 
     void clear();
 };

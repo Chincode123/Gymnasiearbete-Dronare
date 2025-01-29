@@ -259,13 +259,14 @@ void setDeltaTime() {
 
 void sendRadio() {
     while (sendStack.count > 0 && !radio.available()) {
+        uint8_t buffer[32];
         radio.stopListening();
-        radioStackElement* data = sendStack.pop();
-        bool result = radio.write(data->value, data->size);
+        uint8_t size = sendStack.pop(buffer);
+        bool result = radio.write(buffer, size);
         radio.startListening();
 
         if (!result){
-            sendStack.push(data->value, data->size);
+            sendStack.push(buffer, size);g
             break;
         }
     }
