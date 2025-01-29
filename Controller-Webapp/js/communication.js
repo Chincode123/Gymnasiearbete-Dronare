@@ -140,7 +140,7 @@ class SerialReader {
 }
 const serialReader = new SerialReader();
 
-const portSettings = { baudRate: 9600 };
+const portSettings = { baudRate: 115200 };
 let port;
 document.querySelector("#select-serial").addEventListener("click", async () => {
   port = await navigator.serial.requestPort();
