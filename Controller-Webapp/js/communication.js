@@ -301,8 +301,6 @@ read = async () => {
               }
             }
           }
-
-          new TextDecoder().decode(value).split("\n").forEach((str) => addToTerminal(str));
         }
       }
     } catch (error) {
