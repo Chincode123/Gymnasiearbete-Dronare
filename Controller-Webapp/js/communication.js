@@ -109,13 +109,14 @@ class SerialReader {
           data: out,
           done: true,
           messageType: messageType,
+          reading: this.reading
         };
       }
     } else if (byte == this.marker.start) {
       this.reading = true;
     }
 
-    return { done: false };
+    return { done: false, reading: this.reading };
   };
 
   readPIDInstruction = (data) => {
@@ -139,6 +140,43 @@ class SerialReader {
   }
 }
 const serialReader = new SerialReader();
+
+
+class Terminal {
+  decoder = new TextDecoder();
+  currentMessage = new Uint8Array(64);
+  currentIndex = 0;
+  
+  previousLog = "";
+
+  readByte = (byte) => {
+    if (byte == 10) {
+      const message = this.decoder.decode(this.currentMessage);
+      this.addToTerminal(message);
+      this.currentMessage = new Uint8Array(64);
+      currentIndex = 0; 
+      return
+    }
+
+    this.currentMessage[this.currentIndex++] = byte;
+  }
+
+  addToTerminal = (log) => {
+    const output = document.getElementById("output");
+    if (log == this.previousLog) {
+      output.children[0].children[0].innerText = parseInt(output.children[0].children[0].innerText) + 1;
+      return;
+    }
+  
+    output.innerHTML = `<div><span>1</span> | ${log}</div>` + output.innerHTML;
+    this.previousLog = log;
+    if (output.children.length > 40) {
+      output.removeChild(output.lastChild);
+    }
+  }
+}
+const terminal = new Terminal();
+
 
 const portSettings = { baudRate: 115200 };
 let port;
@@ -180,6 +218,10 @@ read = async () => {
         if (value) {
           for (const byte of value) {
             const result = serialReader.read(byte);
+
+            if (!result.reading) {
+              terminal.readByte(byte);
+            }
 
             if (result.done) {
               console.log(result);
@@ -450,18 +492,3 @@ sendControllerInstructions = () => {
   );
   write(instructions);
 };
-
-let previousLog = "";
-addToTerminal = (log) => {
-  const output = document.getElementById("output");
-  if (log == previousLog) {
-    output.children[0].children[0].innerText = parseInt(output.children[0].children[0].innerText) + 1;
-    return;
-  }
-
-  output.innerHTML = `<div><span>1</span> | ${log}</div>` + output.innerHTML;
-  previousLog = log;
-  if (output.children.length > 40) {
-    output.removeChild(output.lastChild);
-  }
-}
