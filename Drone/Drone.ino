@@ -230,7 +230,7 @@ void loop() {
 
     if (sendStack.count <= 0) {
         messageOut.messageType = _MSG_DRONE_ACCELERATION;
-        memcpy(messageOut.dataBuffer, &orientation.acceleration, sizeof(orientation.acceleration));
+        memcpy(messageOut.dataBuffer, &orientation.adjustedAcceleration, sizeof(orientation.acceleration));
         sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
 
         messageOut.messageType = _MSG_DRONE_VELOCITY;

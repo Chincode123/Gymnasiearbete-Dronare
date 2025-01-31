@@ -112,7 +112,7 @@ void Orientation::calculateVelocity(float deltaTime) {
         Looks reasonable, but haven't made sure
     */
 
-    vector adjustedAcceleration = {
+    adjustedAcceleration = {
         // x'
         acceleration.x * (cosYaw * cosPitch) +
         acceleration.y * ((cosYaw * sinPitch * sinRoll) - (sinYaw * cosRoll)) +

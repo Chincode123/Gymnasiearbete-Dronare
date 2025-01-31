@@ -34,6 +34,7 @@ public:
     vector angles;
 
     vector acceleration;
+    vector adjustedAcceleration;
     vector velocity;
 
     void update(float deltaTime);
