@@ -7,8 +7,8 @@
 #include <Orientation.h>
 #include <RadioSendStack.h>
 
-#define CE_PIN 6
-#define CSN_PIN 7
+#define CE_PIN 7
+#define CSN_PIN 6
 
 // Radio
 RF24 radio(CE_PIN, CSN_PIN, 4000000);
@@ -62,9 +62,7 @@ bool activated = false;
 void setup() {
     // Set up radio
     while(!radio.begin());
-    if(!configureRadio(radio)) {
-        while (true);
-    }
+    while(!configureRadio(radio));
     radio.openWritingPipe(DRONE_ADDRESS);
     radio.openReadingPipe(1, RECEIVER_ADDRESS);
 

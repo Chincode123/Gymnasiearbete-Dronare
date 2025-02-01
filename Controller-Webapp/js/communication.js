@@ -112,7 +112,7 @@ class SerialReader {
           reading: this.reading
         };
       }
-    } else if (byte == this.marker.start) {
+    } else if (byte == this.startMarker) {
       this.reading = true;
     }
 
@@ -154,7 +154,7 @@ class Terminal {
       const message = this.decoder.decode(this.currentMessage);
       this.addToTerminal(message);
       this.currentMessage = new Uint8Array(64);
-      currentIndex = 0; 
+      this.currentIndex = 0; 
       return
     }
 
@@ -191,20 +191,25 @@ let hasAcknowledged = true;
 let acknowledgeAttempts = 0;
 let maxAcknowledgeAttempts = 5;
 write = async (data) => {
+  console.log(port);
+  const writer = port.writable.getWriter();
+  
   if (!hasAcknowledged) {
+    console.log("Not acknowledged");
     return false;
   }
-
-  const writer = port.writable.getWriter();
-
-  await writer.write(data);
-  hasAcknowledged = false;
+  else {
+    await writer.write(data);
+    hasAcknowledged = false;
+  }
 
   // Allow the serial port to be closed later.
   writer.releaseLock();
+  console.log("write release lock")
 };
 
 read = async () => {
+  console.log(port);
   while (port.readable) {
     const reader = port.readable.getReader();
     try {
@@ -228,6 +233,7 @@ read = async () => {
 
               if (!hasAcknowledged){
                 acknowledgeAttempts++;
+                console.log(acknowledgeAttempts);
                 if (acknowledgeAttempts >= maxAcknowledgeAttempts) {
                   hasAcknowledged = true;
                   acknowledgeAttempts = 0;
@@ -316,7 +322,7 @@ document.getElementById("open").addEventListener("click", async () => {
     console.log(error);
   }
 
-  await port.open({ baudRate: 9600 });
+  await port.open(portSettings);
 });
 
 toInstruction = (values, messageType) => {

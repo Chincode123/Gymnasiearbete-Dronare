@@ -65,10 +65,8 @@ void Orientation::readFromIMU(vector& acceleration, vector& angularVelocity) {
 void Orientation::readFromIMU() {
     readFromIMU(acceleration, angularVelocity);
     
-    if (applyOffset) {
-        acceleration += accelerationOffset;
-        angularVelocity += angularVelocityOffset;
-    }
+    acceleration += accelerationOffset;
+    angularVelocity += angularVelocityOffset;
 }
 
 vector Orientation::calculateAccelerationAngles(const vector& acceleration) {
