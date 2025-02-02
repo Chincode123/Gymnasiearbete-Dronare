@@ -210,7 +210,13 @@ document.querySelector("#select-serial").addEventListener("click", async () => {
 	terminal.addToTerminal("[App] Serial Port Connected");
 });
 
+let writing = false;
 write = async () => {
+	if (writing || !port.writable) {
+		return;
+	}
+	writing = true;
+
 	// console.log(port);
 	const writer = port.writable.getWriter();
 
@@ -219,9 +225,15 @@ write = async () => {
 
 	// Allow the serial port to be closed later.
 	writer.releaseLock();
+	writing = false;
 };
 
+let reading = false
 read = async () => {
+	if (reading) {
+		return;
+	}
+	reading = true;
 	// console.log(port);
 	while (port.readable) {
 		const reader = port.readable.getReader();
@@ -313,6 +325,7 @@ read = async () => {
 			console.log(error);
 		}
 	}
+	reading = false;
 };
 
 document.getElementById("open").addEventListener("click", async () => {
