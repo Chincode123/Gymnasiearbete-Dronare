@@ -81,8 +81,19 @@ div {
 
 #drone {
     font-size: 17px;
+
+    display: flex;
+    justify-content: space-between;
 }
 
 #drone span {
     font-size: 19px;
+}
+
+#drone div {
+    width: 100%;
+}
+
+#drone div:nth-child(2) p {
+    text-align: center;
 }
