@@ -9,7 +9,7 @@
 RF24 radio(CE_PIN, CSN_PIN, 4000000);
 
 InstructionHandler instructionHandler;
-uint8_t readBuffer[31];
+uint8_t readBuffer[32];
 
 RadioMessage messageOut, messageIn;
 
@@ -39,6 +39,7 @@ void loop()
     float deltaTime = (float)(millis() - previousTime) / 1000;
     previousTime = millis();
 
+    // Serial input
     if (instructionHandler.read())
     {
         uint8_t messageType = instructionHandler.getData(readBuffer);
@@ -47,15 +48,11 @@ void loop()
         bool result = send();
 
         switch (messageType) {
-        case _MSG_DRONE_LOG:
-            memcpy(&messageIn, &readBuffer, sizeof(messageIn));
-            dronePrint((const char*)messageIn.dataBuffer);
-            break;
         case _MSG_CONTROLLER_INPUT:
             if (result)
-              receiverPrint("Sent: controller input");
+              receiverPrint("Sent: Controller input");
             else
-              receiverPrint("Faild to send: controller input");
+              receiverPrint("Faild to send: Controller input");
             break;
         case _MSG_SET_PID_V:
             if (result)
@@ -83,24 +80,24 @@ void loop()
           break;
         case _MSG_ACTIVATE:
           if (result)
-            receiverPrint("Sent: activation request");
+            receiverPrint("Sent: Activation request");
           else 
-            receiverPrint("Failed to send: activation request");
+            receiverPrint("Failed to send: Activation request");
           break;
         case _MSG_DEACTIVATE:
           if (result)
-            receiverPrint("Sent: deactivation request");
+            receiverPrint("Sent: Deactivation request");
           else 
-            receiverPrint("Failed to send: deactivation request");
+            receiverPrint("Failed to send: Deactivation request");
           break;
         case _MSG_REQUEST_PID_V:
         case _MSG_REQUEST_PID_P:
         case _MSG_REQUEST_PID_R:
         case _MSG_REQUEST_TARGET_RANGES:
           if (result)
-            receiverPrint("Sent: request");
+            receiverPrint("Sent: Request");
           else
-            receiverPrint("Failed to send: request");
+            receiverPrint("Failed to send: Request");
           break;
         // TODO: Add other messages
         default:
@@ -112,14 +109,19 @@ void loop()
         }
     }
 
+    // Radio input
     if (radio.available()) {
         radio.read(&messageIn, sizeof(messageIn));
-        instructionHandler.write(messageIn.dataBuffer, messageIn.messageType);
+        switch (messageIn.messageType) {
+          case _MSG_DRONE_LOG:
+            dronePrint((const char*)messageIn.dataBuffer);
+            break;
+          default:
+            instructionHandler.write(messageIn.dataBuffer, messageIn.messageType);
+        }
     }
 
-    messageOut.messageType = _MSG_RECEIVER_DELTATIME;
-    memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));
-    send();
+    instructionHandler.write(&deltaTime, _MSG_RECEIVER_DELTATIME);
 }
 
 bool send()
