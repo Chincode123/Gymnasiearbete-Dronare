@@ -343,7 +343,7 @@ getControllerInstructions = (x, y, power) => {
 	values[2] = (power * 127) & 0x0000ff;
 
 	const messageType = new SerialMessage().messageTypeFromName.get("controller-instructions");
-	uint8 = new Uint8Array(new SerialMessage().messageLengths.get(messageType));
+	const uint8 = new Uint8Array(new SerialMessage().messageLengths.get(messageType));
 	uint8[0] = values[0];
 	uint8[1] = values[1];
 	uint8[2] = values[2];
