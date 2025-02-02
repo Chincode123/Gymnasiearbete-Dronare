@@ -174,6 +174,11 @@ class Terminal {
 			output.removeChild(output.lastChild);
 		}
 	}
+
+	clear = () => {
+		document.getElementById("output").innerHTML = "";
+		this.previousLog = "";
+	};
 }
 const terminal = new Terminal();
 
@@ -403,7 +408,7 @@ getRequestInstruction = (type) => {
 document
 	.getElementById("velocity")
 	.querySelector(".send")
-	.addEventListener("click", async () => {
+	.addEventListener("click", () => {
 		const instructions = getPIDInstructions(
 			document.getElementById("pid-v-p").value,
 			document.getElementById("pid-v-i").value,
@@ -417,7 +422,7 @@ document
 document
 	.getElementById("pitch")
 	.querySelector(".send")
-	.addEventListener("click", async () => {
+	.addEventListener("click", () => {
 		const instructions = getPIDInstructions(
 			document.getElementById("pid-p-p").value,
 			document.getElementById("pid-p-i").value,
@@ -431,7 +436,7 @@ document
 document
 	.getElementById("roll")
 	.querySelector(".send")
-	.addEventListener("click", async () => {
+	.addEventListener("click", () => {
 		const instructions = getPIDInstructions(
 			document.getElementById("pid-r-p").value,
 			document.getElementById("pid-r-i").value,
@@ -445,7 +450,7 @@ document
 document
 	.getElementById("target-ranges")
 	.querySelector(".send")
-	.addEventListener("click", async () => {
+	.addEventListener("click", () => {
 		const instructions = getTargetRangeInstructions(
 			document.getElementById("target-ranges-pitch").value,
 			document.getElementById("target-ranges-roll").value,
@@ -458,7 +463,7 @@ document
 document
 	.getElementById("velocity")
 	.querySelector(".get")
-	.addEventListener("click", async () => {
+	.addEventListener("click", () => {
 		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-pid-velocity"));
 		writingHandler.set(instructions);
 	});
@@ -466,7 +471,7 @@ document
 document
 	.getElementById("pitch")
 	.querySelector(".get")
-	.addEventListener("click", async () => {
+	.addEventListener("click", () => {
 		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-pid-pitch"));
 		writingHandler.set(instructions);
 	});
@@ -474,7 +479,7 @@ document
 document
 	.getElementById("roll")
 	.querySelector(".get")
-	.addEventListener("click", async () => {
+	.addEventListener("click", () => {
 		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-pid-roll"));
 		writingHandler.set(instructions);
 	});
@@ -482,21 +487,21 @@ document
 document
 	.getElementById("target-ranges")
 	.querySelector(".get")
-	.addEventListener("click", async () => {
+	.addEventListener("click", () => {
 		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-target-ranges"));
 		writingHandler.set(instructions);
 	});
 
 document
 	.getElementById("on")
-	.addEventListener("click", async () => {
+	.addEventListener("click", () => {
 		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("activate"));
 		writingHandler.set(instructions);
 	});
 
 document
 	.getElementById("off")
-	.addEventListener("click", async () => {
+	.addEventListener("click", () => {
 		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("deactivate"));
 		writingHandler.set(instructions);
 	});
@@ -511,5 +516,4 @@ sendControllerInstructions = () => {
 };
 
 
-
-
+document.getElementById("clear").addEventListener("click", terminal.clear);
