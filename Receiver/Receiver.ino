@@ -25,6 +25,7 @@ void setup()
         while (true);
     }
     if(!configureRadio(radio)) {
+        Serial.println("Radio configuration failed");
         while (true);
     }
     radio.openWritingPipe(RECEIVER_ADDRESS);
@@ -121,7 +122,7 @@ void loop()
         }
     }
 
-    instructionHandler.write(&deltaTime, _MSG_RECEIVER_DELTATIME);
+    instructionHandler.write((uint8_t*)&deltaTime, _MSG_RECEIVER_DELTATIME);
 }
 
 bool send()

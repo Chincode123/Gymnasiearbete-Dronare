@@ -109,7 +109,7 @@ class SerialReader {
 					data: out,
 					done: true,
 					messageType: messageType,
-					reading: this.reading
+					reading: true
 				};
 			}
 		} else if (byte == this.startMarker) {
@@ -137,8 +137,8 @@ class SerialReader {
 	readDeltaTime = (data) => {
 		const floatValues = new Float32Array(data.buffer);
 		return floatValues[0];
-	}
-}
+	};
+};
 const serialReader = new SerialReader();
 
 
@@ -206,10 +206,12 @@ document.querySelector("#select-serial").addEventListener("click", async () => {
 	port.open(portSettings);
 	setInterval(read);
 	setInterval(write);
+	
+	terminal.addToTerminal("[App] Serial Port Connected");
 });
 
 write = async () => {
-	console.log(port);
+	// console.log(port);
 	const writer = port.writable.getWriter();
 
 	const instructions = writingHandler.get();
@@ -217,11 +219,10 @@ write = async () => {
 
 	// Allow the serial port to be closed later.
 	writer.releaseLock();
-	console.log("write release lock")
 };
 
 read = async () => {
-	console.log(port);
+	// console.log(port);
 	while (port.readable) {
 		const reader = port.readable.getReader();
 		try {
@@ -230,6 +231,7 @@ read = async () => {
 				if (done) {
 					// Allow the serial port to be closed later.
 					reader.releaseLock();
+					console.log("exit read");
 					break;
 				}
 				if (value) {
@@ -241,23 +243,22 @@ read = async () => {
 						}
 
 						if (result.done) {
-							console.log(result);
 
 							// pid
 							if (result.messageType == "pid-velocity") {
-								const pid = serialReader.readPIDInstruction(result.value);
+								const pid = serialReader.readPIDInstruction(result.data);
 								document.getElementById("pid-v-p").value = pid.p;
 								document.getElementById("pid-v-i").value = pid.i;
 								document.getElementById("pid-v-d").value = pid.d;
 							}
 							else if (result.messageType == "pid-pitch") {
-								const pid = serialReader.readPIDInstruction(result.value);
+								const pid = serialReader.readPIDInstruction(result.data);
 								document.getElementById("pid-p-p").value = pid.p;
 								document.getElementById("pid-p-i").value = pid.i;
 								document.getElementById("pid-p-d").value = pid.d;
 							}
 							else if (result.messageType == "pid-roll") {
-								const pid = serialReader.readPIDInstruction(result.value);
+								const pid = serialReader.readPIDInstruction(result.data);
 								document.getElementById("pid-r-p").value = pid.p;
 								document.getElementById("pid-r-i").value = pid.i;
 								document.getElementById("pid-r-d").value = pid.d;
@@ -265,7 +266,7 @@ read = async () => {
 
 							// target values
 							else if (result.messageType == "target-ranges") {
-								const ranges = serialReader.readTargetRanges(result.value);
+								const ranges = serialReader.readTargetRanges(result.data);
 								document.getElementById("terget-ranges-velocity").value = ranges.maxVerticalVelocity;
 								document.getElementById("terget-ranges-pitch").value = ranges.maxPitch;
 								document.getElementById("terget-ranges-roll").value = ranges.maxRoll;
@@ -273,35 +274,35 @@ read = async () => {
 
 							// drone info
 							else if (result.messageType == "drone-velocity") {
-								const velocity = serialReader.readVector(result.value);
+								const velocity = serialReader.readVector(result.data);
 								document.getElementById("vel-x").innerHTML = velocity.x.toFixed(2);
 								document.getElementById("vel-y").innerHTML = velocity.y.toFixed(2);
 								document.getElementById("vel-z").innerHTML = velocity.z.toFixed(2);
 							}
 							else if (result.messageType == "drone-acceleration") {
-								const acceleration = serialReader.readVector(result.value);
+								const acceleration = serialReader.readVector(result.data);
 								document.getElementById("acc-x").innerHTML = acceleration.x.toFixed(2);
 								document.getElementById("acc-y").innerHTML = acceleration.y.toFixed(2);
 								document.getElementById("acc-z").innerHTML = acceleration.z.toFixed(2);
 							}
 							else if (result.messageType == "drone-angular-velocity") {
-								const angular_velocity = serialReader.readVector(result.value);
+								const angular_velocity = serialReader.readVector(result.data);
 								document.getElementById("angular-vel-x").innerHTML = angular_velocity.x.toFixed(2);
 								document.getElementById("angular-vel-y").innerHTML = angular_velocity.y.toFixed(2);
 								document.getElementById("angular-vel-z").innerHTML = angular_velocity.z.toFixed(2);
 							}
 							else if (result.messageType == "drone-angles") {
-								const angles = serialReader.readVector(result.value);
+								const angles = serialReader.readVector(result.data);
 								document.getElementById("pitch-value").innerHTML = angles.x.toFixed(2);
 								document.getElementById("roll-value").innerHTML = angles.y.toFixed(2);
 								document.getElementById("yaw-value").innerHTML = angles.z.toFixed(2);
 							}
 							else if (result.messageType == "drone-delta-time") {
-								const updateRate = 1 / SerialReader.readDeltaTime(result.value);
+								const updateRate = 1 / serialReader.readDeltaTime(result.data);
 								document.getElementById("drone-update").innerHTML = updateRate.toFixed(0);
 							}
 							else if (result.messageType == "receiver-delta-time") {
-								const updateRate = 1 / SerialReader.readDeltaTime(result.value);
+								const updateRate = 1 / serialReader.readDeltaTime(result.data);
 								document.getElementById("receiver-update").innerHTML = updateRate.toFixed(0);
 							}
 						}
