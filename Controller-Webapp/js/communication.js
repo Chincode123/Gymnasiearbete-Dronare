@@ -162,6 +162,8 @@ class Terminal {
 	}
 
 	addToTerminal = (log) => {
+		console.log(log);
+
 		const output = document.getElementById("output");
 		if (log == this.previousLog) {
 			output.children[0].children[0].innerText = parseInt(output.children[0].children[0].innerText) + 1;
@@ -184,7 +186,7 @@ const terminal = new Terminal();
 
 
 class WritingHandler {
-	currentInstructions;
+	currentInstructions = null;
 
 	set = (instructions) => {
 		this.currentInstructions = instructions;
@@ -204,19 +206,24 @@ class WritingHandler {
 const writingHandler = new WritingHandler();
 
 
-const portSettings = { baudRate: 115200 };
+const portSettings = { baudRate: 115200};
 let port;
 document.querySelector("#select-serial").addEventListener("click", async () => {
 	port = await navigator.serial.requestPort();
-	port.open(portSettings);
-	setInterval(read);
-	setInterval(write);
-	
-	terminal.addToTerminal("[App] Serial Port Connected");
+	try {
+		port.open(portSettings);
+		setInterval(read);
+		setInterval(write);
+		
+		terminal.addToTerminal("[App] Serial Port Connected");
+	}
+	catch (error) {
+		terminal.addToTerminal("[App] " + error);
+	}
 });
 
 let writing = false;
-write = async () => {
+async function write () {
 	if (writing || !port.writable) {
 		return;
 	}

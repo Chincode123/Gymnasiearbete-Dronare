@@ -3,6 +3,8 @@
 #include <RadioData.h>
 #include <InstructionHandler.h>
 
+// #define DEBUG
+
 #define CE_PIN 7
 #define CSN_PIN 8
 
@@ -50,10 +52,19 @@ void loop()
 
         switch (messageType) {
         case _MSG_CONTROLLER_INPUT:
-            if (result)
-              receiverPrint("Sent: Controller input");
-            else
-              receiverPrint("Faild to send: Controller input");
+            if (result) {
+                controllerInstructions controller;
+                memcpy(&controller, messageOut.dataBuffer, sizeof(controller));
+                Serial.print("x:");
+                Serial.print((float)controller.stick_X / 127);
+                Serial.print(" y:");
+                Serial.print((float)controller.stick_Y / 127);
+                Serial.print(" power:");
+                Serial.println((float)controller.power / 127);
+              }
+            else {
+              // receiverPrint("Faild to send: Controller input");
+              }
             break;
         case _MSG_SET_PID_V:
             if (result)
@@ -101,12 +112,12 @@ void loop()
             receiverPrint("Failed to send: Request");
           break;
         // TODO: Add other messages
-        default:
-            if (result)
-              receiverPrint("Sent: TYPE=UNKNOWN");
-            else
-              receiverPrint("Failed to send: TYPE=UNKNOWN");
-            break;
+        // default:
+        //     if (result)
+        //       receiverPrint("Sent: TYPE=UNKNOWN");
+        //     else
+        //       receiverPrint("Failed to send: TYPE=UNKNOWN");
+        //     break;
         }
     }
 
@@ -127,13 +138,21 @@ void loop()
 
 bool send()
 {
+    #ifdef DEBUG
+      Serial.println("trying to send");
+    #endif
+
     radio.stopListening();
-    bool result = radio.write(messageOut.dataBuffer, sizeof(messageOut));
+    bool result = radio.write(&messageOut.dataBuffer, sizeof(messageOut));
     radio.startListening();
-    if (result)
-    {
-        instructionHandler.acknowledge();
-    }
+
+    #ifdef DEBUG
+      if (result)
+        Serial.println("successfully sent");
+      else
+        Serial.println("failed to send");
+    #endif
+    
     return result;
 }
 
