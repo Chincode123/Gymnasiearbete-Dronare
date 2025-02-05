@@ -8,7 +8,9 @@
 #include <RadioSendStack.h>
 
 #define DEBUG
+#ifdef DEBUG
 char* testSwitch = "";
+#endif
 
 #define CE_PIN 7
 #define CSN_PIN 6
@@ -154,6 +156,8 @@ void loop() {
 
                 orientation.begin(500);
 
+                #ifndef DEBUG
+
                 // Ramp up motors to 50%
                 power = 0;
                 time = 0;
@@ -167,6 +171,8 @@ void loop() {
                     time += deltaTime;
                     power = 128 * time;
                 }
+
+                #endif
                 
                 consoleLog("Activation complete", true);
                 break;
@@ -175,6 +181,8 @@ void loop() {
                 activated = false;
 
                 orientation.end();
+
+                #ifndef DEBUG
 
                 // Ramp down motors to 0%
                 power = 0;
@@ -189,6 +197,7 @@ void loop() {
                     time += deltaTime;
                     power = 128 * (1 - time);
                 }
+                #endif
                 digitalWrite(MOTOR_TL_Pin, LOW);
                 digitalWrite(MOTOR_TR_Pin, LOW);
                 digitalWrite(MOTOR_BR_Pin, LOW);
@@ -307,6 +316,11 @@ void loop() {
         memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));
         sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
     }
+
+    #ifdef DEBUG
+      Serial.println(testSwitch);
+      delay(200);
+    #endif
 }
 
 void setDeltaTime() {
@@ -327,6 +341,16 @@ void sendRadio() {
         bool result = radio.write(buffer, size);
         radio.startListening();
 
+        #ifdef DEBUG
+          Serial.print("Message: ");
+          for (int i = 0; i < 32; i++) {
+            Serial.print((int)buffer[i]);
+            Serial.print(" ");
+          }
+          Serial.print("Length: ");
+          Serial.println((int)size);
+        #endif
+
         if (!result){
             #ifdef DEBUG
               Serial.println("failed to send");
@@ -340,11 +364,6 @@ void sendRadio() {
           Serial.println("successfully sent");
         #endif
     }
-
-    #ifdef DEBUG
-      Serial.println(testSwitch);
-      delay(200);
-    #endif
 }
 
 void consoleLog(const char* message, bool important) {
