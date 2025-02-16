@@ -10,6 +10,7 @@
 
 RF24 radio(CE_PIN, CSN_PIN, 4000000);
 
+constexpr baudRate = 115200;
 InstructionHandler instructionHandler;
 uint8_t readBuffer[32];
 
@@ -19,7 +20,7 @@ long previousTime;
 
 void setup()
 {
-    Serial.begin(115200);
+    Serial.begin(baudRate);
     while (!Serial);
 
     if (!radio.begin()){
@@ -123,7 +124,10 @@ void loop()
 
     // Radio input
     if (radio.available()) {
+        Serial.end();
         radio.read(&messageIn, sizeof(messageIn));
+        Serial.begin(baudRate);
+
         switch (messageIn.messageType) {
           case _MSG_DRONE_LOG:
             dronePrint((const char*)messageIn.dataBuffer);
@@ -138,6 +142,7 @@ void loop()
 
 bool send()
 {
+    Serial.end();
     #ifdef DEBUG
       Serial.println("trying to send");
     #endif
@@ -145,6 +150,8 @@ bool send()
     radio.stopListening();
     bool result = radio.write(&messageOut.dataBuffer, sizeof(messageOut));
     radio.startListening();
+
+    Serial.begin(baudRate);
 
     #ifdef DEBUG
       if (result)
