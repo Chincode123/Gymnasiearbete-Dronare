@@ -232,21 +232,21 @@ void loop() {
                 pidOut.k_i = velocityI;
                 pidOut.k_d = velocityD;
                 memcpy(messageOut.dataBuffer, &pidOut, sizeof(pidOut));
-                sendStack.push(&messageOut, sizeof(messageOut));
+                sendStack.push(messageOut);
                 break;
             case _MSG_REQUEST_PID_P:
                 pidOut.k_p = pitchP;
                 pidOut.k_i = pitchI;
                 pidOut.k_d = pitchD;
                 memcpy(messageOut.dataBuffer, &pidOut, sizeof(pidOut));
-                sendStack.push(&messageOut, sizeof(messageOut));
+                sendStack.push(messageOut);
                 break;
             case _MSG_REQUEST_PID_R:
                 pidOut.k_p = rollP;
                 pidOut.k_i = rollI;
                 pidOut.k_d = rollD;
                 memcpy(messageOut.dataBuffer, &pidOut, sizeof(pidOut));
-                sendStack.push(&messageOut, sizeof(messageOut));
+                sendStack.push(messageOut);
                 break;
             case _MSG_SET_TARGET_RANGES:
                 memcpy(&targetRanges, messageIn.dataBuffer, sizeof(targetRanges));
@@ -257,7 +257,7 @@ void loop() {
             case _MSG_REQUEST_TARGET_RANGES:
                 targetRanges = {maxPitch, maxRoll, maxVelocity};
                 memcpy(messageOut.dataBuffer, &targetRanges, sizeof(targetRanges));
-                sendStack.push(&messageOut, sizeof(messageOut));
+                sendStack.push(messageOut);
                 break;
             default:
                 consoleLog("Error interpreting messageType", false);
@@ -298,23 +298,23 @@ void loop() {
     if (sendStack.count <= 0) {
         messageOut.messageType = _MSG_DRONE_ACCELERATION;
         memcpy(messageOut.dataBuffer, &orientation.adjustedAcceleration, sizeof(orientation.acceleration));
-        sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
+        sendStack.push(messageOut);
 
         messageOut.messageType = _MSG_DRONE_VELOCITY;
         memcpy(messageOut.dataBuffer, &orientation.velocity, sizeof(orientation.velocity));
-        sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
+        sendStack.push(messageOut);
 
         messageOut.messageType = _MSG_DRONE_ANGULAR_VELOCITY;
         memcpy(messageOut.dataBuffer, &orientation.angularVelocity, sizeof(orientation.angularVelocity));
-        sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
+        sendStack.push(messageOut);
 
         messageOut.messageType = _MSG_DRONE_ANGLES;
         memcpy(messageOut.dataBuffer, &orientation.angles, sizeof(orientation.angles));
-        sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
+        sendStack.push(messageOut);
 
         messageOut.messageType = _MSG_DRONE_DELTATIME;
         memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));
-        sendStack.push(messageOut.dataBuffer, sizeof(messageOut));
+        sendStack.push(messageOut);
     }
 
     #ifdef DEBUG
@@ -335,20 +335,18 @@ void sendRadio() {
           Serial.println("attempting to send");
         #endif
 
-        uint8_t buffer[32];
-        radio.stopListening();
-        uint8_t size = sendStack.pop(buffer);
-        bool result = radio.write(buffer, size);
+        RadioMessage message = sendStack.pop();
+        bool result = radio.write(&message, sizeof(message));
         radio.startListening();
 
         #ifdef DEBUG
           Serial.print("Message: ");
           for (int i = 0; i < 32; i++) {
-            Serial.print((int)buffer[i]);
+            Serial.print((int)message.dataBuffer[i]);
             Serial.print(" ");
           }
           Serial.print("Length: ");
-          Serial.println((int)size);
+          Serial.println((int)sizeof(message));
         #endif
 
         if (!result){
@@ -356,7 +354,7 @@ void sendRadio() {
               Serial.println("failed to send");
             #endif
 
-            sendStack.push(buffer, size);
+            sendStack.push(message);
             break;
         }
 
@@ -375,7 +373,7 @@ void consoleLog(const char* message, bool important) {
     memcpy(logMessage.dataBuffer, message, messageLength);
     
     if (important)
-        sendStack.push(&logMessage, sizeof(logMessage));
+        sendStack.push(logMessage);
     else
-        sendStack.queue(&logMessage, sizeof(logMessage));
+        sendStack.queue(logMessage);
 }

@@ -12,22 +12,15 @@ radioStackElement* RadioSendStack::get(radioStackElement* currentElement, uint8_
     return get(currentElement->next, currentIndex + 1, targetIndex);
 }
 
-radioStackElement* RadioSendStack::create(void* data, uint8_t size) {
-    count++;
+radioStackElement* RadioSendStack::create(const RadioMessage& data) {
     radioStackElement* element = (radioStackElement*)malloc(sizeof(radioStackElement));
     if (element == NULL) {
         // Handle allocation error
         return nullptr;
     }
-    
-    element->value = malloc(size);
-    if (element-> value == NULL) {
-        // Handle allocation error
-        return nullptr;
-    }
+    count++;
 
-    element->size = size;
-    memcpy(element->value, data, size);
+    element->value = data;
     return element;
 }
 
@@ -35,20 +28,14 @@ bool RadioSendStack::removeAt(uint8_t index) {
     count--;
     if (index == 0) {
         radioStackElement* newFirst = firstElement->next;
-        free(firstElement->value);
-        free(firstElement->value);
         free(firstElement);
         firstElement = newFirst;
-        return true;
         return true;
     }
     else if (index == count - 1) {
         radioStackElement* newLast = get(count - 2);
-        free(lastElement->value);
-        free(lastElement->value);
         free(lastElement);
         lastElement = newLast;
-        return true;
         return true;
     }
     else if (index >= count) {
@@ -57,46 +44,52 @@ bool RadioSendStack::removeAt(uint8_t index) {
 
     radioStackElement* previousElement = get(index - 1);
     previousElement->next = previousElement->next->next;
-    free(previousElement->next->value);
-    free(previousElement->next->value);
     free(previousElement->next);
     return true;
 }
 
-bool RadioSendStack::push(void* data, uint8_t size) {
-    radioStackElement* element = create(data, size);
+bool RadioSendStack::push(const RadioMessage& data) {
+    radioStackElement* element = create(data);
 
     if (element == nullptr) {
         return false;
     }
 
+    if (firstElement == nullptr) {
+        firstElement = element;
+        lastElement = element;
+        return true;
+    }
     element->next = firstElement;
     firstElement = element;
     return true;
 }
 
-bool RadioSendStack::queue(void* data, uint8_t size) {
-    radioStackElement* element = create(data, size);
+bool RadioSendStack::queue(const RadioMessage& data) {
+    radioStackElement* element = create(data);
 
     if (element == nullptr) {
         return false;
     }
 
-    lastElement->next = element;
+    if (lastElement != nullptr) {
+        lastElement->next = element;
+    } else {
+        firstElement = element;
+    }
     lastElement = element;
     return true;
 }
 
-uint8_t RadioSendStack::pop(void* buffer) {
-    pop(0, buffer);
+RadioMessage RadioSendStack::pop() {
+    return pop(0);
 }
 
-uint8_t RadioSendStack::pop(uint8_t index, void* buffer) {
+RadioMessage RadioSendStack::pop(uint8_t index) {
     radioStackElement* element = get(index);
-    uint8_t size = element->size;
-    memcpy(buffer, element->value, size);
+    RadioMessage value = element->value;
     removeAt(index);
-    return size;
+    return value;
 }
 
 void RadioSendStack::clear() {
