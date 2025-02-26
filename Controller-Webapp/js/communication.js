@@ -3,7 +3,7 @@ class SerialMessage {
 	type;
 	length;
 
-	messageTypeFromIndex = new Map([
+	static messageTypeFromIndex = new Map([
 		[0, "controller-instructions"],
 		[1, "pid-velocity"],
 		[2, "pid-pitch"],
@@ -25,7 +25,7 @@ class SerialMessage {
 		[18, "receiver-delta-time"]
 	]);
 
-	messageTypeFromName = new Map([
+	static messageTypeFromName = new Map([
 		["controller-instructions", 0],
 		["pid-velocity", 1],
 		["pid-pitch", 2],
@@ -47,33 +47,33 @@ class SerialMessage {
 		["receiver-delta-time", 18]
 	]);
 
-	messageLengths = new Map([
-		[this.messageTypeFromName.get("controller-instructions"), 3],
-		[this.messageTypeFromName.get("pid-velocity"), 12],
-		[this.messageTypeFromName.get("pid-pitch"), 12],
-		[this.messageTypeFromName.get("pid-roll"), 12],
-		[this.messageTypeFromName.get("request-pid-velocity"), 0],
-		[this.messageTypeFromName.get("request-pid-pitch"), 0],
-		[this.messageTypeFromName.get("request-pid-roll"), 0],
-		[this.messageTypeFromName.get("target-ranges"), 12],
-		[this.messageTypeFromName.get("request-target-ranges"), 0],
-		[this.messageTypeFromName.get("acknowledge"), 1],
-		[this.messageTypeFromName.get("drone-log"), 31],
-		[this.messageTypeFromName.get("activate"), 0],
-		[this.messageTypeFromName.get("deactivate"), 0],
-		[this.messageTypeFromName.get("drone-velocity"), 12],
-		[this.messageTypeFromName.get("drone-acceleration"), 12],
-		[this.messageTypeFromName.get("drone-angular-velocity"), 12],
-		[this.messageTypeFromName.get("drone-angles"), 12],
-		[this.messageTypeFromName.get("drone-delta-time"), 4],
-		[this.messageTypeFromName.get("receiver-delta-time"), 4]
+	static messageLengths = new Map([
+		[SerialMessage.messageTypeFromName.get("controller-instructions"), 3],
+		[SerialMessage.messageTypeFromName.get("pid-velocity"), 12],
+		[SerialMessage.messageTypeFromName.get("pid-pitch"), 12],
+		[SerialMessage.messageTypeFromName.get("pid-roll"), 12],
+		[SerialMessage.messageTypeFromName.get("request-pid-velocity"), 0],
+		[SerialMessage.messageTypeFromName.get("request-pid-pitch"), 0],
+		[SerialMessage.messageTypeFromName.get("request-pid-roll"), 0],
+		[SerialMessage.messageTypeFromName.get("target-ranges"), 12],
+		[SerialMessage.messageTypeFromName.get("request-target-ranges"), 0],
+		[SerialMessage.messageTypeFromName.get("acknowledge"), 1],
+		[SerialMessage.messageTypeFromName.get("drone-log"), 31],
+		[SerialMessage.messageTypeFromName.get("activate"), 0],
+		[SerialMessage.messageTypeFromName.get("deactivate"), 0],
+		[SerialMessage.messageTypeFromName.get("drone-velocity"), 12],
+		[SerialMessage.messageTypeFromName.get("drone-acceleration"), 12],
+		[SerialMessage.messageTypeFromName.get("drone-angular-velocity"), 12],
+		[SerialMessage.messageTypeFromName.get("drone-angles"), 12],
+		[SerialMessage.messageTypeFromName.get("drone-delta-time"), 4],
+		[SerialMessage.messageTypeFromName.get("receiver-delta-time"), 4]
 	]);
 
 	set = (type) => {
-		if (this.messageLengths.has(type)) {
+		if (SerialMessage.messageLengths.has(type)) {
 			this.initiated = true;
 			this.type = type;
-			this.length = this.messageLengths.get(type);
+			this.length = SerialMessage.messageLengths.get(type);
 			return true;
 		}
 		return false;
@@ -101,7 +101,7 @@ class SerialReader {
 			} else {
 				this.data[this.data.length] = byte;
 				this.reading = false;
-				const messageType = this.message.messageTypeFromIndex.get(this.message.type);
+				const messageType = SerialMessage.messageTypeFromIndex.get(this.message.type);
 				this.message.reset();
 				const out = new Uint8Array(this.data);
 				this.data = [];
@@ -215,11 +215,13 @@ class WritingHandler {
 
 	acceptAcknowledge = (messageType) => {
 		// console.log(messageType, this.currentInstructionsType);
-		if (messageType == this.currentInstructionsType) {
-			this.hasInstructions = false;
-			this.currentInstructions = null;
-			this.currentInstructionsType = null;
+		if (messageType != this.currentInstructionsType) {
+			return;
 		}
+
+		this.hasInstructions = false;
+		this.currentInstructions = null;
+		this.currentInstructionsType = null;
 	}
 };
 const writingHandler = new WritingHandler();
@@ -279,6 +281,8 @@ async function read() {
 				}
 				if (value) {
 					for (const byte of value) {
+						console.log(byte);
+
 						const result = serialReader.read(byte);
 
 						if (!result.reading) {
@@ -390,8 +394,8 @@ getControllerInstructions = (x, y, power) => {
 	values[1] = (y * 127) & 0x0000ff;
 	values[2] = (power * 127) & 0x0000ff;
 
-	const messageType = new SerialMessage().messageTypeFromName.get("controller-instructions");
-	const uint8 = new Uint8Array(new SerialMessage().messageLengths.get(messageType));
+	const messageType = SerialMessage.messageTypeFromName.get("controller-instructions");
+	const uint8 = new Uint8Array(SerialMessage.messageLengths.get(messageType));
 	uint8[0] = values[0];
 	uint8[1] = values[1];
 	uint8[2] = values[2];
@@ -409,7 +413,7 @@ getPIDInstructions = (p, i, d, module) => {
 
 	const byteValues = new Uint8Array(floatValues.buffer);
 
-	const messageType = new SerialMessage().messageTypeFromName.get("pid-" + module);
+	const messageType = SerialMessage.messageTypeFromName.get("pid-" + module);
 	const out = toInstruction(byteValues, messageType);
 
 	return out;
@@ -423,7 +427,7 @@ getTargetRangeInstructions = (maxPitch, maxRoll, maxVerticalVelocity) => {
 
 	const byteValues = new Uint8Array(floatValues.buffer);
 
-	const messageType = new SerialMessage().messageTypeFromName.get("target-ranges");
+	const messageType = SerialMessage.messageTypeFromName.get("target-ranges");
 
 	const out = toInstruction(byteValues, messageType);
 
@@ -446,7 +450,7 @@ document
 			"velocity"
 		);
 
-		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("pid-velocity"));
+		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("pid-velocity"));
 	});
 
 document
@@ -460,7 +464,7 @@ document
 			"pitch"
 		);
 
-		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("pid-pitch"));
+		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("pid-pitch"));
 	});
 
 document
@@ -474,7 +478,7 @@ document
 			"roll"
 		);
 
-		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("pid-roll"));
+		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("pid-roll"));
 	});
 
 document
@@ -487,53 +491,53 @@ document
 			document.getElementById("target-ranges-velocity").value
 		);
 
-		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("target-ranges"));
+		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("target-ranges"));
 	});
 
 document
 	.getElementById("velocity")
 	.querySelector(".get")
 	.addEventListener("click", () => {
-		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-pid-velocity"));
-		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("request-pid-velocity"));
+		const instructions = getRequestInstruction(SerialMessage.messageTypeFromName.get("request-pid-velocity"));
+		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("request-pid-velocity"));
 	});
 
 document
 	.getElementById("pitch")
 	.querySelector(".get")
 	.addEventListener("click", () => {
-		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-pid-pitch"));
-		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("request-pid-pitch"));
+		const instructions = getRequestInstruction(SerialMessage.messageTypeFromName.get("request-pid-pitch"));
+		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("request-pid-pitch"));
 	});
 
 document
 	.getElementById("roll")
 	.querySelector(".get")
 	.addEventListener("click", () => {
-		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-pid-roll"));
-		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("request-pid-roll"));
+		const instructions = getRequestInstruction(SerialMessage.messageTypeFromName.get("request-pid-roll"));
+		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("request-pid-roll"));
 	});
 
 document
 	.getElementById("target-ranges")
 	.querySelector(".get")
 	.addEventListener("click", () => {
-		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-target-ranges"));
-		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("request-target-ranges"));
+		const instructions = getRequestInstruction(SerialMessage.messageTypeFromName.get("request-target-ranges"));
+		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("request-target-ranges"));
 	});
 
 document
 	.getElementById("on")
 	.addEventListener("click", () => {
-		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("activate"));
-		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("activate"));
+		const instructions = getRequestInstruction(SerialMessage.messageTypeFromName.get("activate"));
+		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("activate"));
 	});
 
 document
 	.getElementById("off")
 	.addEventListener("click", () => {
-		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("deactivate"));
-		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("deactivate"));
+		const instructions = getRequestInstruction(SerialMessage.messageTypeFromName.get("deactivate"));
+		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("deactivate"));
 	});
 
 sendControllerInstructions = () => {

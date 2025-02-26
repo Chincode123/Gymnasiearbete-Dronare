@@ -10,8 +10,8 @@ document.addEventListener("mousemove", (event) => {
     return;
   }
 
-  joystick_area_size = joystick_area.getBoundingClientRect();
-  joystick_area_width = joystick_area_size.right - joystick_area_size.left;
+  const joystick_area_size = joystick_area.getBoundingClientRect();
+  const joystick_area_width = joystick_area_size.right - joystick_area_size.left;
 
   joystick.x =
     ((event.clientX - joystick_area_size.right) / joystick_area_width + 0.5) *
@@ -33,7 +33,7 @@ document.addEventListener("mousemove", (event) => {
 
 document
   .getElementById("joystick-area")
-  .addEventListener("mousedown", (event) => {
+  .addEventListener("mousedown", () => {
     using_joystick = true;
   });
 
