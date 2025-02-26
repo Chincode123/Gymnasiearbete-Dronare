@@ -8,9 +8,6 @@
 #include <RadioSendStack.h>
 
 #define DEBUG
-#ifdef DEBUG
-char* testSwitch = "";
-#endif
 
 #define CE_PIN 7
 #define CSN_PIN 6
@@ -66,7 +63,7 @@ bool activated = false;
 
 void setup() {
     #ifdef DEBUG
-      Serial.begin(9600);
+      Serial.begin(115200);
       while (!Serial);
     #endif
 
@@ -84,6 +81,7 @@ void setup() {
      }
     radio.openWritingPipe(DRONE_ADDRESS);
     radio.openReadingPipe(1, RECEIVER_ADDRESS);
+    radio.startListening();
 
     // Set up motor controller
     motorController.setTargetValues(&targetVelocity, &targetPitch, &targetRoll);
@@ -107,16 +105,12 @@ void setup() {
 }
 
 void loop() {
-    #ifdef DEBUG
-      Serial.println("loop");
-    #endif
-
     setDeltaTime();
     
     // Radio read
-    if (radio.available()) {
+    if (radio.available() && millis() % 20 != 0) {
         #ifdef DEBUG
-          Serial.println("radio available");
+          // Serial.println("radio available");
         #endif
 
         // scope variables
@@ -128,8 +122,7 @@ void loop() {
         memcpy(&messageIn, &readBuffer, sizeof(messageIn));
 
         #ifdef DEBUG
-          Serial.print("message type:");
-          Serial.println(messageIn.messageType);
+          // printRadioMessage(messageIn);
         #endif
 
         switch (messageIn.messageType) {
@@ -138,12 +131,12 @@ void loop() {
                 memcpy(&controller, messageIn.dataBuffer, sizeof(controller));
                 
                 #ifdef DEBUG
-                  Serial.print("x:");
-                  Serial.print((float)controller.stick_X / 127);
-                  Serial.print(" y:");
-                  Serial.print((float)controller.stick_Y / 127);
-                  Serial.print(" power:");
-                  Serial.print((float)controller.power / 127);
+                  // Serial.print("x:");
+                  // Serial.print((float)controller.stick_X / 127);
+                  // Serial.print(" y:");
+                  // Serial.print((float)controller.stick_Y / 127);
+                  // Serial.print(" power:");
+                  // Serial.println((float)controller.power / 127);
                 #endif
 
                 targetVelocity = maxVelocity * (float)controller.power / 127;
@@ -157,7 +150,6 @@ void loop() {
                 orientation.begin(500);
 
                 #ifndef DEBUG
-
                 // Ramp up motors to 50%
                 power = 0;
                 time = 0;
@@ -171,7 +163,6 @@ void loop() {
                     time += deltaTime;
                     power = 128 * time;
                 }
-
                 #endif
                 
                 consoleLog("Activation complete", true);
@@ -183,7 +174,6 @@ void loop() {
                 orientation.end();
 
                 #ifndef DEBUG
-
                 // Ramp down motors to 0%
                 power = 0;
                 time = 0;
@@ -206,14 +196,20 @@ void loop() {
                 consoleLog("Deactivated", true);
                 break;
             case _MSG_SET_PID_V:
-                #ifdef DEBUG
-                  testSwitch = "test";
-                #endif
-
                 memcpy(&pidIn, messageIn.dataBuffer, sizeof(pidIn));
                 velocityP = pidIn.k_p;
                 velocityI = pidIn.k_i;
                 velocityD = pidIn.k_d;
+
+                #ifdef DEBUG
+                  Serial.print("PID-V: p:");
+                  Serial.print(velocityP);
+                  Serial.print(" i:");
+                  Serial.print(velocityI);
+                  Serial.print(" d:");
+                  Serial.println(velocityD);
+                #endif
+
                 break;
             case _MSG_SET_PID_P:
                 memcpy(&pidIn, messageIn.dataBuffer, sizeof(pidIn));
@@ -232,13 +228,19 @@ void loop() {
                 pidOut.k_i = velocityI;
                 pidOut.k_d = velocityD;
                 memcpy(messageOut.dataBuffer, &pidOut, sizeof(pidOut));
+                messageOut.messageType = _MSG_SET_PID_V;
                 sendStack.push(messageOut);
+
+                #ifdef DEBUG
+                  Serial.println("Requesting pid-v");
+                #endif
                 break;
             case _MSG_REQUEST_PID_P:
                 pidOut.k_p = pitchP;
                 pidOut.k_i = pitchI;
                 pidOut.k_d = pitchD;
                 memcpy(messageOut.dataBuffer, &pidOut, sizeof(pidOut));
+                messageOut.messageType = _MSG_SET_PID_P;
                 sendStack.push(messageOut);
                 break;
             case _MSG_REQUEST_PID_R:
@@ -246,6 +248,7 @@ void loop() {
                 pidOut.k_i = rollI;
                 pidOut.k_d = rollD;
                 memcpy(messageOut.dataBuffer, &pidOut, sizeof(pidOut));
+                messageOut.messageType = _MSG_SET_PID_R;
                 sendStack.push(messageOut);
                 break;
             case _MSG_SET_TARGET_RANGES:
@@ -257,6 +260,7 @@ void loop() {
             case _MSG_REQUEST_TARGET_RANGES:
                 targetRanges = {maxPitch, maxRoll, maxVelocity};
                 memcpy(messageOut.dataBuffer, &targetRanges, sizeof(targetRanges));
+                messageOut.messageType = _MSG_SET_TARGET_RANGES;
                 sendStack.push(messageOut);
                 break;
             default:
@@ -266,13 +270,13 @@ void loop() {
     }
     #ifdef DEBUG
     else {
-      Serial.println("radio not available");
+      // Serial.println("radio not available");
     }
     #endif
 
     if (activated) {
       #ifdef DEBUG
-        Serial.println("activated");
+        // Serial.println("activated");
       #endif
 
         orientation.update(deltaTime);
@@ -284,16 +288,16 @@ void loop() {
     }
     else {
         #ifdef DEBUG
-        Serial.println("not activated");
+        // Serial.println("not activated");
         #endif
 
-        if (millis() % 5000 == 0) {
+        if (millis() % 1000 == 0) {
             consoleLog("Waiting for activation", true);
         }
     }
 
     // Output
-    sendRadio();
+    if (millis() % 20 == 0) sendRadio();
 
     if (sendStack.count <= 0) {
         messageOut.messageType = _MSG_DRONE_ACCELERATION;
@@ -316,11 +320,6 @@ void loop() {
         memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));
         sendStack.push(messageOut);
     }
-
-    #ifdef DEBUG
-      Serial.println(testSwitch);
-      delay(200);
-    #endif
 }
 
 void setDeltaTime() {
@@ -330,28 +329,28 @@ void setDeltaTime() {
 }
 
 void sendRadio() {
-    while (sendStack.count > 0 && !radio.available()) {
-        #ifdef DEBUG
-          Serial.println("attempting to send");
+    #ifdef DEBUG
+      Serial.print("(before) SendStack count: ");
+      Serial.println(sendStack.count);
+    #endif
+
+    while (sendStack.count > 0) {
+        #ifdef DEBUG 
+          // Serial.println("attempting to send");
         #endif
 
         RadioMessage message = sendStack.pop();
+        radio.stopListening();
         bool result = radio.write(&message, sizeof(message));
         radio.startListening();
 
-        #ifdef DEBUG
-          Serial.print("Message: ");
-          for (int i = 0; i < 32; i++) {
-            Serial.print((int)message.dataBuffer[i]);
-            Serial.print(" ");
-          }
-          Serial.print("Length: ");
-          Serial.println((int)sizeof(message));
-        #endif
+        // #ifdef DEBUG
+        //   printRadioMessage(message);
+        // #endif
 
         if (!result){
             #ifdef DEBUG
-              Serial.println("failed to send");
+              // Serial.println("failed to send");
             #endif
 
             sendStack.push(message);
@@ -359,9 +358,13 @@ void sendRadio() {
         }
 
         #ifdef DEBUG
-          Serial.println("successfully sent");
+          // Serial.println("successfully sent");
         #endif
     }
+    #ifdef DEBUG
+      // Serial.print("(after) SendStack count: ");
+      // Serial.println(sendStack.count);
+    #endif
 }
 
 void consoleLog(const char* message, bool important) {
@@ -377,3 +380,17 @@ void consoleLog(const char* message, bool important) {
     else
         sendStack.queue(logMessage);
 }
+
+#ifdef DEBUG
+void printRadioMessage(RadioMessage message) {
+    Serial.print("Message type: ");
+    Serial.println(message.messageType);
+    Serial.print("Data: ");
+    for (int i = 0; i < sizeof(message.dataBuffer); i++) {
+        Serial.print((int)message.dataBuffer[i]);
+        Serial.print(" ");
+    }
+    Serial.print("Length: ");
+    Serial.println((int)sizeof(message));
+}
+#endif

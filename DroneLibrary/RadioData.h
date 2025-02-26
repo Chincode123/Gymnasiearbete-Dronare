@@ -47,6 +47,7 @@
 #define _MSG_LENGTH_ANGULAR_VELOCITY 12
 #define _MSG_LENGTH_ANGLES 12
 #define _MSG_LENGTH_DELTATIME 4
+#define _MSG_LEGNTH_ACKNOWLEDGE 1
 
 struct controllerInstructions {
     int8_t stick_X;

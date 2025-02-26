@@ -3,14 +3,13 @@
 #include <RadioData.h>
 #include <InstructionHandler.h>
 
-// #define DEBUG
+#define DEBUG
 
 #define CE_PIN 7
 #define CSN_PIN 8
 
 RF24 radio(CE_PIN, CSN_PIN, 4000000);
 
-constexpr baudRate = 115200;
 InstructionHandler instructionHandler;
 uint8_t readBuffer[32];
 
@@ -20,7 +19,7 @@ long previousTime;
 
 void setup()
 {
-    Serial.begin(baudRate);
+    Serial.begin(115200);
     while (!Serial);
 
     if (!radio.begin()){
@@ -49,22 +48,33 @@ void loop()
         uint8_t messageType = instructionHandler.getData(readBuffer);
         messageOut.messageType = messageType;
         memcpy(messageOut.dataBuffer, &readBuffer, sizeof(messageOut.dataBuffer));
-        bool result = send();
+        
+        #ifdef DEBUG
+          // printRadioMessage(messageOut);
+        #endif
+
+        bool result;
+        if (millis() % 5 == 0) 
+          result = send();
+        if (result) 
+          instructionHandler.acknowledge(messageType);
 
         switch (messageType) {
         case _MSG_CONTROLLER_INPUT:
             if (result) {
                 controllerInstructions controller;
                 memcpy(&controller, messageOut.dataBuffer, sizeof(controller));
-                Serial.print("x:");
-                Serial.print((float)controller.stick_X / 127);
-                Serial.print(" y:");
-                Serial.print((float)controller.stick_Y / 127);
-                Serial.print(" power:");
-                Serial.println((float)controller.power / 127);
+                #ifdef DEBUG
+                  Serial.print("x:");
+                  Serial.print((float)controller.stick_X / 127);
+                  Serial.print(" y:");
+                  Serial.print((float)controller.stick_Y / 127);
+                  Serial.print(" power:");
+                  Serial.println((float)controller.power / 127);
+                #endif
               }
             else {
-              // receiverPrint("Faild to send: Controller input");
+              receiverPrint("Faild to send: Controller input");
               }
             break;
         case _MSG_SET_PID_V:
@@ -123,10 +133,8 @@ void loop()
     }
 
     // Radio input
-    if (radio.available()) {
-        Serial.end();
+    if (radio.available() && millis() % 5 != 0) {
         radio.read(&messageIn, sizeof(messageIn));
-        Serial.begin(baudRate);
 
         switch (messageIn.messageType) {
           case _MSG_DRONE_LOG:
@@ -142,22 +150,20 @@ void loop()
 
 bool send()
 {
-    Serial.end();
     #ifdef DEBUG
-      Serial.println("trying to send");
+      // Serial.println("trying to send");
     #endif
 
     radio.stopListening();
-    bool result = radio.write(&messageOut.dataBuffer, sizeof(messageOut));
+    bool result = radio.write(&messageOut, sizeof(messageOut));
     radio.startListening();
 
-    Serial.begin(baudRate);
 
     #ifdef DEBUG
-      if (result)
-        Serial.println("successfully sent");
-      else
-        Serial.println("failed to send");
+      // if (result)
+      //   Serial.println("successfully sent");
+      // else
+      //   Serial.println("failed to send");
     #endif
     
     return result;
@@ -172,3 +178,17 @@ void dronePrint(const char* message) {
   Serial.print("[Drone] ");
   Serial.println(message);
 }
+
+#ifdef DEBUG
+void printRadioMessage(RadioMessage message) {
+    Serial.print("Message type: ");
+    Serial.println(message.messageType);
+    Serial.print("Data: ");
+    for (int i = 0; i < sizeof(message.dataBuffer); i++) {
+        Serial.print((int)message.dataBuffer[i]);
+        Serial.print(" ");
+    }
+    Serial.print("Length: ");
+    Serial.println((int)sizeof(message));
+}
+#endif

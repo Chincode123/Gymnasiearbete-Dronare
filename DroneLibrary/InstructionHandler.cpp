@@ -42,11 +42,13 @@ bool Message::set(uint8_t type) {
         case _MSG_RECEIVER_DELTATIME:
             length = _MSG_LENGTH_DELTATIME;
             break;
+        case _MSG_ACKNOWLEDGE:
+            length = _MSG_LEGNTH_ACKNOWLEDGE;
+        break;
         case _MSG_REQUEST_PID_V:
         case _MSG_REQUEST_PID_P:
         case _MSG_REQUEST_PID_R:
         case _MSG_REQUEST_TARGET_RANGES:
-        case _MSG_ACKNOWLEDGE:
         case _MSG_ACTIVATE:
         case _MSG_DEACTIVATE:
             length = 0;
@@ -94,6 +96,7 @@ uint8_t InstructionHandler::getData(void* out) {
     uint8_t messageType = message.type;
     acquiredData = false;
     readIndex = 0;
+    memset(readBuffer, 0, sizeof(readBuffer));
     message.reset();
     
     return messageType;
@@ -117,6 +120,6 @@ void InstructionHandler::write(uint8_t* data, uint8_t type) {
     free(output);
 }
 
-void InstructionHandler::acknowledge() {
-    write(nullptr, _MSG_ACKNOWLEDGE);
+void InstructionHandler::acknowledge(uint8_t messageType) {
+    write(&messageType, _MSG_ACKNOWLEDGE);
 }

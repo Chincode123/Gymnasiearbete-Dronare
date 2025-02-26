@@ -34,7 +34,7 @@ public:
     bool read();
     uint8_t getData(void* out);
     void write(uint8_t* data, uint8_t type);
-    void acknowledge();
+    void acknowledge(uint8_t messageType);
 };
 
 #endif

@@ -57,7 +57,7 @@ class SerialMessage {
 		[this.messageTypeFromName.get("request-pid-roll"), 0],
 		[this.messageTypeFromName.get("target-ranges"), 12],
 		[this.messageTypeFromName.get("request-target-ranges"), 0],
-		[this.messageTypeFromName.get("acknowledge"), 0],
+		[this.messageTypeFromName.get("acknowledge"), 1],
 		[this.messageTypeFromName.get("drone-log"), 31],
 		[this.messageTypeFromName.get("activate"), 0],
 		[this.messageTypeFromName.get("deactivate"), 0],
@@ -149,20 +149,28 @@ class Terminal {
 
 	previousLog = "";
 
+	print = () => {
+		const message = this.decoder.decode(this.currentMessage);
+		this.addToTerminal(message);
+		this.currentMessage = new Uint8Array(64);
+		this.currentIndex = 0;
+	}
+
 	readByte = (byte) => {
 		if (byte == 10) {
-			const message = this.decoder.decode(this.currentMessage);
-			this.addToTerminal(message);
-			this.currentMessage = new Uint8Array(64);
-			this.currentIndex = 0;
-			return
+			this.print();
+			return;
+		}
+
+		if (this.currentIndex >= this.currentMessage.length) {
+			this.print();
 		}
 
 		this.currentMessage[this.currentIndex++] = byte;
 	}
 
 	addToTerminal = (log) => {
-		console.log(log);
+		// console.log(log);
 
 		const output = document.getElementById("output");
 		if (log == this.previousLog) {
@@ -186,20 +194,31 @@ const terminal = new Terminal();
 
 
 class WritingHandler {
+	hasInstructions = false;
 	currentInstructions = null;
+	currentInstructionsType;
 
-	set = (instructions) => {
+	set = (instructions, type) => {
 		this.currentInstructions = instructions;
+		this.currentInstructionsType = type;
+		this.hasInstructions = true;
 	}
 
 	get = () => {
-		if (this.currentInstructions) {
-			const sendInstructons = this.currentInstructions;
-			this.currentInstructions = null;
-			return sendInstructons;
+		if (this.hasInstructions) {
+			return this.currentInstructions;
 		}
 		else {
 			return sendControllerInstructions();
+		}
+	}
+
+	acceptAcknowledge = (messageType) => {
+		// console.log(messageType, this.currentInstructionsType);
+		if (messageType == this.currentInstructionsType) {
+			this.hasInstructions = false;
+			this.currentInstructions = null;
+			this.currentInstructionsType = null;
 		}
 	}
 };
@@ -241,7 +260,7 @@ async function write () {
 };
 
 let reading = false
-read = async () => {
+async function read() {
 	if (reading) {
 		return;
 	}
@@ -267,9 +286,13 @@ read = async () => {
 						}
 
 						if (result.done) {
-
+							// acknowledge
+							if (result.messageType == "acknowledge") {
+								writingHandler.acceptAcknowledge(result.data[0]);
+							}
 							// pid
-							if (result.messageType == "pid-velocity") {
+							else if (result.messageType == "pid-velocity") {
+								console.log(result);
 								const pid = serialReader.readPIDInstruction(result.data);
 								document.getElementById("pid-v-p").value = pid.p;
 								document.getElementById("pid-v-i").value = pid.i;
@@ -423,7 +446,7 @@ document
 			"velocity"
 		);
 
-		writingHandler.set(instructions);
+		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("pid-velocity"));
 	});
 
 document
@@ -437,7 +460,7 @@ document
 			"pitch"
 		);
 
-		writingHandler.set(instructions);
+		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("pid-pitch"));
 	});
 
 document
@@ -451,7 +474,7 @@ document
 			"roll"
 		);
 
-		writingHandler.set(instructions);
+		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("pid-roll"));
 	});
 
 document
@@ -464,7 +487,7 @@ document
 			document.getElementById("target-ranges-velocity").value
 		);
 
-		writingHandler.set(instructions);
+		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("target-ranges"));
 	});
 
 document
@@ -472,7 +495,7 @@ document
 	.querySelector(".get")
 	.addEventListener("click", () => {
 		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-pid-velocity"));
-		writingHandler.set(instructions);
+		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("request-pid-velocity"));
 	});
 
 document
@@ -480,7 +503,7 @@ document
 	.querySelector(".get")
 	.addEventListener("click", () => {
 		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-pid-pitch"));
-		writingHandler.set(instructions);
+		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("request-pid-pitch"));
 	});
 
 document
@@ -488,7 +511,7 @@ document
 	.querySelector(".get")
 	.addEventListener("click", () => {
 		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-pid-roll"));
-		writingHandler.set(instructions);
+		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("request-pid-roll"));
 	});
 
 document
@@ -496,21 +519,21 @@ document
 	.querySelector(".get")
 	.addEventListener("click", () => {
 		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("request-target-ranges"));
-		writingHandler.set(instructions);
+		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("request-target-ranges"));
 	});
 
 document
 	.getElementById("on")
 	.addEventListener("click", () => {
 		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("activate"));
-		writingHandler.set(instructions);
+		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("activate"));
 	});
 
 document
 	.getElementById("off")
 	.addEventListener("click", () => {
 		const instructions = getRequestInstruction(new SerialMessage().messageTypeFromName.get("deactivate"));
-		writingHandler.set(instructions);
+		writingHandler.set(instructions, serialReader.message.messageTypeFromName.get("deactivate"));
 	});
 
 sendControllerInstructions = () => {
