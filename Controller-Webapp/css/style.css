@@ -1,5 +1,7 @@
 * {
     max-height: 98vh;
+
+    font-family: sans-serif;
 }
 
 div {
@@ -77,6 +79,14 @@ div {
     display:flex; 
     flex-direction: column-reverse; 
     overflow: hidden;
+}
+
+#output div {
+    padding-left: 5px;
+}
+
+#output * {
+    font-family: monospace;
 }
 
 #drone {
