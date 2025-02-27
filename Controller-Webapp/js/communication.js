@@ -73,7 +73,7 @@ class SerialMessage {
 		[SerialMessage.messageTypeFromName.get("receiver-delta-time"), 4]
 	]);
 
-	set = (type) => {
+	set(type) {
 		if (SerialMessage.messageLengths.has(type)) {
 			this.initiated = true;
 			this.type = type;
@@ -81,11 +81,11 @@ class SerialMessage {
 			return true;
 		}
 		return false;
-	};
+	}
 
-	reset = () => {
+	reset() {
 		this.initiated = false;
-	};
+	}
 }
 
 class SerialReader {
@@ -101,7 +101,7 @@ class SerialReader {
 		this.startMarker = 33;
 	}
 
-	read = (byte) => {
+	read(byte) {
 		if (this.reading) {
 			if (!this.message.initiated) {
 				if (!this.message.set(byte)) {
@@ -129,28 +129,28 @@ class SerialReader {
 		}
 
 		return { done: false, reading: this.reading };
-	};
+	}
 
-	readPIDInstruction = (data) => {
+	readPIDInstruction(data) {
 		const floatValues = new Float32Array(data.buffer);
 		return { p: floatValues[0], i: floatValues[1], d: floatValues[2] };
-	};
+	}
 
-	readTargetRanges = (data) => {
+	readTargetRanges(data) {
 		const floatValues = new Float32Array(data.buffer);
 		return { maxPitch: floatValues[0], maxRoll: floatValues[1], maxVerticalVelocity: floatValues[2] };
-	};
+	}
 
-	readVector = (data) => {
+	readVector(data) {
 		const floatValues = new Float32Array(data.buffer);
 		return { x: floatValues[0], y: floatValues[1], z: floatValues[2] };
-	};
+	}
 
-	readDeltaTime = (data) => {
+	readDeltaTime(data) {
 		const floatValues = new Float32Array(data.buffer);
 		return floatValues[0];
-	};
-};
+	}
+}
 const serialReader = new SerialReader();
 
 
@@ -167,14 +167,14 @@ class Terminal {
 		this.previousLog = "";
 	}
 
-	print = () => {
+	print() {
 		const message = this.decoder.decode(this.currentMessage);
 		this.addToTerminal(message);
 		this.currentMessage = new Uint8Array(64);
 		this.currentIndex = 0;
 	}
 
-	readByte = (byte) => {
+	readByte(byte) {
 		if (byte == 10) {
 			this.print();
 			return;
@@ -187,7 +187,7 @@ class Terminal {
 		this.currentMessage[this.currentIndex++] = byte;
 	}
 
-	addToTerminal = (log) => {
+	addToTerminal(log) {
 		// console.log(log);
 
 		const output = document.getElementById("output");
@@ -203,10 +203,10 @@ class Terminal {
 		}
 	}
 
-	clear = () => {
+	clear() {
 		document.getElementById("output").innerHTML = "";
 		this.previousLog = "";
-	};
+	}
 }
 const terminal = new Terminal();
 
@@ -223,18 +223,18 @@ class WritingHandler {
 		this.confirmSendAcknowledge = { hasConfirmed: true, value: null };
 	}
 
-	set = (instructions, type) => {
+	set(instructions, type) {
 		this.currentInstructions = instructions;
 		this.currentInstructionsType = type;
 		this.hasInstructions = true;
 	}
 
-	setWithConfirm = (instructions, type, value) => {
+	setWithConfirm(instructions, type, value) {
 		this.set(instructions, type);
 		this.confirmSendAcknowledge = { hasConfirmed: false, value: value };
 	}
 
-	get = () => {
+	get() {
 		if (this.hasInstructions) {
 			return this.currentInstructions;
 		}
@@ -243,7 +243,7 @@ class WritingHandler {
 		}
 	}
 
-	acceptAcknowledge = (messageType) => {
+	acceptAcknowledge(messageType) {
 		// console.log(messageType, this.currentInstructionsType);
 		if (messageType != this.currentInstructionsType) {
 			return;
@@ -258,7 +258,7 @@ class WritingHandler {
 		this.currentInstructionsType = null;
 	}
 
-	confirmSendData = (value, messageType) => {
+	confirmSendData(value, messageType) {
 		if (!this.confirmSendAcknowledge.hasConfirmed) {
 			return;
 		}
@@ -270,13 +270,13 @@ class WritingHandler {
 		this.confirmSendAcknowledge.hasConfirmed = true;
 		this.acceptAcknowledge(messageType);
 	}
-};
+}
 const writingHandler = new WritingHandler();
 
 
 const portSettings = { baudRate: 115200};
 let port;
-document.querySelector("#select-serial").addEventListener("click", async () => {
+document.querySelector("#select-serial").addEventListener("click", async function() {
 	port = await navigator.serial.requestPort();
 	try {
 		port.open(portSettings);
@@ -291,7 +291,7 @@ document.querySelector("#select-serial").addEventListener("click", async () => {
 });
 
 let writing = false;
-async function write () {
+async function write() {
 	if (writing || !port.writable) {
 		return;
 	}
@@ -306,7 +306,7 @@ async function write () {
 	// Allow the serial port to be closed later.
 	writer.releaseLock();
 	writing = false;
-};
+}
 
 let reading = false
 async function read() {
@@ -413,9 +413,9 @@ async function read() {
 		}
 	}
 	reading = false;
-};
+}
 
-document.getElementById("open").addEventListener("click", async () => {
+document.getElementById("open").addEventListener("click", async function() {
 	try {
 		await port.close();
 	} catch (error) {
@@ -425,7 +425,7 @@ document.getElementById("open").addEventListener("click", async () => {
 	await port.open(portSettings);
 });
 
-toInstruction = (values, messageType) => {
+function toInstruction(values, messageType) {
 	out = new Uint8Array(values.length + 2);
 	out[0] = 33;
 	out[1] = messageType;
@@ -433,10 +433,10 @@ toInstruction = (values, messageType) => {
 		out[i + 2] = values[i];
 	}
 	return out;
-};
+}
 
 // -1 <= x, y, power <= 1
-getControllerInstructions = (x, y, power) => {
+function getControllerInstructions(x, y, power) {
 	const values = new Int8Array(3);
 	values[0] = (x * 127) & 0x0000ff;
 	values[1] = (y * 127) & 0x0000ff;
@@ -451,9 +451,9 @@ getControllerInstructions = (x, y, power) => {
 	const out = toInstruction(uint8, messageType);
 
 	return out;
-};
+}
 
-getPIDInstructions = (values, module) => {
+function getPIDInstructions(values, module) {
 	const floatValues = new Float32Array(3);
 	floatValues[0] = values.p;
 	floatValues[1] = values.i;
@@ -465,9 +465,9 @@ getPIDInstructions = (values, module) => {
 	const out = toInstruction(byteValues, messageType);
 
 	return out;
-};
+}
 
-getTargetRangeInstructions = (maxPitch, maxRoll, maxVerticalVelocity) => {
+function getTargetRangeInstructions(maxPitch, maxRoll, maxVerticalVelocity) {
 	const floatValues = new Float32Array(3);
 	floatValues[0] = maxPitch;
 	floatValues[1] = maxRoll;
@@ -480,17 +480,17 @@ getTargetRangeInstructions = (maxPitch, maxRoll, maxVerticalVelocity) => {
 	const out = toInstruction(byteValues, messageType);
 
 	return out;
-};
+}
 
-getRequestInstruction = (type) => {
+function getRequestInstruction(type) {
 	const out = toInstruction(new Uint8Array(0), type);
 	return out;
-};
+}
 
 document
 	.getElementById("velocity")
 	.querySelector(".send")
-	.addEventListener("click", () => {
+	.addEventListener("click", function() {
 		const values = {
 			p: document.getElementById("pid-v-p").value,
 			i: document.getElementById("pid-v-i").value,
@@ -504,7 +504,7 @@ document
 document
 	.getElementById("pitch")
 	.querySelector(".send")
-	.addEventListener("click", () => {
+	.addEventListener("click", function() {
 		const values = {
 			p: document.getElementById("pid-p-p").value,
 			i: document.getElementById("pid-p-i").value,
@@ -521,7 +521,7 @@ document
 document
 	.getElementById("roll")
 	.querySelector(".send")
-	.addEventListener("click", () => {
+	.addEventListener("click", function() {
 		const values = {
 			p: document.getElementById("pid-r-p").value,
 			i: document.getElementById("pid-r-i").value,
@@ -535,7 +535,7 @@ document
 document
 	.getElementById("target-ranges")
 	.querySelector(".send")
-	.addEventListener("click", () => {
+	.addEventListener("click", function() {
 		const values = {
 			maxPitch: document.getElementById("target-ranges-pitch").value,
 			maxRoll: document.getElementById("target-ranges-roll").value,
@@ -549,7 +549,7 @@ document
 document
 	.getElementById("velocity")
 	.querySelector(".get")
-	.addEventListener("click", () => {
+	.addEventListener("click", function() {
 		const instructions = getRequestInstruction(SerialMessage.messageTypeFromName.get("request-pid-velocity"));
 		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("request-pid-velocity"));
 	});
@@ -557,7 +557,7 @@ document
 document
 	.getElementById("pitch")
 	.querySelector(".get")
-	.addEventListener("click", () => {
+	.addEventListener("click", function() {
 		const instructions = getRequestInstruction(SerialMessage.messageTypeFromName.get("request-pid-pitch"));
 		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("request-pid-pitch"));
 	});
@@ -565,7 +565,7 @@ document
 document
 	.getElementById("roll")
 	.querySelector(".get")
-	.addEventListener("click", () => {
+	.addEventListener("click", function() {
 		const instructions = getRequestInstruction(SerialMessage.messageTypeFromName.get("request-pid-roll"));
 		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("request-pid-roll"));
 	});
@@ -573,33 +573,33 @@ document
 document
 	.getElementById("target-ranges")
 	.querySelector(".get")
-	.addEventListener("click", () => {
+	.addEventListener("click", function() {
 		const instructions = getRequestInstruction(SerialMessage.messageTypeFromName.get("request-target-ranges"));
 		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("request-target-ranges"));
 	});
 
 document
 	.getElementById("on")
-	.addEventListener("click", () => {
+	.addEventListener("click", function() {
 		const instructions = getRequestInstruction(SerialMessage.messageTypeFromName.get("activate"));
 		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("activate"));
 	});
 
 document
 	.getElementById("off")
-	.addEventListener("click", () => {
+	.addEventListener("click", function() {
 		const instructions = getRequestInstruction(SerialMessage.messageTypeFromName.get("deactivate"));
 		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("deactivate"));
 	});
 
-sendControllerInstructions = () => {
-	instructions = getControllerInstructions(
+function sendControllerInstructions() {
+	const instructions = getControllerInstructions(
 		joystick.x,
 		joystick.y,
 		document.getElementById("power").value
 	);
 	return instructions;
-};
+}
 
 
 document.getElementById("clear").addEventListener("click", terminal.clear);
