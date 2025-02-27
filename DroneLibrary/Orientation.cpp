@@ -47,9 +47,18 @@ void Orientation::readFromIMU(vector& acceleration, vector& angularVelocity) {
     Wire.endTransmission(false);
     Wire.requestFrom(MPU, 6, true);
 
-    acceleration.x = (Wire.read() << 8 | Wire.read()) / 163840.0;
-    acceleration.y = (Wire.read() << 8 | Wire.read()) / 163840.0;
-    acceleration.z = (Wire.read() << 8 | Wire.read()) / 163840.0;
+    acceleration.x = (Wire.read() << 8 | Wire.read()) / 16384.0;
+    acceleration.y = (Wire.read() << 8 | Wire.read()) / 16384.0;
+    acceleration.z = (Wire.read() << 8 | Wire.read()) / 16384.0;
+
+    // #ifdef Serial
+    //     Serial.print("Acceleration: ");
+    //     Serial.print(acceleration.x);
+    //     Serial.print(", ");
+    //     Serial.print(acceleration.y);
+    //     Serial.print(", ");
+    //     Serial.print(acceleration.z);
+    // #endif
 
     // Gyroscope
     Wire.beginTransmission(MPU);
@@ -60,6 +69,15 @@ void Orientation::readFromIMU(vector& acceleration, vector& angularVelocity) {
     angularVelocity.x = (Wire.read() << 8 | Wire.read()) / 131.0;
     angularVelocity.y = (Wire.read() << 8 | Wire.read()) / 131.0;
     angularVelocity.z = (Wire.read() << 8 | Wire.read()) / 131.0;
+
+    // #ifdef Serial
+    //     Serial.print("      Angular velocity: ");
+    //     Serial.print(angularVelocity.x);
+    //     Serial.print(", ");
+    //     Serial.print(angularVelocity.y);
+    //     Serial.print(", ");
+    //     Serial.println(angularVelocity.z);
+    // #endif
 }
 
 void Orientation::readFromIMU() {
@@ -67,12 +85,21 @@ void Orientation::readFromIMU() {
     
     acceleration += accelerationOffset;
     angularVelocity += angularVelocityOffset;
-}
 
-vector Orientation::calculateAccelerationAngles(const vector& acceleration) {
-    return {atan2(acceleration.y, sqrt(pow(acceleration.x, 2) + pow(acceleration.z, 2))) * 180 / PI,
-            atan2(-1 * acceleration.x, sqrt(pow(acceleration.y, 2) + pow(acceleration.z, 2))) * 180 / PI,
-            atan2(acceleration.y, acceleration.x) * 180 / PI};
+    // #ifdef Serial
+    //     Serial.print("Acceleration: ");
+    //     Serial.print(acceleration.x);
+    //     Serial.print(", ");
+    //     Serial.print(acceleration.y);
+    //     Serial.print(", ");
+    //     Serial.print(acceleration.z);
+    //     Serial.print("      Angular velocity: ");
+    //     Serial.print(angularVelocity.x);
+    //     Serial.print(", ");
+    //     Serial.print(angularVelocity.y);
+    //     Serial.print(", ");
+    //     Serial.println(angularVelocity.z);
+    // #endif
 }
 
 void Orientation::update(float deltaTime) {
@@ -80,6 +107,12 @@ void Orientation::update(float deltaTime) {
 
     calculateAngles(deltaTime);    
     calculateVelocity(deltaTime);
+}
+
+vector Orientation::calculateAccelerationAngles(const vector& acceleration) {
+    return {atan2(acceleration.y, sqrt(pow(acceleration.x, 2) + pow(acceleration.z, 2))) * 180 / PI,
+            atan2(-1 * acceleration.x, sqrt(pow(acceleration.y, 2) + pow(acceleration.z, 2))) * 180 / PI,
+            atan2(acceleration.y, acceleration.x) * 180 / PI};
 }
 
 void Orientation::calculateAngles(float deltaTime) {
@@ -93,12 +126,12 @@ void Orientation::calculateAngles(float deltaTime) {
 }
 
 void Orientation::calculateVelocity(float deltaTime) {
-    float sinPitch = sin(angles.x);
-    float sinRoll = sin(angles.y);
-    float sinYaw = sin(angles.z);
-    float cosPitch = cos(angles.x);
-    float cosRoll = cos(angles.y);
-    float cosYaw = cos(angles.z);
+    float sinPitch = sin(angles.x * PI / 180.0);
+    float sinRoll = sin(angles.y * PI / 180.0);
+    float sinYaw = sin(angles.z * PI / 180.0);
+    float cosPitch = cos(angles.x * PI / 180.0);
+    float cosRoll = cos(angles.y * PI / 180.0);
+    float cosYaw = cos(angles.z * PI / 180.0);
     
     /*
         Acording to ChatGPT, this rotational matrix transforms the acceleration values to the world frame
@@ -141,8 +174,8 @@ void Orientation::calculateOffsets(uint16_t cycles) {
     for (int i = 0; i < cycles; i++) {
         readFromIMU(acceleration, angularVelocity);
 
-        angularVelocityOffset += angularVelocity;
-        accelerationOffset += acceleration;
+        angularVelocityOffset -= angularVelocity;
+        accelerationOffset -= acceleration;
     }
     
     angularVelocityOffset /= cycles;
@@ -151,7 +184,7 @@ void Orientation::calculateOffsets(uint16_t cycles) {
     for (int i = 0; i < cycles; i++) {
         readFromIMU(acceleration, angularVelocity);
 
-        accelerationAngleOffset += calculateAccelerationAngles((vector)(acceleration + accelerationOffset));
+        accelerationAngleOffset += calculateAccelerationAngles((acceleration + accelerationOffset));
     }
 
     accelerationAngleOffset /= cycles;

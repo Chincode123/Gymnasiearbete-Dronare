@@ -3,7 +3,7 @@
 #include <RadioData.h>
 #include <InstructionHandler.h>
 
-#define DEBUG
+// #define DEBUG
 
 #define CE_PIN 7
 #define CSN_PIN 8
@@ -74,7 +74,7 @@ void loop()
                 #endif
               }
             else {
-              receiverPrint("Faild to send: Controller input");
+              // receiverPrint("Faild to send: Controller input");
               }
             break;
         case _MSG_SET_PID_V:

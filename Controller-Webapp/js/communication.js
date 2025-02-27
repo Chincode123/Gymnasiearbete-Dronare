@@ -281,7 +281,7 @@ async function read() {
 				}
 				if (value) {
 					for (const byte of value) {
-						console.log(byte);
+						// console.log(byte);
 
 						const result = serialReader.read(byte);
 
@@ -344,6 +344,7 @@ async function read() {
 							}
 							else if (result.messageType == "drone-angles") {
 								const angles = serialReader.readVector(result.data);
+								console.log("angles", angles);
 								document.getElementById("pitch-value").innerHTML = angles.x.toFixed(2);
 								document.getElementById("roll-value").innerHTML = angles.y.toFixed(2);
 								document.getElementById("yaw-value").innerHTML = angles.z.toFixed(2);

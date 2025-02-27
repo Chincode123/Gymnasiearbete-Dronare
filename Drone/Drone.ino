@@ -281,10 +281,12 @@ void loop() {
 
         orientation.update(deltaTime);
         motorController.calculatePower(orientation.velocity.z, orientation.angles.x, orientation.angles.y, deltaTime);
-        analogWrite(MOTOR_TL_Pin, 128 + (motorPowerTL / 2));   
-        analogWrite(MOTOR_TR_Pin, 128 + (motorPowerTR / 2));   
-        analogWrite(MOTOR_BR_Pin, 128 + (motorPowerBR / 2));   
-        analogWrite(MOTOR_BL_Pin, 128 + (motorPowerBL / 2));
+        #ifndef DEBUGG
+          analogWrite(MOTOR_TL_Pin, 128 + (motorPowerTL / 2));   
+          analogWrite(MOTOR_TR_Pin, 128 + (motorPowerTR / 2));   
+          analogWrite(MOTOR_BR_Pin, 128 + (motorPowerBR / 2));   
+          analogWrite(MOTOR_BL_Pin, 128 + (motorPowerBL / 2));
+        #endif
     }
     else {
         #ifdef DEBUG
@@ -330,8 +332,8 @@ void setDeltaTime() {
 
 void sendRadio() {
     #ifdef DEBUG
-      Serial.print("(before) SendStack count: ");
-      Serial.println(sendStack.count);
+      // Serial.print("(before) SendStack count: ");
+      // Serial.println(sendStack.count);
     #endif
 
     while (sendStack.count > 0) {
