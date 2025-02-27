@@ -7,7 +7,7 @@ class SerialMessage {
 		this.initiated = false;
 	}
 
-	static messageTypeFromIndex = new Map([
+	static messageNameFromType = new Map([
 		[0, "controller-instructions"],
 		[1, "pid-velocity"],
 		[2, "pid-pitch"],
@@ -112,7 +112,7 @@ class SerialReader {
 			} else {
 				this.data[this.data.length] = byte;
 				this.reading = false;
-				const messageTypeName = SerialMessage.messageTypeFromIndex.get(this.message.type);
+				const messageTypeName = SerialMessage.messageNameFromType.get(this.message.type);
 				this.message.reset();
 				const out = new Uint8Array(this.data);
 				this.data = [];
@@ -249,7 +249,12 @@ class WritingHandler {
 			return;
 		}
 
-		if (this.confirmSendAcknowledge.hasConfirmed) {
+		if (!this.confirmSendAcknowledge.hasConfirmed) {
+			const currentTypeName = SerialMessage.messageNameFromType.get(this.currentInstructionsType);
+			const requestTypeName = `request-${currentTypeName}`;
+			const requestType = SerialMessage.messageTypeFromName.get(requestTypeName);
+			const requestInstructions = getRequestInstruction(requestType);
+			this.set(requestInstructions, requestType);
 			return;
 		}
 
@@ -263,7 +268,7 @@ class WritingHandler {
 			return;
 		}
 
-		if (this.confirmSendAcknowledge.value == value) {
+		if (this.confirmSendAcknowledge.value != value) {
 			return;
 		}
 
@@ -426,7 +431,7 @@ document.getElementById("open").addEventListener("click", async function() {
 });
 
 function toInstruction(values, messageType) {
-	out = new Uint8Array(values.length + 2);
+	const out = new Uint8Array(values.length + 2);
 	out[0] = 33;
 	out[1] = messageType;
 	for (let i = 0; i < values.length; i++) {
