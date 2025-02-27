@@ -264,7 +264,7 @@ class WritingHandler {
 	}
 
 	confirmSendData(value, messageType) {
-		if (!this.confirmSendAcknowledge.hasConfirmed) {
+		if (this.confirmSendAcknowledge.hasConfirmed) {
 			return;
 		}
 
