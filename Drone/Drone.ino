@@ -97,7 +97,7 @@ void setup() {
     // Initial time
     previousTime = millis();
 
-    consoleLog("Connected", true);
+    radioLog("Connected", true);
 
     #ifdef DEBUG
       Serial.println("completed setup");
@@ -165,7 +165,7 @@ void loop() {
                 }
                 #endif
                 
-                consoleLog("Activation complete", true);
+                radioLog("Activation complete", true);
                 break;
             case _MSG_DEACTIVATE:
                 if (!activated) break;
@@ -193,7 +193,7 @@ void loop() {
                 digitalWrite(MOTOR_BR_Pin, LOW);
                 digitalWrite(MOTOR_BL_Pin, LOW);
 
-                consoleLog("Deactivated", true);
+                radioLog("Deactivated", true);
                 break;
             case _MSG_SET_PID_V:
                 memcpy(&pidIn, messageIn.dataBuffer, sizeof(pidIn));
@@ -264,7 +264,7 @@ void loop() {
                 sendStack.push(messageOut);
                 break;
             default:
-                consoleLog("Error interpreting messageType", false);
+                radioLog("Error interpreting messageType", false);
                 break;
         }
     }
@@ -294,7 +294,7 @@ void loop() {
         #endif
 
         if (millis() % 1000 == 0) {
-            consoleLog("Waiting for activation", true);
+            radioLog("Waiting for activation", true);
         }
     }
 
@@ -336,15 +336,14 @@ void sendRadio() {
       // Serial.println(sendStack.count);
     #endif
 
+    radio.stopListening();
     while (sendStack.count > 0) {
         #ifdef DEBUG 
           // Serial.println("attempting to send");
         #endif
 
         RadioMessage message = sendStack.pop();
-        radio.stopListening();
         bool result = radio.write(&message, sizeof(message));
-        radio.startListening();
 
         // #ifdef DEBUG
         //   printRadioMessage(message);
@@ -363,13 +362,14 @@ void sendRadio() {
           // Serial.println("successfully sent");
         #endif
     }
+    radio.startListening();
     #ifdef DEBUG
       // Serial.print("(after) SendStack count: ");
       // Serial.println(sendStack.count);
     #endif
 }
 
-void consoleLog(const char* message, bool important) {
+void radioLog(const char* message, bool important) {
     #define DRONE_LOG
     RadioMessage logMessage;
     logMessage.messageType = _MSG_DRONE_LOG;

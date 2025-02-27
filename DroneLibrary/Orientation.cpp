@@ -17,10 +17,6 @@ void Orientation::begin(uint16_t cycles) {
     Wire.endTransmission(true);
 
     calculateOffsets(cycles);
-
-    #ifdef DRONE_LOG
-    consoleLog("Initiated orientation", true);
-    #endif
 }
 
 void Orientation::end() {
