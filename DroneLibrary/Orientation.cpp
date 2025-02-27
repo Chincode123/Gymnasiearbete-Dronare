@@ -47,9 +47,13 @@ void Orientation::readFromIMU(vector& acceleration, vector& angularVelocity) {
     Wire.endTransmission(false);
     Wire.requestFrom(MPU, 6, true);
 
-    acceleration.x = (Wire.read() << 8 | Wire.read()) / 16384.0;
-    acceleration.y = (Wire.read() << 8 | Wire.read()) / 16384.0;
-    acceleration.z = (Wire.read() << 8 | Wire.read()) / 16384.0;
+    // values are between -2(g) and 2(g)
+    acceleration.x = ((Wire.read() << 8 | Wire.read()) / 16384.0);
+    acceleration.y = ((Wire.read() << 8 | Wire.read()) / 16384.0);
+    acceleration.z = ((Wire.read() << 8 | Wire.read()) / 16384.0);
+
+    float g = 9.82;
+    acceleration *= g;
 
     // #ifdef Serial
     //     Serial.print("Acceleration: ");
@@ -66,6 +70,7 @@ void Orientation::readFromIMU(vector& acceleration, vector& angularVelocity) {
     Wire.endTransmission(false);
     Wire.requestFrom(MPU, 6, true);
 
+    // value between -250 and 250 degrees per second
     angularVelocity.x = (Wire.read() << 8 | Wire.read()) / 131.0;
     angularVelocity.y = (Wire.read() << 8 | Wire.read()) / 131.0;
     angularVelocity.z = (Wire.read() << 8 | Wire.read()) / 131.0;
