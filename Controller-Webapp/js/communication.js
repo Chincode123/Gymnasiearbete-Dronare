@@ -1,7 +1,11 @@
 class SerialMessage {
-	initiated = false;
+	initiated;
 	type;
 	length;
+
+	SerialMessage() {
+		this.initiated = false;
+	}
 
 	static messageTypeFromIndex = new Map([
 		[0, "controller-instructions"],
@@ -85,10 +89,17 @@ class SerialMessage {
 }
 
 class SerialReader {
-	message = new SerialMessage();
-	data = [];
-	reading = false;
-	startMarker = 33;
+	message;
+	data;
+	reading; 
+	startMarker; 
+
+	SerialReader() {
+		this.message = new SerialMessage();
+		this.data = [];
+		this.reading = false;
+		this.startMarker = 33;
+	}
 
 	read = (byte) => {
 		if (this.reading) {
@@ -101,14 +112,15 @@ class SerialReader {
 			} else {
 				this.data[this.data.length] = byte;
 				this.reading = false;
-				const messageType = SerialMessage.messageTypeFromIndex.get(this.message.type);
+				const messageTypeName = SerialMessage.messageTypeFromIndex.get(this.message.type);
 				this.message.reset();
 				const out = new Uint8Array(this.data);
 				this.data = [];
 				return {
 					data: out,
 					done: true,
-					messageType: messageType,
+					messageType: this.message.type,
+					messageTypeName: messageTypeName,
 					reading: true
 				};
 			}
@@ -143,11 +155,17 @@ const serialReader = new SerialReader();
 
 
 class Terminal {
-	decoder = new TextDecoder();
-	currentMessage = new Uint8Array(64);
-	currentIndex = 0;
+	decoder;
+	currentMessage;
+	currentIndex;
+	previousLog;
 
-	previousLog = "";
+	Terminal() {
+		this.decoder = new TextDecoder();
+		this.currentMessage = new Uint8Array(64);
+		this.currentIndex = 0;
+		this.previousLog = "";
+	}
 
 	print = () => {
 		const message = this.decoder.decode(this.currentMessage);
@@ -194,14 +212,26 @@ const terminal = new Terminal();
 
 
 class WritingHandler {
-	hasInstructions = false;
-	currentInstructions = null;
+	hasInstructions;
+	currentInstructions;
 	currentInstructionsType;
+	confirmSendAcknowledge;
+
+	WritingHandler() {
+		this.hasInstructions = false;
+		this.currentInstructions = null;
+		this.confirmSendAcknowledge = { hasConfirmed: true, value: null };
+	}
 
 	set = (instructions, type) => {
 		this.currentInstructions = instructions;
 		this.currentInstructionsType = type;
 		this.hasInstructions = true;
+	}
+
+	setWithConfirm = (instructions, type, value) => {
+		this.set(instructions, type);
+		this.confirmSendAcknowledge = { hasConfirmed: false, value: value };
 	}
 
 	get = () => {
@@ -219,9 +249,26 @@ class WritingHandler {
 			return;
 		}
 
+		if (this.confirmSendAcknowledge.hasConfirmed) {
+			return;
+		}
+
 		this.hasInstructions = false;
 		this.currentInstructions = null;
 		this.currentInstructionsType = null;
+	}
+
+	confirmSendData = (value, messageType) => {
+		if (!this.confirmSendAcknowledge.hasConfirmed) {
+			return;
+		}
+
+		if (this.confirmSendAcknowledge.value == value) {
+			return;
+		}
+
+		this.confirmSendAcknowledge.hasConfirmed = true;
+		this.acceptAcknowledge(messageType);
 	}
 };
 const writingHandler = new WritingHandler();
@@ -291,24 +338,24 @@ async function read() {
 
 						if (result.done) {
 							// acknowledge
-							if (result.messageType == "acknowledge") {
+							if (result.messageTypeName == "acknowledge") {
 								writingHandler.acceptAcknowledge(result.data[0]);
 							}
 							// pid
-							else if (result.messageType == "pid-velocity") {
+							else if (result.messageTypeName == "pid-velocity") {
 								console.log(result);
 								const pid = serialReader.readPIDInstruction(result.data);
 								document.getElementById("pid-v-p").value = pid.p;
 								document.getElementById("pid-v-i").value = pid.i;
 								document.getElementById("pid-v-d").value = pid.d;
 							}
-							else if (result.messageType == "pid-pitch") {
+							else if (result.messageTypeName == "pid-pitch") {
 								const pid = serialReader.readPIDInstruction(result.data);
 								document.getElementById("pid-p-p").value = pid.p;
 								document.getElementById("pid-p-i").value = pid.i;
 								document.getElementById("pid-p-d").value = pid.d;
 							}
-							else if (result.messageType == "pid-roll") {
+							else if (result.messageTypeName == "pid-roll") {
 								const pid = serialReader.readPIDInstruction(result.data);
 								document.getElementById("pid-r-p").value = pid.p;
 								document.getElementById("pid-r-i").value = pid.i;
@@ -316,7 +363,7 @@ async function read() {
 							}
 
 							// target values
-							else if (result.messageType == "target-ranges") {
+							else if (result.messageTypeName == "target-ranges") {
 								const ranges = serialReader.readTargetRanges(result.data);
 								document.getElementById("terget-ranges-velocity").value = ranges.maxVerticalVelocity;
 								document.getElementById("terget-ranges-pitch").value = ranges.maxPitch;
@@ -324,36 +371,36 @@ async function read() {
 							}
 
 							// drone info
-							else if (result.messageType == "drone-velocity") {
+							else if (result.messageTypeName == "drone-velocity") {
 								const velocity = serialReader.readVector(result.data);
 								document.getElementById("vel-x").innerHTML = velocity.x.toFixed(2);
 								document.getElementById("vel-y").innerHTML = velocity.y.toFixed(2);
 								document.getElementById("vel-z").innerHTML = velocity.z.toFixed(2);
 							}
-							else if (result.messageType == "drone-acceleration") {
+							else if (result.messageTypeName == "drone-acceleration") {
 								const acceleration = serialReader.readVector(result.data);
 								document.getElementById("acc-x").innerHTML = acceleration.x.toFixed(2);
 								document.getElementById("acc-y").innerHTML = acceleration.y.toFixed(2);
 								document.getElementById("acc-z").innerHTML = acceleration.z.toFixed(2);
 							}
-							else if (result.messageType == "drone-angular-velocity") {
+							else if (result.messageTypeName == "drone-angular-velocity") {
 								const angular_velocity = serialReader.readVector(result.data);
 								document.getElementById("angular-vel-x").innerHTML = angular_velocity.x.toFixed(2);
 								document.getElementById("angular-vel-y").innerHTML = angular_velocity.y.toFixed(2);
 								document.getElementById("angular-vel-z").innerHTML = angular_velocity.z.toFixed(2);
 							}
-							else if (result.messageType == "drone-angles") {
+							else if (result.messageTypeName == "drone-angles") {
 								const angles = serialReader.readVector(result.data);
 								console.log("angles", angles);
 								document.getElementById("pitch-value").innerHTML = angles.x.toFixed(2);
 								document.getElementById("roll-value").innerHTML = angles.y.toFixed(2);
 								document.getElementById("yaw-value").innerHTML = angles.z.toFixed(2);
 							}
-							else if (result.messageType == "drone-delta-time") {
+							else if (result.messageTypeName == "drone-delta-time") {
 								const updateRate = 1 / serialReader.readDeltaTime(result.data);
 								document.getElementById("drone-update").innerHTML = updateRate.toFixed(0);
 							}
-							else if (result.messageType == "receiver-delta-time") {
+							else if (result.messageTypeName == "receiver-delta-time") {
 								const updateRate = 1 / serialReader.readDeltaTime(result.data);
 								document.getElementById("receiver-update").innerHTML = updateRate.toFixed(0);
 							}
@@ -406,11 +453,11 @@ getControllerInstructions = (x, y, power) => {
 	return out;
 };
 
-getPIDInstructions = (p, i, d, module) => {
+getPIDInstructions = (values, module) => {
 	const floatValues = new Float32Array(3);
-	floatValues[0] = p;
-	floatValues[1] = i;
-	floatValues[2] = d;
+	floatValues[0] = values.p;
+	floatValues[1] = values.i;
+	floatValues[2] = values.d;
 
 	const byteValues = new Uint8Array(floatValues.buffer);
 
@@ -444,55 +491,59 @@ document
 	.getElementById("velocity")
 	.querySelector(".send")
 	.addEventListener("click", () => {
-		const instructions = getPIDInstructions(
-			document.getElementById("pid-v-p").value,
-			document.getElementById("pid-v-i").value,
-			document.getElementById("pid-v-d").value,
-			"velocity"
-		);
+		const values = {
+			p: document.getElementById("pid-v-p").value,
+			i: document.getElementById("pid-v-i").value,
+			d: document.getElementById("pid-v-d").value,
+		};
+		const instructions = getPIDInstructions(values, "velocity");
 
-		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("pid-velocity"));
+		writingHandler.setWithConfirm(instructions, SerialMessage.messageTypeFromName.get("pid-velocity"), values);
 	});
 
 document
 	.getElementById("pitch")
 	.querySelector(".send")
 	.addEventListener("click", () => {
+		const values = {
+			p: document.getElementById("pid-p-p").value,
+			i: document.getElementById("pid-p-i").value,
+			d: document.getElementById("pid-p-d").value,
+		};
 		const instructions = getPIDInstructions(
-			document.getElementById("pid-p-p").value,
-			document.getElementById("pid-p-i").value,
-			document.getElementById("pid-p-d").value,
+			values,
 			"pitch"
 		);
 
-		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("pid-pitch"));
+		writingHandler.setWithConfirm(instructions, SerialMessage.messageTypeFromName.get("pid-pitch"), values);
 	});
 
 document
 	.getElementById("roll")
 	.querySelector(".send")
 	.addEventListener("click", () => {
-		const instructions = getPIDInstructions(
-			document.getElementById("pid-r-p").value,
-			document.getElementById("pid-r-i").value,
-			document.getElementById("pid-r-d").value,
-			"roll"
-		);
+		const values = {
+			p: document.getElementById("pid-r-p").value,
+			i: document.getElementById("pid-r-i").value,
+			d: document.getElementById("pid-r-d").value,
+		};
+		const instructions = getPIDInstructions(values, "roll");
 
-		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("pid-roll"));
+		writingHandler.setWithConfirm(instructions, SerialMessage.messageTypeFromName.get("pid-roll"), values);
 	});
 
 document
 	.getElementById("target-ranges")
 	.querySelector(".send")
 	.addEventListener("click", () => {
-		const instructions = getTargetRangeInstructions(
-			document.getElementById("target-ranges-pitch").value,
-			document.getElementById("target-ranges-roll").value,
-			document.getElementById("target-ranges-velocity").value
-		);
+		const values = {
+			maxPitch: document.getElementById("target-ranges-pitch").value,
+			maxRoll: document.getElementById("target-ranges-roll").value,
+			maxVerticalVelocity: document.getElementById("target-ranges-velocity").value,
+		};
+		const instructions = getTargetRangeInstructions(values.maxPitch, values.maxRoll, values.maxVerticalVelocity);
 
-		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("target-ranges"));
+		writingHandler.setWithConfirm(instructions, SerialMessage.messageTypeFromName.get("target-ranges"), values);
 	});
 
 document
