@@ -1,4 +1,5 @@
 #include "Vectors.h"
+#include <Arduino.h>
 
 float vector::magnitude(){
     return sqrt((*this) * (*this));

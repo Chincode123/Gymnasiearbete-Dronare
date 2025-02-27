@@ -34,13 +34,16 @@ void setup()
     radio.openReadingPipe(1, DRONE_ADDRESS);
     radio.startListening();
 
-    previousTime = millis();
+    previousTime = micros();
 }
 
 void loop()
 {
-    float deltaTime = (float)(millis() - previousTime) / 1000;
-    previousTime = millis();
+    float deltaTime = (float)(micros() - previousTime) / 1000000;
+    previousTime = micros();
+    if (deltaTime == 0) {
+        deltaTime = 0.000001;
+    }
 
     // Serial input
     if (instructionHandler.read())

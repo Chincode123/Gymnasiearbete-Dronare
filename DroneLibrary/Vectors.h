@@ -1,8 +1,6 @@
 #ifndef VECTORS_H_
 #define VECTORS_H_
 
-#include <Arduino.h>
-
 // 3-Dimensional vector
 struct vector {
     float x, y, z;

@@ -95,7 +95,7 @@ void setup() {
     pinMode(MOTOR_BL_Pin, OUTPUT);
     
     // Initial time
-    previousTime = millis();
+    previousTime = micros();
 
     radioLog("Connected", true);
 
@@ -325,9 +325,12 @@ void loop() {
 }
 
 void setDeltaTime() {
-    unsigned long currentTime = millis();
-    deltaTime = (float)(currentTime - previousTime) / 1000;
+    unsigned long currentTime = micros();
+    deltaTime = (float)(currentTime - previousTime) / 1000000;
     previousTime = currentTime;
+    if (deltaTime == 0) {
+        deltaTime = 0.000001;
+    }
 }
 
 void sendRadio() {
