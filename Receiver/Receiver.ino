@@ -50,7 +50,7 @@ void loop()
         memcpy(messageOut.dataBuffer, &readBuffer, sizeof(messageOut.dataBuffer));
         
         #ifdef DEBUG
-          // printRadioMessage(messageOut);
+          printRadioMessage(messageOut);
         #endif
 
         bool result;
@@ -72,9 +72,11 @@ void loop()
                   Serial.print(" power:");
                   Serial.println((float)controller.power / 127);
                 #endif
+                break;
               }
+        #ifdef DEBUG
             else {
-              // receiverPrint("Faild to send: Controller input");
+              receiverPrint("Faild to send: Controller input");
               }
             break;
         case _MSG_SET_PID_V:
@@ -123,12 +125,13 @@ void loop()
             receiverPrint("Failed to send: Request");
           break;
         // TODO: Add other messages
-        // default:
-        //     if (result)
-        //       receiverPrint("Sent: TYPE=UNKNOWN");
-        //     else
-        //       receiverPrint("Failed to send: TYPE=UNKNOWN");
-        //     break;
+        default:
+            if (result)
+              receiverPrint("Sent: TYPE=UNKNOWN");
+            else
+              receiverPrint("Failed to send: TYPE=UNKNOWN");
+            break;
+        #endif
         }
     }
 
