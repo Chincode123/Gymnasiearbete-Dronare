@@ -103,7 +103,7 @@ void loop() {
     // Radio read
     if (radio.available() && millis() % 20 != 0) {
         #ifdef DEBUG
-          // Serial.println("radio available");
+          Serial.println("radio available");
         #endif
 
         // scope variables
@@ -115,7 +115,7 @@ void loop() {
         memcpy(&messageIn, &readBuffer, sizeof(messageIn));
 
         #ifdef DEBUG
-          // printRadioMessage(messageIn);
+          printRadioMessage(messageIn);
         #endif
 
         switch (messageIn.messageType) {
@@ -124,12 +124,12 @@ void loop() {
                 memcpy(&controller, messageIn.dataBuffer, sizeof(controller));
                 
                 #ifdef DEBUG
-                  // Serial.print("x:");
-                  // Serial.print((float)controller.stick_X / 127);
-                  // Serial.print(" y:");
-                  // Serial.print((float)controller.stick_Y / 127);
-                  // Serial.print(" power:");
-                  // Serial.println((float)controller.power / 127);
+                  Serial.print("x:");
+                  Serial.print((float)controller.stick_X / 127);
+                  Serial.print(" y:");
+                  Serial.print((float)controller.stick_Y / 127);
+                  Serial.print(" power:");
+                  Serial.println((float)controller.power / 127);
                 #endif
 
                 targetVelocity = maxVelocity * (float)controller.power / 127;
@@ -200,13 +200,13 @@ void loop() {
     }
     #ifdef DEBUG
     else {
-      // Serial.println("radio not available");
+      Serial.println("radio not available");
     }
     #endif
 
     if (activated) {
       #ifdef DEBUG
-        // Serial.println("activated");
+        Serial.println("activated");
       #endif
 
         orientation.update(deltaTime);
@@ -220,7 +220,7 @@ void loop() {
     }
     else {
         #ifdef DEBUG
-        // Serial.println("not activated");
+          Serial.println("not activated");
         #endif
 
         if (millis() % 1000 == 0) {
@@ -245,26 +245,26 @@ void setDeltaTime() {
 
 void sendRadio() {
     #ifdef DEBUG
-      // Serial.print("(before) SendStack count: ");
-      // Serial.println(sendStack.count);
+      Serial.print("(before) SendStack count: ");
+      Serial.println(sendStack.count);
     #endif
 
     radio.stopListening();
     while (sendStack.count > 0) {
         #ifdef DEBUG 
-          // Serial.println("attempting to send");
+          Serial.println("attempting to send");
         #endif
 
         RadioMessage message = sendStack.pop();
         bool result = radio.write(&message, sizeof(message));
 
-        // #ifdef DEBUG
-        //   printRadioMessage(message);
-        // #endif
+        #ifdef DEBUG
+          printRadioMessage(message);
+        #endif
 
         if (!result){
             #ifdef DEBUG
-              // Serial.println("failed to send");
+              Serial.println("failed to send");
             #endif
 
             sendStack.push(message);
@@ -272,13 +272,13 @@ void sendRadio() {
         }
 
         #ifdef DEBUG
-          // Serial.println("successfully sent");
+          Serial.println("successfully sent");
         #endif
     }
     radio.startListening();
     #ifdef DEBUG
-      // Serial.print("(after) SendStack count: ");
-      // Serial.println(sendStack.count);
+      Serial.print("(after) SendStack count: ");
+      Serial.println(sendStack.count);
     #endif
 }
 
