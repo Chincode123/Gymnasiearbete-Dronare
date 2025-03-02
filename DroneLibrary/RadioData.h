@@ -7,15 +7,6 @@
 #define DRONE_ADDRESS       (uint8_t*)"DRONE"  
 #define RECEIVER_ADDRESS    (uint8_t*)"RCEVR"
 
-#define BUTTON_ACTIVATE     0b00000001
-#define BUTTON_DEACTIVATE   0b00000010
-#define BUTTON_2            0b00000100
-#define BUTTON_3            0b00001000
-#define BUTTON_4            0b00010000
-#define BUTTON_5            0b00100000
-#define BUTTON_6            0b01000000
-#define BUTTON_7            0b10000000
-
 #define _MSG_CONTROLLER_INPUT 0
 #define _MSG_SET_PID_V 1
 #define _MSG_SET_PID_P 2
