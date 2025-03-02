@@ -29,24 +29,17 @@ MotorController motorController(motorPowerTL, motorPowerTR, motorPowerBR, motorP
 
 // PID-values
 float targetVelocity;
-float velocityP = 0; 
-float velocityI = 0; 
-float velocityD = 0;
 float maxVelocity;
+PID_Instructions PID_Velocity;
 
 float targetPitch;
-float pitchP = 0; 
-float pitchI = 0; 
-float pitchD = 0;
 float maxPitch;
+PID_Instructions PID_Pitch;
 
 float targetRoll;
-float rollP = 0; 
-float rollI = 0; 
-float rollD = 0;
 float maxRoll;
+PID_Instructions PID_Roll;
 
-PID_Instructions pidIn, pidOut;
 
 // Delta time
 unsigned long previousTime;
@@ -85,9 +78,9 @@ void setup() {
 
     // Set up motor controller
     motorController.setTargetValues(&targetVelocity, &targetPitch, &targetRoll);
-    motorController.setVelocityConstants(&velocityP, &velocityI, &velocityD);
-    motorController.setPitchConstants(&pitchP, &pitchI, &pitchD);
-    motorController.setRollConstants(&rollP, &rollI, &rollD);
+    motorController.setVelocityConstants(&PID_Velocity);
+    motorController.setPitchConstants(&PID_Pitch);
+    motorController.setRollConstants(&PID_Roll);
 
     pinMode(MOTOR_TL_Pin, OUTPUT);
     pinMode(MOTOR_TR_Pin, OUTPUT);
@@ -144,110 +137,47 @@ void loop() {
                 targetRoll = maxRoll * ((float)controller.stick_Y / 127);
                 break;
             case _MSG_ACTIVATE:
-                if (activated) break;
-                activated = true;
-
-                orientation.begin(500);
-
-                #ifndef DEBUG
-                // Ramp up motors to 50%
-                power = 0;
-                time = 0;
-                while (time < 1) {
-                    setDeltaTime();
-                    analogWrite(MOTOR_TL_Pin, power);
-                    analogWrite(MOTOR_TR_Pin, power);
-                    analogWrite(MOTOR_BR_Pin, power);
-                    analogWrite(MOTOR_BL_Pin, power);
-
-                    time += deltaTime;
-                    power = 128 * time;
-                }
-                #endif
-                
-                radioLog("Activation complete", true);
+                actiiivate();
                 break;
             case _MSG_DEACTIVATE:
-                if (!activated) break;
-                activated = false;
-
-                orientation.end();
-
-                #ifndef DEBUG
-                // Ramp down motors to 0%
-                power = 0;
-                time = 0;
-                while (time < 1) {
-                    setDeltaTime();
-                    analogWrite(MOTOR_TL_Pin, power);
-                    analogWrite(MOTOR_TR_Pin, power);
-                    analogWrite(MOTOR_BR_Pin, power);
-                    analogWrite(MOTOR_BL_Pin, power);
-
-                    time += deltaTime;
-                    power = 128 * (1 - time);
-                }
-                #endif
-                digitalWrite(MOTOR_TL_Pin, LOW);
-                digitalWrite(MOTOR_TR_Pin, LOW);
-                digitalWrite(MOTOR_BR_Pin, LOW);
-                digitalWrite(MOTOR_BL_Pin, LOW);
-
-                radioLog("Deactivated", true);
+                deactivate();
                 break;
             case _MSG_SET_PID_V:
-                memcpy(&pidIn, messageIn.dataBuffer, sizeof(pidIn));
-                velocityP = pidIn.k_p;
-                velocityI = pidIn.k_i;
-                velocityD = pidIn.k_d;
+                memcpy(&PID_Velocity, messageIn.dataBuffer, sizeof(PID_Velocity));
 
                 #ifdef DEBUG
                   Serial.print("PID-V: p:");
-                  Serial.print(velocityP);
+                  Serial.print(PID_Velocity.k_p);
                   Serial.print(" i:");
-                  Serial.print(velocityI);
+                  Serial.print(PID_Velocity.k_i);
                   Serial.print(" d:");
-                  Serial.println(velocityD);
+                  Serial.println(PID_Velocity.k_d);
                 #endif
 
                 break;
             case _MSG_SET_PID_P:
-                memcpy(&pidIn, messageIn.dataBuffer, sizeof(pidIn));
-                pitchP = pidIn.k_p;
-                pitchI = pidIn.k_i;
-                pitchD = pidIn.k_d;
+                memcpy(&PID_Pitch, messageIn.dataBuffer, sizeof(PID_Pitch));               
                 break;
             case _MSG_SET_PID_R:
-                memcpy(&pidIn, messageIn.dataBuffer, sizeof(pidIn));
-                rollP = pidIn.k_p;
-                rollI = pidIn.k_i;
-                rollD = pidIn.k_d;
+                memcpy(&PID_Roll, messageIn.dataBuffer, sizeof(PID_Roll));
                 break;
             case _MSG_REQUEST_PID_V:
-                pidOut.k_p = velocityP;
-                pidOut.k_i = velocityI;
-                pidOut.k_d = velocityD;
-                memcpy(messageOut.dataBuffer, &pidOut, sizeof(pidOut));
+                memcpy(messageOut.dataBuffer, &PID_Velocity, sizeof(PID_Velocity));
                 messageOut.messageType = _MSG_SET_PID_V;
                 sendStack.push(messageOut);
 
                 #ifdef DEBUG
                   Serial.println("Requesting pid-v");
                 #endif
+
                 break;
             case _MSG_REQUEST_PID_P:
-                pidOut.k_p = pitchP;
-                pidOut.k_i = pitchI;
-                pidOut.k_d = pitchD;
-                memcpy(messageOut.dataBuffer, &pidOut, sizeof(pidOut));
+                memcpy(messageOut.dataBuffer, &PID_Pitch, sizeof(PID_Pitch));
                 messageOut.messageType = _MSG_SET_PID_P;
                 sendStack.push(messageOut);
                 break;
             case _MSG_REQUEST_PID_R:
-                pidOut.k_p = rollP;
-                pidOut.k_i = rollI;
-                pidOut.k_d = rollD;
-                memcpy(messageOut.dataBuffer, &pidOut, sizeof(pidOut));
+                memcpy(messageOut.dataBuffer, &PID_Roll, sizeof(PID_Roll));
                 messageOut.messageType = _MSG_SET_PID_R;
                 sendStack.push(messageOut);
                 break;
@@ -301,27 +231,7 @@ void loop() {
     // Output
     if (millis() % 20 == 0) sendRadio();
 
-    if (sendStack.count <= 0) {
-        messageOut.messageType = _MSG_DRONE_ACCELERATION;
-        memcpy(messageOut.dataBuffer, &orientation.adjustedAcceleration, sizeof(orientation.acceleration));
-        sendStack.push(messageOut);
-
-        messageOut.messageType = _MSG_DRONE_VELOCITY;
-        memcpy(messageOut.dataBuffer, &orientation.velocity, sizeof(orientation.velocity));
-        sendStack.push(messageOut);
-
-        messageOut.messageType = _MSG_DRONE_ANGULAR_VELOCITY;
-        memcpy(messageOut.dataBuffer, &orientation.angularVelocity, sizeof(orientation.angularVelocity));
-        sendStack.push(messageOut);
-
-        messageOut.messageType = _MSG_DRONE_ANGLES;
-        memcpy(messageOut.dataBuffer, &orientation.angles, sizeof(orientation.angles));
-        sendStack.push(messageOut);
-
-        messageOut.messageType = _MSG_DRONE_DELTATIME;
-        memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));
-        sendStack.push(messageOut);
-    }
+    sequenceTelemetry();
 }
 
 void setDeltaTime() {
@@ -399,3 +309,74 @@ void printRadioMessage(RadioMessage message) {
     Serial.println((int)sizeof(message));
 }
 #endif
+
+void activate() {
+  if (activated) break;
+  activated = true;
+  orientation.begin(500);
+  #ifndef DEBUG
+  // Ramp up motors to 50%
+  power = 0;
+  time = 0;
+  while (time < 1) {
+      setDeltaTime();
+      analogWrite(MOTOR_TL_Pin, power);
+      analogWrite(MOTOR_TR_Pin, power);
+      analogWrite(MOTOR_BR_Pin, power);
+      analogWrite(MOTOR_BL_Pin, power);
+      time += deltaTime;
+      power = 128 * time;
+  }
+  #endif
+
+  radioLog("Activation complete", true);
+}
+
+void deactivate() {
+  if (!activated) break;
+  activated = false;
+  orientation.end();
+  #ifndef DEBUG
+  // Ramp down motors to 0%
+  power = 0;
+  time = 0;
+  while (time < 1) {
+      setDeltaTime();
+      analogWrite(MOTOR_TL_Pin, power);
+      analogWrite(MOTOR_TR_Pin, power);
+      analogWrite(MOTOR_BR_Pin, power);
+      analogWrite(MOTOR_BL_Pin, power);
+      time += deltaTime;
+      power = 128 * (1 - time);
+  }
+  #endif
+  digitalWrite(MOTOR_TL_Pin, LOW);
+  digitalWrite(MOTOR_TR_Pin, LOW);
+  digitalWrite(MOTOR_BR_Pin, LOW);
+  digitalWrite(MOTOR_BL_Pin, LOW);
+  radioLog("Deactivated", true);
+}
+
+void sequenceTelemetry() {
+  if (sendStack.count <= 0) {
+    messageOut.messageType = _MSG_DRONE_ACCELERATION;
+    memcpy(messageOut.dataBuffer, &orientation.adjustedAcceleration, sizeof(orientation.acceleration));
+    sendStack.push(messageOut);
+
+    messageOut.messageType = _MSG_DRONE_VELOCITY;
+    memcpy(messageOut.dataBuffer, &orientation.velocity, sizeof(orientation.velocity));
+    sendStack.push(messageOut);
+
+    messageOut.messageType = _MSG_DRONE_ANGULAR_VELOCITY;
+    memcpy(messageOut.dataBuffer, &orientation.angularVelocity, sizeof(orientation.angularVelocity));
+    sendStack.push(messageOut);
+
+    messageOut.messageType = _MSG_DRONE_ANGLES;
+    memcpy(messageOut.dataBuffer, &orientation.angles, sizeof(orientation.angles));
+    sendStack.push(messageOut);
+
+    messageOut.messageType = _MSG_DRONE_DELTATIME;
+    memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));
+    sendStack.push(messageOut);
+  }
+}
