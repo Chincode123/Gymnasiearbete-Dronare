@@ -1,5 +1,6 @@
 #include "Orientation.h"
 #include <Wire.h>
+#include <Arduino.h>
 
 Orientation::Orientation(uint8_t MPU) {
     this->MPU = MPU;
@@ -84,8 +85,8 @@ void Orientation::readFromIMU(vector& acceleration, vector& angularVelocity) {
 void Orientation::readFromIMU() {
     readFromIMU(acceleration, angularVelocity);
     
-    acceleration += accelerationOffset;
-    angularVelocity += angularVelocityOffset;
+    acceleration -= accelerationOffset;
+    angularVelocity -= angularVelocityOffset;
 
     // #ifdef Serial
     //     Serial.print("Acceleration: ");
@@ -120,7 +121,7 @@ void Orientation::calculateAngles(float deltaTime) {
     vector accelerationAngles = (calculateAccelerationAngles(acceleration) - accelerationAngleOffset);
 
     float rateOfChange = 0.1;
-    angles += (((angularVelocity * deltaTime) + angleError) * rateOfChange);
+    angles += ((angularVelocity * deltaTime) + angleError) * rateOfChange;
 
     accelerationError += ((accelerationAngles - angles) * deltaTime);
     angleError =  (accelerationAngles + accelerationError - angles);
@@ -141,7 +142,7 @@ void Orientation::calculateVelocity(float deltaTime) {
 ​        |sin(yaw)cos(pitch)     sin(yaw)sin(pitch)sin(roll)+cos(yaw)cos(roll)   sin(yaw)sin(pitch)cos(roll)−cos(yaw)sin(roll) |
 ​        |−sin(pitch)                       cos(pitch)sin(roll)                             cos(pitch)cos(roll)                |
 ​
-        Looks reasonable, but haven't made sure
+        Looks reasonable, but haven't confirmed
     */
 
     adjustedAcceleration = {
@@ -175,8 +176,8 @@ void Orientation::calculateOffsets(uint16_t cycles) {
     for (int i = 0; i < cycles; i++) {
         readFromIMU(acceleration, angularVelocity);
 
-        angularVelocityOffset -= angularVelocity;
-        accelerationOffset -= acceleration;
+        angularVelocityOffset += angularVelocity;
+        accelerationOffset += acceleration;
     }
     
     angularVelocityOffset /= cycles;
@@ -184,6 +185,7 @@ void Orientation::calculateOffsets(uint16_t cycles) {
 
     for (int i = 0; i < cycles; i++) {
         readFromIMU(acceleration, angularVelocity);
+        acceleration -= accelerationOffset;
 
         accelerationAngleOffset += calculateAccelerationAngles((acceleration + accelerationOffset));
     }

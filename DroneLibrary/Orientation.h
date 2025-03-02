@@ -2,7 +2,6 @@
 #define ORIENTATION_H_
 
 #include "Vectors.h"
-#include <Arduino.h>
 
 class Orientation {
     uint8_t MPU;
