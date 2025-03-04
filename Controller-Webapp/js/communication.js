@@ -599,8 +599,8 @@ document
 
 function sendControllerInstructions() {
 	const instructions = getControllerInstructions(
-		joystick.x,
-		joystick.y,
+		-joystick.x,
+		-joystick.y,
 		document.getElementById("power").value
 	);
 	return instructions;
