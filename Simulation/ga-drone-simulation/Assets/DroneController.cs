@@ -55,8 +55,8 @@ public class DroneController : MonoBehaviour
     void Update()
     {
         desiredVelocity = velocityRange * Input.GetAxisRaw("Triggers") * Mathf.Abs(Input.GetAxisRaw("Triggers"));
-        desiredPitch = pitchRange * Input.GetAxisRaw("Vertical");
-        desiredRoll = rollRange * Input.GetAxisRaw("Horizontal");
+        desiredPitch = -pitchRange * Input.GetAxisRaw("Vertical");
+        desiredRoll = -rollRange * Input.GetAxisRaw("Horizontal");
 
         // currentPitch = Mathf.Atan2(-transform.up.z, transform.up.y) * Mathf.Rad2Deg;
         // currentRoll = Mathf.Atan2(-transform.up.x, transform.up.y)  * Mathf.Rad2Deg;
@@ -123,7 +123,7 @@ public class DroneController : MonoBehaviour
         previousVelocityError = velocityErorr;
 
         float basePower = velocityP * velocityErorr + velocityI * velocityIntegral + velocityD * velocityDerivitive;
-
+        basePower = Mathf.Clamp(basePower, -127, 127);
 
         float pitchError = desiredPitch - currentPitch;
 
@@ -184,7 +184,7 @@ public class DroneController : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(propellers[i].position, propellers[i].position + propellerPower[i] * propellers[i].up);
+            Gizmos.DrawLine(propellers[i].position, propellers[i].position + (propellerPower[i] / 25) * propellers[i].up);
         }
 
         // velocitiy
