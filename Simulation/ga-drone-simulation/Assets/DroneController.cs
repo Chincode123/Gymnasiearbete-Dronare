@@ -34,8 +34,8 @@ public class DroneController : MonoBehaviour
 
     [SerializeField] float angleP, angleI, angleD;
 
-    [SerializeFeild] float velocityRange, pitchRange, rollRange;
-    [SerializeFeild] float currentPitch, currentRoll;
+    [SerializeField] float velocityRange, pitchRange, rollRange;
+    [SerializeField] float currentPitch, currentRoll;
 
     Vector3 rotation;
 
@@ -58,8 +58,15 @@ public class DroneController : MonoBehaviour
         desiredPitch = pitchRange * Input.GetAxisRaw("Vertical");
         desiredRoll = rollRange * Input.GetAxisRaw("Horizontal");
 
-        currentPitch = Mathf.Atan2(-transform.up.z, transform.up.y) * Mathf.Rad2Deg;
-        currentRoll = Mathf.Atan2(-transform.up.x, transform.up.y)  * Mathf.Rad2Deg;
+        // currentPitch = Mathf.Atan2(-transform.up.z, transform.up.y) * Mathf.Rad2Deg;
+        // currentRoll = Mathf.Atan2(-transform.up.x, transform.up.y)  * Mathf.Rad2Deg;
+
+        currentPitch = rigidbody.rotation.eulerAngles.x;
+        currentRoll = rigidbody.rotation.eulerAngles.z;
+        // Adjust angles to -180 to 180 range
+        currentPitch = currentPitch > 180 ? -(currentPitch - 360) : -currentPitch;
+        currentRoll = currentRoll > 180 ? currentRoll - 360 : currentRoll;
+
 
         ShiftPropellerPower();
 
@@ -116,8 +123,6 @@ public class DroneController : MonoBehaviour
         previousVelocityError = velocityErorr;
 
         float basePower = velocityP * velocityErorr + velocityI * velocityIntegral + velocityD * velocityDerivitive;
-        basePower = Mathf.Clamp(basePower, -127, 127);
-
 
 
         float pitchError = desiredPitch - currentPitch;
