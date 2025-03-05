@@ -1530,21 +1530,21 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
-  pitchP: 1.5
-  pitchI: 0.2
-  pitchD: 0.1
   desiredPitch: -0
-  rollP: 1
-  rollI: 0.05
-  rollD: 0.5
+  pitchPID:
+    P: 0
+    I: 0
+    D: 0
   desiredRoll: -0
-  velocityP: 100
-  velocityI: 20
-  velocityD: 3
+  rollPID:
+    P: 0
+    I: 0
+    D: 0
   desiredVelocity: 0
-  angleP: 5
-  angleI: 0.1
-  angleD: 5
+  velocityPID:
+    P: 0
+    I: 0
+    D: 0
   velocityRange: 3
   pitchRange: 15
   rollRange: 15
@@ -2535,21 +2535,21 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
-  pitchP: 1.5
-  pitchI: 0.2
-  pitchD: 0.1
   desiredPitch: -0
-  rollP: 1
-  rollI: 0.05
-  rollD: 0.5
+  pitchPID:
+    P: 0
+    I: 0
+    D: 0
   desiredRoll: -0
-  velocityP: 100
-  velocityI: 20
-  velocityD: 3
+  rollPID:
+    P: 0
+    I: 0
+    D: 0
   desiredVelocity: 0
-  angleP: 5
-  angleI: 0.1
-  angleD: 5
+  velocityPID:
+    P: 100
+    I: 20
+    D: 3
   velocityRange: 3
   pitchRange: 15
   rollRange: 15
@@ -2570,7 +2570,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 98
+  m_Constraints: 122
   m_CollisionDetection: 0
 --- !u!4 &1493849463
 Transform:
