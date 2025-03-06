@@ -2,8 +2,8 @@ let using_joystick = false;
 const joystick = { x: 0, y: 0 };
 const joystick_area = document.getElementById("joystick-area");
 const joystick_marker = document.getElementById("joystick-marker");
-const joystick_out_x = document.getElementById("joystick-x-out");
-const joystick_out_y = document.getElementById("joystick-y-out");
+const joystick_info_x = document.getElementById("joystick-x-info");
+const joystick_info_y = document.getElementById("joystick-y-info");
 
 document.addEventListener("mousemove", (event) => {
   if (!using_joystick) {
@@ -48,17 +48,41 @@ document.addEventListener("mouseup", () => {
   joystick.y = 0;
 });
 
-document.addEventListener("keydown", (event) => {
-  if (event.key == " ") {
-    power = 1;
+function lerp(a, b, t) {
+  const out = a + ((b - a) * t);
+  const difference = Math.abs(out - b);
+  const minDifference = 0.01
+  if (difference <= minDifference) {
+    return b;
   }
-  else if (event.key == "Shift") {
-    power = -1;
+  return out;
+}
+
+let targetPower = 0
+document.addEventListener("keydown", (event) => {
+  console.log(event.key);
+
+  if (event.key == " ") {
+    targetPower = 1;
+    return;
+  }
+
+  if (event.key == "Shift") {
+    event.preventDefault();
+    targetPower = -1;
+    return;
   }
 });
 
 document.addEventListener("keyup", (event) => {
-  power = 0;
+  if (event.key == " " || event.key == "Shift") {
+    targetPower = 0;
+    return;
+  }
+});
+
+setInterval(() => {
+  power = lerp(power, targetPower, 0.1);
 });
 
 let gamepad_index;
@@ -81,19 +105,19 @@ gamepadInputLoop = () => {
 };
 
 let power = 0;
-const power_out = document.getElementById("power-out");
+const power_info = document.getElementById("power-info");
 const power_slider = document.getElementById("power");
 power_slider.addEventListener("input", (event) => {
   power = event.target.value;
 });
 
 updateUI = () => {
-  power_out.innerText = (parseFloat(power) * 100).toFixed() + "%";
+  power_info.innerText = (parseFloat(power) * 100).toFixed() + "%";
 
   power_slider.value = power;
 
-  joystick_out_x.innerText = joystick.x.toFixed(2);
-  joystick_out_y.innerText = joystick.y.toFixed(2);
+  joystick_info_x.innerText = joystick.x.toFixed(2);
+  joystick_info_y.innerText = joystick.y.toFixed(2);
 
   joystick_marker.style.left = `${joystick.x * 50}%`;
   joystick_marker.style.top = `${joystick.y * -50}%`;
