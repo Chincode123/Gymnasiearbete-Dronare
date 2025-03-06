@@ -48,6 +48,19 @@ document.addEventListener("mouseup", () => {
   joystick.y = 0;
 });
 
+document.addEventListener("keydown", (event) => {
+  if (event.key == " ") {
+    power = 1;
+  }
+  else if (event.key == "Shift") {
+    power = -1;
+  }
+});
+
+document.addEventListener("keyup", (event) => {
+  power = 0;
+});
+
 let gamepad_index;
 window.addEventListener("gamepadconnected", (event) => {
   gamepad_index = event.gamepad.index;
@@ -87,3 +100,4 @@ updateUI = () => {
 };
 
 setInterval(updateUI);
+
