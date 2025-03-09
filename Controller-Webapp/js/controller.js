@@ -170,8 +170,8 @@ gamepadInputLoop = () => {
 let power = 0;
 const power_info = document.getElementById("power-info");
 const power_slider = document.getElementById("power");
-power_slider.addEventListener("input", (event) => {
-  targetPower = event.target.value;
+power_slider.addEventListener("input", () => {
+  targetPower = power_slider.value;
   using_keyboard = true;
 });
 
