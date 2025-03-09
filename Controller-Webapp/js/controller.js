@@ -55,21 +55,53 @@ document.addEventListener("mouseup", () => {
 });
 
 function lerp(a, b, t) {
-  console.log(a, b, t);
   const out = a + ((b - a) * t);
   const difference = Math.abs(out - b);
   const minDifference = 0.01
-  console.log(out, difference, minDifference);
   if (difference <= minDifference) {
     return b;
   }
   return out;
 }
 
+const keyboardAxes = {vertical: 0, horizontal: 0,};
+function setKeyAxes(key) {
+  if (key == "w" || key == "W") {
+    keyboardAxes.vertical = 1;
+  }
+  else if (key == "a" || key == "A") {
+    keyboardAxes.horizontal = -1;
+  }
+  else if (key == "s" || key == "S") {
+    keyboardAxes.vertical = -1;
+  }
+  else if (key == "d" || key == "D") {
+    keyboardAxes.horizontal = 1;
+  }
+
+  setJoystickFromKeyboard();
+}
+
+function unsetKeyAxes(key) {
+  if ((key == "w" || key == "W") || (key == "s" || key == "S")) {
+    keyboardAxes.vertical = 0;
+  }
+  else if ((key == "a" || key == "A") || (key == "d" || key == "D")) {
+    keyboardAxes.horizontal = 0;
+  }
+
+  setJoystickFromKeyboard();
+}
+
+function setJoystickFromKeyboard() {
+  joystick.x = keyboardAxes.horizontal;
+  joystick.y = keyboardAxes.vertical;
+
+  normalizeJoystick(joystick);
+}
+
 let targetPower = 0
 document.addEventListener("keydown", (event) => {
-  console.log(event.key);
-  
   using_keyboard = true;
   
   if (event.key == " ") {
@@ -82,6 +114,8 @@ document.addEventListener("keydown", (event) => {
     targetPower = -1;
     return;
   }
+
+  setKeyAxes(event.key)
 });
 
 document.addEventListener("keyup", (event) => {
@@ -89,6 +123,8 @@ document.addEventListener("keyup", (event) => {
     targetPower = 0;
     return;
   }
+
+  unsetKeyAxes(event.key)
 });
 
 setInterval(() => {
