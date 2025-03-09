@@ -1,9 +1,20 @@
+let using_keyboard = false;
 let using_joystick = false;
 const joystick = { x: 0, y: 0 };
 const joystick_area = document.getElementById("joystick-area");
 const joystick_marker = document.getElementById("joystick-marker");
 const joystick_info_x = document.getElementById("joystick-x-info");
 const joystick_info_y = document.getElementById("joystick-y-info");
+
+function normalizeJoystick(joystick) {
+  const joystick_magnitude = Math.sqrt(
+    joystick.x * joystick.x + joystick.y * joystick.y
+  );
+  if (joystick_magnitude > 1) {
+    joystick.x /= joystick_magnitude;
+    joystick.y /= joystick_magnitude;
+  }
+}
 
 document.addEventListener("mousemove", (event) => {
   if (!using_joystick) {
@@ -22,19 +33,14 @@ document.addEventListener("mousemove", (event) => {
   joystick.x = Math.min(Math.max(joystick.x, -1), 1);
   joystick.y = Math.min(Math.max(joystick.y, -1), 1);
 
-  const joystick_magnitude = Math.sqrt(
-    joystick.x * joystick.x + joystick.y * joystick.y
-  );
-  if (joystick_magnitude > 1) {
-    joystick.x /= joystick_magnitude;
-    joystick.y /= joystick_magnitude;
-  }
+  normalizeJoystick(joystick);
 });
 
 document
   .getElementById("joystick-area")
   .addEventListener("mousedown", () => {
     using_joystick = true;
+    using_keyboard = true;
   });
 
 document.addEventListener("mouseup", () => {
@@ -49,9 +55,11 @@ document.addEventListener("mouseup", () => {
 });
 
 function lerp(a, b, t) {
+  console.log(a, b, t);
   const out = a + ((b - a) * t);
   const difference = Math.abs(out - b);
   const minDifference = 0.01
+  console.log(out, difference, minDifference);
   if (difference <= minDifference) {
     return b;
   }
@@ -61,7 +69,9 @@ function lerp(a, b, t) {
 let targetPower = 0
 document.addEventListener("keydown", (event) => {
   console.log(event.key);
-
+  
+  using_keyboard = true;
+  
   if (event.key == " ") {
     targetPower = 1;
     return;
@@ -82,7 +92,7 @@ document.addEventListener("keyup", (event) => {
 });
 
 setInterval(() => {
-  power = lerp(power, targetPower, 0.1);
+  power = lerp(parseFloat(power), targetPower, 0.1);
 });
 
 let gamepad_index;
@@ -94,21 +104,35 @@ window.addEventListener("gamepadconnected", (event) => {
 gamepadInputLoop = () => {
   const gamepad = navigator.getGamepads()[gamepad_index];
 
+  gamepad.axes.forEach((axis) => {
+    if (axis >= 0.1) {
+      using_keyboard = false;
+    }
+  });
+
+  gamepad.buttons.forEach((button) => {
+    if (button.pressed) {
+      using_keyboard = false;
+    }
+  });
+
+  if (using_keyboard) {
+    return;
+  }
+
   joystick.x = gamepad.axes[0];
   joystick.y = -gamepad.axes[1];
 
-  power = -gamepad.buttons[6].value + gamepad.buttons[7].value;
-  power *= Math.abs(power);
-
-  console.log(joystick);
-  console.log(power);
+  targetPower = -gamepad.buttons[6].value + gamepad.buttons[7].value;
+  targetPower *= Math.abs(targetPower);
 };
 
 let power = 0;
 const power_info = document.getElementById("power-info");
 const power_slider = document.getElementById("power");
 power_slider.addEventListener("input", (event) => {
-  power = event.target.value;
+  targetPower = event.target.value;
+  using_keyboard = true;
 });
 
 updateUI = () => {
@@ -124,4 +148,3 @@ updateUI = () => {
 };
 
 setInterval(updateUI);
-
