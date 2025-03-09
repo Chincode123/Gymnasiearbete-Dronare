@@ -43,15 +43,19 @@ document
     using_keyboard = true;
   });
 
+function resetMarker() {
+  joystick_marker.style.left = 0;
+  joystick_marker.style.top = 0;
+  joystick.x = 0;
+  joystick.y = 0;
+}
+
 document.addEventListener("mouseup", () => {
   if (!using_joystick) {
     return;
   }
   using_joystick = false;
-  joystick_marker.style.left = 0;
-  joystick_marker.style.top = 0;
-  joystick.x = 0;
-  joystick.y = 0;
+  resetMarker();
 });
 
 function lerp(a, b, t) {
@@ -179,8 +183,14 @@ updateUI = () => {
   joystick_info_x.innerText = joystick.x.toFixed(2);
   joystick_info_y.innerText = joystick.y.toFixed(2);
 
-  joystick_marker.style.left = `${joystick.x * 50}%`;
-  joystick_marker.style.top = `${joystick.y * -50}%`;
+  marker_position = {
+    horizontal: lerp(parseFloat(joystick_marker.style.left), joystick.x * 50, 0.1),
+    vertical: lerp(parseFloat(joystick_marker.style.top), joystick.y * -50, 0.1),
+  }
+  console.log("current", parseFloat(joystick_marker.style.left), "target", joystick.x);
+  console.log(marker_position);
+  joystick_marker.style.left = `${marker_position.horizontal}%`;
+  joystick_marker.style.top = `${marker_position.vertical}%`;
 };
 
 setInterval(updateUI);
