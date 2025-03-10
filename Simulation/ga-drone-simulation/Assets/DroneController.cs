@@ -113,7 +113,7 @@ public class DroneController : MonoBehaviour
         float pitchShift = pitchPID.P * pitchError + pitchPID.I * pitchIntegral + pitchPID.D * pitchDerivitive;
 
         float rollError = desiredRoll - currentRoll;
-        pitchIntegral += rollError * Time.deltaTime;
+        rollIntegral += rollError * Time.deltaTime;
         float rollDerivitive = (rollError - previousRollError) / Time.deltaTime;
         previousRollError = rollError;
         float rollShift = rollPID.P * rollError + rollPID.I * rollIntegral + rollPID.D * rollDerivitive;
