@@ -1491,6 +1491,7 @@ MonoBehaviour:
   rollRange: 15
   currentPitch: 0
   currentRoll: 0
+  centerOfMass: {x: 0, y: 0, z: 0}
   rigidbody: {fileID: 675060069}
 --- !u!54 &675060069
 Rigidbody:
@@ -1836,7 +1837,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.01
   far clip plane: 1000
   field of view: 60
   orthographic: 0
@@ -2491,6 +2492,7 @@ MonoBehaviour:
   rollRange: 5
   currentPitch: 0
   currentRoll: 0
+  centerOfMass: {x: 0.085, y: 0.015, z: 0.03}
   rigidbody: {fileID: 1493849462}
 --- !u!54 &1493849462
 Rigidbody:
@@ -2506,7 +2508,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 32
+  m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!4 &1493849463
 Transform:

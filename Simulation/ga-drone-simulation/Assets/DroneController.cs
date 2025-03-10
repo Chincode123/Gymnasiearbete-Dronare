@@ -58,6 +58,9 @@ public class DroneController : MonoBehaviour
     [SerializeField] float currentPitch;
     [SerializeField] float currentRoll;
 
+    [Header("Center of Mass")]
+    [SerializeField] Vector3 centerOfMass;
+
     Vector3 rotation;
 
     [Header("References")]
@@ -69,6 +72,7 @@ public class DroneController : MonoBehaviour
         {
             propellerDirections[i] = propellers[i].position - transform.position;
         }
+        rigidbody.centerOfMass = centerOfMass;
     }
 
     void Update()
@@ -155,5 +159,9 @@ public class DroneController : MonoBehaviour
         // acceleration
         Gizmos.color = Color.magenta;
         Gizmos.DrawLine(transform.position, transform.position + acceleration);
+
+        // Center of mass
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(transform.position + transform.rotation * centerOfMass, 0.01f);
     }
 }
