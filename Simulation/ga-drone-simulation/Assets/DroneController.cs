@@ -74,7 +74,7 @@ public class DroneController : MonoBehaviour
     void Update()
     {
         float inputPower = ((Input.GetKey(KeyCode.LeftShift)) ? 0 : 1) - ((Input.GetKey(KeyCode.Space)) ? 0 : 1);
-        inputPower = (inputPower == 0) ? Input.GetAxisRaw("Triggers") * Mathf.Abs(Input.GetAxisRaw("Triggers")) : inputPower;
+        inputPower = (inputPower != 0) ? inputPower : Input.GetAxisRaw("Triggers") * Mathf.Abs(Input.GetAxisRaw("Triggers")) ;
         desiredVelocity = velocityRange * inputPower;
         desiredPitch = -pitchRange * Input.GetAxisRaw("Vertical");
         desiredRoll = -rollRange * Input.GetAxisRaw("Horizontal");
