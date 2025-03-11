@@ -187,8 +187,6 @@ updateUI = () => {
     horizontal: lerp(parseFloat(joystick_marker.style.left), joystick.x * 50, 0.1),
     vertical: lerp(parseFloat(joystick_marker.style.top), joystick.y * -50, 0.1),
   }
-  console.log("current", parseFloat(joystick_marker.style.left), "target", joystick.x);
-  console.log(marker_position);
   joystick_marker.style.left = `${marker_position.horizontal}%`;
   joystick_marker.style.top = `${marker_position.vertical}%`;
 };
