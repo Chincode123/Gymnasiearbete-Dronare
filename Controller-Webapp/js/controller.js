@@ -44,8 +44,6 @@ document
   });
 
 function resetMarker() {
-  joystick_marker.style.left = 0;
-  joystick_marker.style.top = 0;
   joystick.x = 0;
   joystick.y = 0;
 }

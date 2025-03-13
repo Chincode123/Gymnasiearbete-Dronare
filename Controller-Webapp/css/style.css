@@ -71,6 +71,8 @@ div {
     border-radius: 50%;
 
     position: relative;
+    left: 0;
+    top: 0;
 }
 
 #constants input {
