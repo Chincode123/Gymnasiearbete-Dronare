@@ -15,13 +15,13 @@
             <div id="values">
                 <div id="controller">
                     <div id="power-slider-container">
-                        <input id="power" type="range" value="0" max="1" min="-1" step="any" list="steps">
+                        <input id="power" type="range" value="0.00" max="1" min="-1" step="any" list="steps">
                         <datalist id="steps">
                             <option value="-1"></option>
                             <option value="-.8"></option>
                             <option value="-.6"></option>
                             <option value="-.4"></option>
-                            <option value=".2"></option>
+                            <option value="-.2"></option>
                             <option value="0"></option>
                             <option value=".2"></option>
                             <option value=".4"></option>
@@ -82,9 +82,9 @@
                         <div id="target-ranges">
                             <p>Target Ranges (+-)</p>
                             <p>
-                                Max Vertical Velocity: <input step="0.01" type="number" value="0" id="target-ranges-velocity" class="p">m/s
-                                Max Pitch: <input step="0.01" type="number" value="0" id="target-ranges-pitch" class="i">&deg;
-                                Max Roll: <input step="0.01" type="number" value="0" id="target-ranges-roll" class="d">&deg;
+                                Max Vertical Velocity: <input step="0.01" type="number" value="0" id="target-ranges-velocity">m/s
+                                Max Pitch: <input step="0.01" type="number" value="0" id="target-ranges-pitch">&deg;
+                                Max Roll: <input step="0.01" type="number" value="0" id="target-ranges-roll">&deg;
                                 <button class="send" type="button">Write Values</button>
                                 <button class="get" type="button">Get values</button>
                             </p>

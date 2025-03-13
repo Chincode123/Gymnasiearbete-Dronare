@@ -3,7 +3,7 @@ class SerialMessage {
 	type;
 	length;
 
-	SerialMessage() {
+	constructor() {
 		this.initiated = false;
 	}
 
@@ -94,7 +94,7 @@ class SerialReader {
 	reading; 
 	startMarker; 
 
-	SerialReader() {
+	constructor() {
 		this.message = new SerialMessage();
 		this.data = [];
 		this.reading = false;
@@ -160,7 +160,7 @@ class Terminal {
 	currentIndex;
 	previousLog;
 
-	Terminal() {
+	constructor() {
 		this.decoder = new TextDecoder();
 		this.currentMessage = new Uint8Array(64);
 		this.currentIndex = 0;
@@ -217,7 +217,7 @@ class WritingHandler {
 	currentInstructionsType;
 	confirmSendAcknowledge;
 
-	WritingHandler() {
+	constructor() {
 		this.hasInstructions = false;
 		this.currentInstructions = null;
 		this.confirmSendAcknowledge = { hasConfirmed: true, value: null };
@@ -421,10 +421,12 @@ async function read() {
 }
 
 document.getElementById("open").addEventListener("click", async function() {
-	try {
-		await port.close();
-	} catch (error) {
-		console.log(error);
+	if (port) {
+		try {
+			await port.close();
+		} catch (error) {
+			console.log(error);
+		}
 	}
 
 	await port.open(portSettings);

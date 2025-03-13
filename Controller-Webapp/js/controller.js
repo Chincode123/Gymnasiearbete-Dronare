@@ -40,7 +40,7 @@ document
   .getElementById("joystick-area")
   .addEventListener("mousedown", () => {
     using_joystick = true;
-    using_keyboard = true;
+    using_keyboard = false;
   });
 
 function resetMarker() {
@@ -59,7 +59,7 @@ document.addEventListener("mouseup", () => {
 function lerp(a, b, t) {
   const out = a + ((b - a) * t);
   const difference = Math.abs(out - b);
-  const minDifference = 0.01
+  const minDifference = 0.01;
   if (difference <= minDifference) {
     return b;
   }
@@ -139,7 +139,7 @@ window.addEventListener("gamepadconnected", (event) => {
   setInterval(gamepadInputLoop);
 });
 
-gamepadInputLoop = () => {
+function gamepadInputLoop () {
   const gamepad = navigator.getGamepads()[gamepad_index];
 
   gamepad.axes.forEach((axis) => {
@@ -174,7 +174,7 @@ power_slider.addEventListener("input", () => {
   using_keyboard = true;
 });
 
-updateUI = () => {
+function updateUI() {
   power_info.innerText = (parseFloat(power) * 100).toFixed() + "%";
 
   power_slider.value = power;
@@ -182,7 +182,7 @@ updateUI = () => {
   joystick_info_x.innerText = joystick.x.toFixed(2);
   joystick_info_y.innerText = joystick.y.toFixed(2);
 
-  marker_position = {
+  const marker_position = {
     horizontal: lerp(parseFloat(joystick_marker.style.left), joystick.x * 50, 0.1),
     vertical: lerp(parseFloat(joystick_marker.style.top), joystick.y * -50, 0.1),
   }
