@@ -160,6 +160,7 @@ gamepadInputLoop = () => {
 
   joystick.x = gamepad.axes[0];
   joystick.y = -gamepad.axes[1];
+  normalizeJoystick(joystick);
 
   targetPower = -gamepad.buttons[6].value + gamepad.buttons[7].value;
   targetPower *= Math.abs(targetPower);
