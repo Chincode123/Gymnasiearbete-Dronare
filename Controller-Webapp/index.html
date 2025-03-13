@@ -10,9 +10,8 @@
 
 <body>
     <div id="wrapper">
-
         <div id="input">
-            <div id="values">
+            <div id="controller-wrapper">
                 <div id="controller">
                     <div id="power-slider-container">
                         <input id="power" type="range" value="0.00" max="1" min="-1" step="any" list="steps">
@@ -44,7 +43,24 @@
                     </div>
                 </div>
 
-                <div>
+                <div id="values">
+                    <div id="drone">
+                        <div>
+                            <p>Acceleration <strong>(x | y | z)</strong></p>
+                            <p>Velocity <strong>(x | y | z)</strong></p>
+                            <p>Angular velocity <strong>(x | y | z)</strong></p>
+                            <p>Rotation <strong>(Pitch | Roll | Yaw)</strong></p>
+                            <p>Update rate <strong>(Drone | Receiver)</strong></p>
+                        </div>
+                        <div>
+                            <p><strong><span id="acc-x">0.00</span>m/s²</strong> | <strong><span id="acc-y">0.00</span>m/s²</strong> | <strong><span id="acc-z">0.00</span>m/s²</strong></p>
+                            <p><strong><span id="vel-x">0.00</span>m/s</strong> | <strong><span id="vel-y">0.00</span>m/s</strong> | <strong><span id="vel-z">0.00</span>m/s</strong></p>
+                            <p><strong><span id="angular-vel-x">0.00</span>&deg;/s</strong> | <strong><span id="angular-vel-y">0.00</span>&deg;/s</strong> | <strong><span id="angular-vel-z">0.00</span>&deg;/s</strong></p>
+                            <p><strong><span id="pitch-value">0.00</span>&deg;</strong> | <strong><span id="roll-value">0.00</span>&deg;</strong> | <strong><span id="yaw-value">0.00</span>&deg;</strong></p>
+                            <p><strong><span id="drone-update">0</span></strong> | <strong><span id="receiver-update">0</span></strong></p>
+                        </div>
+                    </div>
+
                     <div id="constants">
                         <div id="pid">
                             <div id="velocity">
@@ -90,23 +106,6 @@
                             </p>
                         </div>
                     </div>
-                    
-                    <div id="drone">
-                        <div>
-                            <p>Acceleration <strong>(x | y | z)</strong></p>
-                            <p>Velocity <strong>(x | y | z)</strong></p>
-                            <p>Angular velocity <strong>(x | y | z)</strong></p>
-                            <p>Rotation <strong>(Pitch | Roll | Yaw)</strong></p>
-                            <p>Update rate <strong>(Drone | Receiver)</strong></p>
-                        </div>
-                        <div>
-                            <p><strong><span id="acc-x">0.00</span>m/s²</strong> | <strong><span id="acc-y">0.00</span>m/s²</strong> | <strong><span id="acc-z">0.00</span>m/s²</strong></p>
-                            <p><strong><span id="vel-x">0.00</span>m/s</strong> | <strong><span id="vel-y">0.00</span>m/s</strong> | <strong><span id="vel-z">0.00</span>m/s</strong></p>
-                            <p><strong><span id="angular-vel-x">0.00</span>&deg;/s</strong> | <strong><span id="angular-vel-y">0.00</span>&deg;/s</strong> | <strong><span id="angular-vel-z">0.00</span>&deg;/s</strong></p>
-                            <p><strong><span id="pitch-value">0.00</span>&deg;</strong> | <strong><span id="roll-value">0.00</span>&deg;</strong> | <strong><span id="yaw-value">0.00</span>&deg;</strong></p>
-                            <p><strong><span id="drone-update">0</span></strong> | <strong><span id="receiver-update">0</span></strong></p>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -125,5 +124,4 @@
     <script src="js/communication.js"></script>
     <script src="js/controller.js"></script>
 </body>
-
 </html>

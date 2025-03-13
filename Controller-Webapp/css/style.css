@@ -21,7 +21,7 @@ div {
     grid-template-rows: 85% 15%;
 }
 
-#values {
+#controller-wrapper {
     display: grid;
     grid-template-columns: 50% 50%;
 }
@@ -111,4 +111,8 @@ div {
 
 #drone div:nth-child(2) p {
     text-align: center;
+}
+
+#values {
+    overflow-y: scroll;
 }
