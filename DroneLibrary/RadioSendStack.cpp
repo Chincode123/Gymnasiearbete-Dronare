@@ -1,5 +1,11 @@
 #include "RadioSendStack.h"
 
+RadioSendStack::~RadioSendStack() {
+    clear();
+}
+
+uint8_t RadioSendStack::getCount() const { return count; }
+
 radioStackElement* RadioSendStack::get(uint8_t index) {
     return get(firstElement, 0, index);
 }

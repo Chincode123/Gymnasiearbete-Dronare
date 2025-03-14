@@ -188,6 +188,8 @@ void Orientation::calculateOffsets(uint16_t cycles) {
 
         angularVelocityOffset += angularVelocity;
         accelerationOffset += acceleration;
+
+        delay(5);
     }
     
     angularVelocityOffset /= cycles;
@@ -198,6 +200,8 @@ void Orientation::calculateOffsets(uint16_t cycles) {
         acceleration -= accelerationOffset;
 
         accelerationAngleOffset += calculateAccelerationAngles((acceleration + accelerationOffset));
+
+        delay(5);
     }
 
     accelerationAngleOffset /= cycles;
