@@ -108,8 +108,6 @@ void loop() {
 
         // scope variables
         TargetRangeInstructions targetRanges;
-        uint8_t power;
-        float time;
         
         radio.read(&readBuffer, sizeof(readBuffer));
         memcpy(&messageIn, &readBuffer, sizeof(messageIn));
@@ -137,7 +135,7 @@ void loop() {
                 targetRoll = maxRoll * ((float)controller.stick_Y / 127);
                 break;
             case _MSG_ACTIVATE:
-                actiiivate();
+                activate();
                 break;
             case _MSG_DEACTIVATE:
                 deactivate();
@@ -311,13 +309,13 @@ void printRadioMessage(RadioMessage message) {
 #endif
 
 void activate() {
-  if (activated) break;
+  if (activated) return;
   activated = true;
   orientation.begin(500);
   #ifndef DEBUG
   // Ramp up motors to 50%
-  power = 0;
-  time = 0;
+  uint8_t power = 0;
+  float time = 0;
   while (time < 1) {
       setDeltaTime();
       analogWrite(MOTOR_TL_Pin, power);
@@ -333,13 +331,13 @@ void activate() {
 }
 
 void deactivate() {
-  if (!activated) break;
+  if (!activated) return;
   activated = false;
   orientation.end();
   #ifndef DEBUG
   // Ramp down motors to 0%
-  power = 0;
-  time = 0;
+  uint8_t power = 0;
+  float time = 0;
   while (time < 1) {
       setDeltaTime();
       analogWrite(MOTOR_TL_Pin, power);

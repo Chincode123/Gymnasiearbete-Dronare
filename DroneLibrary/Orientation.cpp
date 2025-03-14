@@ -37,7 +37,7 @@ void Orientation::end() {
     velocity = {0, 0 ,0};
 }
 
-void Orientation::readFromIMU(vector& acceleration, vector& angularVelocity) {
+void Orientation::readFromIMU(vector3<float>& acceleration, vector3<float>& angularVelocity) {
     // Acceleration
     Wire.beginTransmission(MPU);
     Wire.write(0x3B);
@@ -111,14 +111,14 @@ void Orientation::update(float deltaTime) {
     calculateVelocity(deltaTime);
 }
 
-vector Orientation::calculateAccelerationAngles(const vector& acceleration) {
+vector3<float> Orientation::calculateAccelerationAngles(const vector3<float>& acceleration) {
     return {atan2(acceleration.y, sqrt(pow(acceleration.x, 2) + pow(acceleration.z, 2))) * 180 / PI,
             atan2(-1 * acceleration.x, sqrt(pow(acceleration.y, 2) + pow(acceleration.z, 2))) * 180 / PI,
             atan2(acceleration.y, acceleration.x) * 180 / PI};
 }
 
 void Orientation::calculateAngles(float deltaTime) {
-    vector accelerationAngles = (calculateAccelerationAngles(acceleration) - accelerationAngleOffset);
+    vector3<float> accelerationAngles = (calculateAccelerationAngles(acceleration) - accelerationAngleOffset);
 
     float rateOfChange = 0.1;
     angles += ((angularVelocity * deltaTime) + angleError) * rateOfChange;
@@ -170,8 +170,8 @@ void Orientation::calculateOffsets(uint16_t cycles) {
     accelerationOffset = {0, 0, 0};
     accelerationAngleOffset = {0, 0, 0};
     
-    vector acceleration;
-    vector angularVelocity;
+    vector3<float> acceleration;
+    vector3<float> angularVelocity;
 
     for (int i = 0; i < cycles; i++) {
         readFromIMU(acceleration, angularVelocity);

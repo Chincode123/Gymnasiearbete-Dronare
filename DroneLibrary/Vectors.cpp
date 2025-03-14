@@ -1,70 +1,93 @@
 #include "Vectors.h"
 #include <Arduino.h>
 
-float vector::magnitude(){
+template<typename T>
+T vector3<T>::magnitude() {
     return sqrt((*this) * (*this));
 }
 
-vector operator+(const vector& u, const vector& v) {
+template<typename T>
+vector3<T> operator+(const vector3<T>& u, const vector3<T>& v) {
     return {u.x + v.x, u.y + v.y, u.z + v.z};
 }
 
-vector operator+=(vector& u, const vector& v) {
-    u = u + v;
+template<typename T>
+vector3<T> operator+=(vector3<T>& u, const vector3<T>& v) {
+    u.x += v.x;
+    u.y += v.y;
+    u.z += v.z;
     return u;
 }
 
-vector operator-(const vector& u, const vector& v) {
+template<typename T>
+vector3<T> operator-(const vector3<T>& u, const vector3<T>& v) {
     return {u.x - v.x, u.y - v.y, u.z - v.z};
 }
 
-vector operator-=(vector& u, const vector& v) {
-    u = u - v;
+template<typename T>
+vector3<T> operator-=(vector3<T>& u, const vector3<T>& v) {
+    u.x -= v.x;
+    u.y -= v.y;
+    u.z -= v.z;
     return u;
 }
 
-float operator*(const vector& u, const vector& v) {
+template<typename T>
+float operator*(const vector3<T>& u, const vector3<T>& v) {
     return u.x * v.x + u.y * v.y + u.z * v.z;
 }
 
-vector operator*(const vector& u, float a) {
+template<typename T>
+vector3<T> operator*(const vector3<T>& u, float a) {
     return {u.x * a, u.y * a, u.z * a};
 }
 
-vector operator*=(vector& u, float a) {
-    u = u * a;
+template<typename T>
+vector3<T> operator*=(vector3<T>& u, float a) {
+    u.x *= a;
+    u.y *= a;
+    u.z *= a;
     return u;
 }
 
-vector operator/(const vector& u, float a) {
+template<typename T>
+vector3<T> operator/(const vector3<T>& u, float a) {
     if (a == 0)
         return {0, 0, 0};
-    return {u.x / a, u.y / a, u.z / a};   
+    return {u.x / a, u.y / a, u.z / a};
 }
 
-vector operator/=(vector& u, float a) {
+template<typename T>
+vector3<T> operator/=(vector3<T>& u, float a) {
     if (a == 0)
         return {0, 0, 0};
-    u = u / a;
+    u.x /= a;
+    u.y /= a;
+    u.z /= a;
     return u;
 }
 
-vector addVectors(const vector& a, const vector& b) {
+template<typename T>
+vector3<T> addVectors(const vector3<T>& a, const vector3<T>& b) {
     return {a.x + b.x, a.y + b.y, a.z + b.z};
 }
 
-vector subtractVectors(const vector& a, const vector&b) {
+template<typename T>
+vector3<T> subtractVectors(const vector3<T>& a, const vector3<T>& b) {
     return {a.x - b.x, a.y - b.y, a.z - b.z};
 }
 
-float dotProduct(const vector& a, const vector& b) {
+template<typename T>
+float dotProduct(const vector3<T>& a, const vector3<T>& b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-float vectorMagnitude(const vector& a) {
+template<typename T>
+float vectorMagnitude(const vector3<T>& a) {
     return sqrt(a * a);
 }
 
-vector projectVector(const vector& a, const vector& b) {
+template<typename T>
+vector3<T> projectVector(const vector3<T>& a, const vector3<T>& b) {
     return b * ((a * b) / (b * b));
 }
