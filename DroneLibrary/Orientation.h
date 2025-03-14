@@ -2,6 +2,7 @@
 #define ORIENTATION_H_
 
 #include "Vectors.h"
+#include "SmoothValue.h"
 
 class Orientation {
     uint8_t MPU;
@@ -30,11 +31,11 @@ public:
     void end();
 
     vector3<float> angularVelocity;
-    vector3<float> angles;
+    vector3<SmoothValue> angles;
 
     vector3<float> acceleration;
     vector3<float> adjustedAcceleration;
-    vector3<float> velocity;
+    vector3<SmoothValue> velocity;
 
     void update(float deltaTime);
 };

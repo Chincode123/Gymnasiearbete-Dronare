@@ -4,6 +4,16 @@
 
 Orientation::Orientation(uint8_t MPU) {
     this->MPU = MPU;
+    angles({
+        SmoothValue(0, 0.1),
+        SmoothValue(0, 0.1),
+        SmoothValue(0, 0.1)
+    });
+    velocity({
+        SmoothValue(0, 0.1),
+        SmoothValue(0, 0.1),
+        SmoothValue(0, 0.1)
+    });
 }
 
 void Orientation::begin() {

@@ -355,26 +355,25 @@ void deactivate() {
   radioLog("Deactivated", true);
 }
 
+template<typename T>
+void sequenceVector(vector3<T> vector, uint8_t messageType) {
+  messageOut.messageType = messageType;
+  memcpy(messageOut.dataBuffer + sizeof(float) * 0, float(vector.x), sizeof(float));
+  memcpy(messageOut.dataBuffer + sizeof(float) * 1, float(vector.y), sizeof(float));
+  memcpy(messageOut.dataBuffer + sizeof(float) * 2, float(vector.z), sizeof(float));
+  sendStack.push(messageOut);
+}
+
 void sequenceTelemetry() {
-  if (sendStack.count <= 0) {
-    messageOut.messageType = _MSG_DRONE_ACCELERATION;
-    memcpy(messageOut.dataBuffer, &orientation.adjustedAcceleration, sizeof(orientation.acceleration));
-    sendStack.push(messageOut);
+  if (sendStack.count > 0)
+    return;
 
-    messageOut.messageType = _MSG_DRONE_VELOCITY;
-    memcpy(messageOut.dataBuffer, &orientation.velocity, sizeof(orientation.velocity));
-    sendStack.push(messageOut);
+    sequenceVector(orientation.adjustedAcceleration, _MSG_DRONE_ACCELERATION);
+    sequenceVector(orientation.velocity, _MSG_DRONE_VELOCITY);
+    sequenceVector(orientation.angularVelocity, _MSG_DRONE_ANGULAR_VELOCITY);
+    sequenceVector(orientation.angles, _MSG_DRONE_ANGLES);
 
-    messageOut.messageType = _MSG_DRONE_ANGULAR_VELOCITY;
-    memcpy(messageOut.dataBuffer, &orientation.angularVelocity, sizeof(orientation.angularVelocity));
-    sendStack.push(messageOut);
-
-    messageOut.messageType = _MSG_DRONE_ANGLES;
-    memcpy(messageOut.dataBuffer, &orientation.angles, sizeof(orientation.angles));
-    sendStack.push(messageOut);
-
-    messageOut.messageType = _MSG_DRONE_DELTATIME;
-    memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));
-    sendStack.push(messageOut);
-  }
+  messageOut.messageType = _MSG_DRONE_DELTATIME;
+  memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));
+  sendStack.push(messageOut);
 }
