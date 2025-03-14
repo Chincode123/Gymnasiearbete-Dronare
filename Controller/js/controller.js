@@ -16,31 +16,37 @@ function normalizeJoystick(joystick) {
   }
 }
 
-document.addEventListener("mousemove", (event) => {
-  if (!using_joystick) {
-    return;
-  }
-
+function setJoystickFromMouse(mouse) {
   const joystick_area_size = joystick_area.getBoundingClientRect();
   const joystick_area_width = joystick_area_size.right - joystick_area_size.left;
 
   joystick.x =
-    ((event.clientX - joystick_area_size.right) / joystick_area_width + 0.5) *
+    ((mouse.x - joystick_area_size.right) / joystick_area_width + 0.5) *
     2;
   joystick.y =
-    ((event.clientY - joystick_area_size.top) / joystick_area_width - 0.5) * -2;
+    ((mouse.y - joystick_area_size.top) / joystick_area_width - 0.5) * -2;
 
   joystick.x = Math.min(Math.max(joystick.x, -1), 1);
   joystick.y = Math.min(Math.max(joystick.y, -1), 1);
 
   normalizeJoystick(joystick);
+}
+
+document.addEventListener("mousemove", (event) => {
+  if (!using_joystick) {
+    return;
+  }
+
+  setJoystickFromMouse({ x: event.clientX, y: event.clientY });
 });
 
 document
   .getElementById("joystick-area")
-  .addEventListener("mousedown", () => {
+  .addEventListener("mousedown", (event) => {
     using_joystick = true;
     using_keyboard = false;
+
+    setJoystickFromMouse({ x: event.clientX, y: event.clientY });
   });
 
 function resetMarker() {
