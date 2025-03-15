@@ -1455,7 +1455,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b92c08f294ca799448dbae532997de5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxPropellerPower: 5
   propellerPower:
   - 0
   - 0
@@ -1466,11 +1465,6 @@ MonoBehaviour:
   - {fileID: 404957399}
   - {fileID: 1311497565}
   - {fileID: 155781938}
-  propellerDirections:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 0}
   desiredPitch: -0
   pitchPID:
     P: 0
@@ -2456,7 +2450,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b92c08f294ca799448dbae532997de5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxPropellerPower: 5
   propellerPower:
   - 0
   - 0
@@ -2467,11 +2460,6 @@ MonoBehaviour:
   - {fileID: 1096619021}
   - {fileID: 1915721625}
   - {fileID: 262341331}
-  propellerDirections:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 0}
   desiredPitch: -0
   pitchPID:
     P: 1

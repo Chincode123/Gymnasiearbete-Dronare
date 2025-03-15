@@ -20,14 +20,9 @@ public class DroneController : MonoBehaviour
         }
     }
 
-    Vector3 acceleration, gyro, d_gyro;
-    Vector3 previousVelocity, previousGyro;
-
     [Header("Propeller Info")]
-    [SerializeField] float maxPropellerPower;
     [SerializeField] float[] propellerPower = new float[4];
     [SerializeField] Transform[] propellers = new Transform[4];
-    [SerializeField] Vector3[] propellerDirections = new Vector3[4];
     Vector3[] previousPorpellerPositions = new Vector3[4];
     Vector3[] propellerVelocities = new Vector3[4];
     Vector3[] previousPropellerVelocities = new Vector3[4];
@@ -57,6 +52,7 @@ public class DroneController : MonoBehaviour
     [Header("Info")]
     [SerializeField] float currentPitch;
     [SerializeField] float currentRoll;
+    [SerializeField] float currentVerticalVelocity;
 
     [Header("Center of Mass")]
     [SerializeField] Vector3 centerOfMass;
@@ -68,10 +64,6 @@ public class DroneController : MonoBehaviour
 
     private void Start()
     {
-        for (int i = 0; i< 4; i++)
-        {
-            propellerDirections[i] = propellers[i].position - transform.position;
-        }
         rigidbody.centerOfMass = centerOfMass;
     }
 
@@ -83,6 +75,7 @@ public class DroneController : MonoBehaviour
         desiredPitch = -pitchRange * Input.GetAxisRaw("Vertical");
         desiredRoll = -rollRange * Input.GetAxisRaw("Horizontal");
 
+        currentVerticalVelocity = rigidbody.velocity.y;
         currentPitch = rigidbody.rotation.eulerAngles.x;
         currentRoll = rigidbody.rotation.eulerAngles.z;
         // Adjust angles to -180 to 180 range
@@ -96,14 +89,14 @@ public class DroneController : MonoBehaviour
     {
         for (int i = 0; i < 4; i++)
         {
-                                                        // -0.5 <= (power / 255) <= 0.5
-            rigidbody.AddForceAtPosition(transform.up * CalculateMotorPower((propellerPower[i] / 255) + 0.5f), propellers[i].position);
+                                                                            // -0.5 <= (power / 255) <= 0.5
+            rigidbody.AddForceAtPosition(propellers[i].up * CalculateMotorPower((propellerPower[i] / 255) + 0.5f), propellers[i].position);
         }
     }
 
     void ShiftPropellerPower()
     {
-        float velocityErorr = desiredVelocity - rigidbody.velocity.y;
+        float velocityErorr = desiredVelocity - currentVerticalVelocity;
         velocityIntegral += velocityErorr * Time.deltaTime;
         float velocityDerivitive = (velocityErorr - previousVelocityError) / Time.deltaTime;
         previousVelocityError = velocityErorr;
@@ -149,16 +142,12 @@ public class DroneController : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(propellers[i].position, propellers[i].position + (propellerPower[i] / 25) * propellers[i].up);
+            Gizmos.DrawLine(propellers[i].position, propellers[i].position + (propellerPower[i] / 100) * propellers[i].up);
         }
 
         // velocitiy
         Gizmos.color = Color.yellow;
         Gizmos.DrawLine(transform.position, transform.position + rigidbody.velocity);
-
-        // acceleration
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawLine(transform.position, transform.position + acceleration);
 
         // Center of mass
         Gizmos.color = Color.blue;
