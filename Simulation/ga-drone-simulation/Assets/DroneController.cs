@@ -97,7 +97,7 @@ public class DroneController : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
                                                         // -0.5 <= (power / 255) <= 0.5
-            rigidbody.AddForceAtPosition(transform.up * calculateMotorPower((propellerPower[i] / 255) + 0.5f), propellers[i].position);
+            rigidbody.AddForceAtPosition(transform.up * CalculateMotorPower((propellerPower[i] / 255) + 0.5f), propellers[i].position);
         }
     }
 
@@ -132,7 +132,7 @@ public class DroneController : MonoBehaviour
     }
 
     // 0 <= x <= 1
-    float calculateMotorPower(float x) {
+    float CalculateMotorPower(float x) {
         if (x <= 0)
             return 0;
         

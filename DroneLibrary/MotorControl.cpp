@@ -1,6 +1,7 @@
 #include "MotorControl.h"
- 
-MotorController::MotorController(uint8_t& motorPowerTL, uint8_t& motorPowerTR, uint8_t& motorPowerBR, uint8_t& motorPowerBL)
+#include <Arduino.h>
+
+MotorController::MotorController(int8_t& motorPowerTL, int8_t& motorPowerTR, int8_t& motorPowerBR, int8_t& motorPowerBL)
  : motorPowerTL(motorPowerTL), motorPowerTR(motorPowerTR), motorPowerBR(motorPowerBR), motorPowerBL(motorPowerBL) {}
 
 void MotorController::setTargetValues(float *targetVelocity, float *targetPitch, float *targetRoll) {
@@ -27,8 +28,8 @@ void MotorController::calculatePower(float velocity, float pitch, float roll, fl
     float pitchShift = pitchController.calculate(pitch, deltaTime);
     float rollShift = rollController.calculate(roll, deltaTime);
 
-    motorPowerTL = (uint8_t)(constrain((basePower + pitchShift + rollShift), -127, 127) + 127);
-    motorPowerTR = (uint8_t)(constrain((basePower + pitchShift - rollShift), -127, 127) + 127);
-    motorPowerBR = (uint8_t)(constrain((basePower - pitchShift - rollShift), -127, 127) + 127);
-    motorPowerBL = (uint8_t)(constrain((basePower - pitchShift + rollShift), -127, 127) + 127);
+    motorPowerTL = int8_t(constrain((basePower + pitchShift + rollShift), -127, 127));
+    motorPowerTR = int8_t(constrain((basePower + pitchShift - rollShift), -127, 127));
+    motorPowerBR = int8_t(constrain((basePower - pitchShift - rollShift), -127, 127));
+    motorPowerBL = int8_t(constrain((basePower - pitchShift + rollShift), -127, 127));
 }

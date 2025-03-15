@@ -3,11 +3,10 @@
 
 #include "PIDController.h"
 #include "RadioData.h"
-#include <Arduino.h>
 
 class MotorController {
 public:    
-    MotorController(uint8_t& motorPowerTL, uint8_t& motorPowerTR, uint8_t& motorPowerBR, uint8_t& motorPowerBL);
+    MotorController(int8_t& motorPowerTL, int8_t& motorPowerTR, int8_t& motorPowerBR, int8_t& motorPowerBL);
 
     void setTargetValues(float *targetVelocity, float *targetPitch, float *targetRoll);
     void setVelocityConstants(const PID_Instructions &values);
@@ -16,7 +15,7 @@ public:
 
     void calculatePower(float velocity, float pitch, float roll, float deltaTime);
 private:
-    uint8_t &motorPowerTL, &motorPowerTR, &motorPowerBR, &motorPowerBL;
+    int8_t &motorPowerTL, &motorPowerTR, &motorPowerBR, &motorPowerBL;
 
     // PID controller for the vertical velocity of the drone
     PID velocityController;

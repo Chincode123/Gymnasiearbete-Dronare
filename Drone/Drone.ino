@@ -23,7 +23,7 @@ RadioMessage messageIn, messageOut;
 #define MOTOR_TR_Pin 4
 #define MOTOR_BR_Pin 3
 #define MOTOR_BL_Pin 2
-uint8_t motorPowerTL = 0, motorPowerTR = 0, motorPowerBR = 0, motorPowerBL = 0;
+int8_t motorPowerTL = 0, motorPowerTR = 0, motorPowerBR = 0, motorPowerBL = 0;
 MotorController motorController(motorPowerTL, motorPowerTR, motorPowerBR, motorPowerBL);
 
 
@@ -210,10 +210,10 @@ void loop() {
         orientation.update(deltaTime);
         motorController.calculatePower(orientation.velocity.z, orientation.angles.x, orientation.angles.y, deltaTime);
         #ifndef DEBUGG
-          analogWrite(MOTOR_TL_Pin, 128 + (motorPowerTL / 2));   
-          analogWrite(MOTOR_TR_Pin, 128 + (motorPowerTR / 2));   
-          analogWrite(MOTOR_BR_Pin, 128 + (motorPowerBR / 2));   
-          analogWrite(MOTOR_BL_Pin, 128 + (motorPowerBL / 2));
+          analogWrite(MOTOR_TL_Pin, uint8_t(127 + motorPowerTL));   
+          analogWrite(MOTOR_TR_Pin, uint8_t(127 + motorPowerTR));   
+          analogWrite(MOTOR_BR_Pin, uint8_t(127 + motorPowerBR));   
+          analogWrite(MOTOR_BL_Pin, uint8_t(127 + motorPowerBL));
         #endif
     }
     else {
