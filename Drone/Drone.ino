@@ -66,12 +66,11 @@ void setup() {
         Serial.println("radio hardrware issue");
       #endif
     }
-    while(!configureRadio(radio));
-     {
+    while(!configureRadio(radio)) {
       #ifdef DEBUG
         Serial.println("radio config issue");
       #endif
-     }
+    }
     radio.openWritingPipe(DRONE_ADDRESS);
     radio.openReadingPipe(1, RECEIVER_ADDRESS);
     radio.startListening();
@@ -209,7 +208,7 @@ void loop() {
 
         orientation.update(deltaTime);
         motorController.calculatePower(orientation.velocity.z, orientation.angles.x, orientation.angles.y, deltaTime);
-        #ifndef DEBUGG
+        #ifndef DEBUG
           analogWrite(MOTOR_TL_Pin, uint8_t(127 + motorPowerTL));   
           analogWrite(MOTOR_TR_Pin, uint8_t(127 + motorPowerTR));   
           analogWrite(MOTOR_BR_Pin, uint8_t(127 + motorPowerBR));   
@@ -234,7 +233,11 @@ void loop() {
 
 void setDeltaTime() {
     unsigned long currentTime = micros();
-    deltaTime = (float)(currentTime - previousTime) / 1000000;
+    if (currentTime < previousTime) {
+        deltaTime = (float)(currentTime + (0xFFFFFFFF - previousTime)) / 1000000;
+    } else {
+        deltaTime = (float)(currentTime - previousTime) / 1000000;
+    }
     previousTime = currentTime;
     if (deltaTime == 0) {
         deltaTime = 0.000001;
@@ -244,11 +247,11 @@ void setDeltaTime() {
 void sendRadio() {
     #ifdef DEBUG
       Serial.print("(before) SendStack count: ");
-      Serial.println(sendStack.count);
+      Serial.println(sendStack.getCount());
     #endif
 
     radio.stopListening();
-    while (sendStack.count > 0) {
+    while (sendStack.getCount() > 0) {
         #ifdef DEBUG 
           Serial.println("attempting to send");
         #endif
@@ -276,7 +279,7 @@ void sendRadio() {
     radio.startListening();
     #ifdef DEBUG
       Serial.print("(after) SendStack count: ");
-      Serial.println(sendStack.count);
+      Serial.println(sendStack.getCount());
     #endif
 }
 
@@ -358,20 +361,20 @@ void deactivate() {
 template<typename T>
 void sequenceVector(vector3<T> vector, uint8_t messageType) {
   messageOut.messageType = messageType;
-  memcpy(messageOut.dataBuffer + sizeof(float) * 0, float(vector.x), sizeof(float));
-  memcpy(messageOut.dataBuffer + sizeof(float) * 1, float(vector.y), sizeof(float));
-  memcpy(messageOut.dataBuffer + sizeof(float) * 2, float(vector.z), sizeof(float));
+  memcpy(messageOut.dataBuffer + sizeof(float) * 0, (void*)(float(vector.x)), sizeof(float));
+  memcpy(messageOut.dataBuffer + sizeof(float) * 1, (void*)(float(vector.y)), sizeof(float));
+  memcpy(messageOut.dataBuffer + sizeof(float) * 2, (void*)(float(vector.z)), sizeof(float));
   sendStack.push(messageOut);
 }
 
 void sequenceTelemetry() {
-  if (sendStack.count > 0)
+  if (sendStack.getCount() > 0)
     return;
 
-    sequenceVector(orientation.adjustedAcceleration, _MSG_DRONE_ACCELERATION);
-    sequenceVector(orientation.velocity, _MSG_DRONE_VELOCITY);
-    sequenceVector(orientation.angularVelocity, _MSG_DRONE_ANGULAR_VELOCITY);
-    sequenceVector(orientation.angles, _MSG_DRONE_ANGLES);
+  sequenceVector(orientation.adjustedAcceleration, _MSG_DRONE_ACCELERATION);
+  sequenceVector(orientation.velocity, _MSG_DRONE_VELOCITY);
+  sequenceVector(orientation.angularVelocity, _MSG_DRONE_ANGULAR_VELOCITY);
+  sequenceVector(orientation.angles, _MSG_DRONE_ANGLES);
 
   messageOut.messageType = _MSG_DRONE_DELTATIME;
   memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));

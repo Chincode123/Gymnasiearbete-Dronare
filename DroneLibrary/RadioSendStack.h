@@ -11,6 +11,7 @@ struct radioStackElement {
 
 class RadioSendStack {
     radioStackElement *firstElement, *lastElement;
+    uint8_t count;
 
     radioStackElement* create(const RadioMessage& data);
     bool removeAt(uint8_t index);
@@ -18,7 +19,10 @@ class RadioSendStack {
     radioStackElement* get(uint8_t index);
     radioStackElement* get(radioStackElement* currentElement, uint8_t curentIndex, uint8_t targetIndex);
 public:
-    uint8_t count;
+    RadioSendStack() : firstElement(nullptr), lastElement(nullptr), count(0) {}
+    ~RadioSendStack();
+
+    uint8_t getCount();
 
     bool push(const RadioMessage& data);
     bool queue(const RadioMessage& data);
