@@ -2,7 +2,7 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 #include <RadioData.h>
-#include <MotorControl.h>
+#include <MotorController.h>
 #include <Vectors.h>
 #include <Orientation.h>
 #include <RadioSendStack.h>

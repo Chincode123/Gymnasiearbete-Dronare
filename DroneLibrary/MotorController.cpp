@@ -1,4 +1,4 @@
-#include "MotorControl.h"
+#include "MotorController.h"
 #include <Arduino.h>
 
 MotorController::MotorController(int8_t& motorPowerTL, int8_t& motorPowerTR, int8_t& motorPowerBR, int8_t& motorPowerBL)
