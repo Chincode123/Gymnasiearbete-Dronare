@@ -34,3 +34,6 @@ SmoothValue& SmoothValue::operator/=(float divisor) {
     return *this;
 }
 
+void SmoothValue::set(float newValue) {
+    value = newValue;
+}

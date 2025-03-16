@@ -15,4 +15,6 @@ public:
     SmoothValue& operator*=(float factor);
 
     SmoothValue& operator/=(float divisor);
+
+    void set(float newValue);
 };

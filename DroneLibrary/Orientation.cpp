@@ -127,14 +127,27 @@ vector3<float> Orientation::calculateAccelerationAngles(const vector3<float>& ac
             atan2(acceleration.y, acceleration.x) * 180 / PI};
 }
 
+float limitAngle(float angle) {
+    while (angle > 180) {
+        angle -= 360;
+    }
+    while (angle < -180) {
+        angle += 360;
+    }
+    return angle;
+}
+
 void Orientation::calculateAngles(float deltaTime) {
     vector3<float> accelerationAngles = (calculateAccelerationAngles(acceleration) - accelerationAngleOffset);
 
-    float rateOfChange = 0.1;
-    angles += ((angularVelocity * deltaTime) + angleError) * rateOfChange;
+    angles += ((angularVelocity * deltaTime) + angleError);
+
+    angles.x.set(limitAngle(angles.x));
+    angles.y.set(limitAngle(angles.y));
+    angles.z.set(limitAngle(angles.z));
 
     accelerationError += ((accelerationAngles - angles) * deltaTime);
-    angleError =  (accelerationAngles + accelerationError - angles);
+    angleError = (accelerationAngles + accelerationError - angles);
 }
 
 void Orientation::calculateVelocity(float deltaTime) {
