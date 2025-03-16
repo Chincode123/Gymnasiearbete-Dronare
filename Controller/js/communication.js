@@ -599,6 +599,84 @@ document
 		writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("deactivate"));
 	});
 
+document
+	.getElementById("get-all")
+	.addEventListener("click", async function() {
+		const messageTypes = [
+			SerialMessage.messageTypeFromName.get("request-pid-velocity"),
+			SerialMessage.messageTypeFromName.get("request-pid-pitch"),
+			SerialMessage.messageTypeFromName.get("request-pid-roll"),
+			SerialMessage.messageTypeFromName.get("request-target-ranges")
+		];
+
+		for (const messageType of messageTypes) {
+			const instructions = getRequestInstruction(messageType);
+			writingHandler.set(instructions, messageType);
+			await new Promise(resolve => {
+                const checkInstructions = setInterval(() => {
+                    if (!writingHandler.hasInstructions) {
+                        clearInterval(checkInstructions);
+                        resolve();
+                    }
+                }, 10);
+            });
+		};
+	});
+
+document
+	.getElementById("send-all")
+	.addEventListener("click", async function() {
+		const pidValues = [
+			{
+				p: document.getElementById("pid-v-p").value,
+				i: document.getElementById("pid-v-i").value,
+				d: document.getElementById("pid-v-d").value,
+				type: "velocity"
+			},
+			{
+				p: document.getElementById("pid-p-p").value,
+				i: document.getElementById("pid-p-i").value,
+				d: document.getElementById("pid-p-d").value,
+				type: "pitch"
+			},
+			{
+				p: document.getElementById("pid-r-p").value,
+				i: document.getElementById("pid-r-i").value,
+				d: document.getElementById("pid-r-d").value,
+				type: "roll"
+			}
+		];
+
+		for (const values of pidValues) {
+			const instructions = getPIDInstructions(values, values.type);
+			writingHandler.setWithConfirm(instructions, SerialMessage.messageTypeFromName.get(`pid-${values.type}`), values);
+			await new Promise(resolve => {
+                const checkInstructions = setInterval(() => {
+                    if (!writingHandler.hasInstructions) {
+                        clearInterval(checkInstructions);
+                        resolve();
+                    }
+                }, 10);
+            });
+		}
+
+		const targetRanges = {
+			maxPitch: document.getElementById("target-ranges-pitch").value,
+			maxRoll: document.getElementById("target-ranges-roll").value,
+			maxVerticalVelocity: document.getElementById("target-ranges-velocity").value
+		};
+		const instructions = getTargetRangeInstructions(targetRanges.maxPitch, targetRanges.maxRoll, targetRanges.maxVerticalVelocity);
+		writingHandler.setWithConfirm(instructions, SerialMessage.messageTypeFromName.get("target-ranges"), targetRanges);
+		await new Promise(resolve => {
+			const checkInstructions = setInterval(() => {
+				if (!writingHandler.hasInstructions) {
+					clearInterval(checkInstructions);
+					resolve();
+				}
+			}, 10);
+		});
+	});
+
 function sendControllerInstructions() {
 	const instructions = getControllerInstructions(
 		-joystick.x,
