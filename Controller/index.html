@@ -63,47 +63,63 @@
 
                     <div id="constants">
                         <div id="pid">
-                            <div id="velocity">
-                                <p>Velocity</p>
-                                <p>
-                                    P: <input step="0.01" type="number" value="0" id="pid-v-p" class="p">
-                                    I: <input step="0.01" type="number" value="0" id="pid-v-i" class="i">
-                                    D: <input step="0.01" type="number" value="0" id="pid-v-d" class="d">
+                            <div id="velocity" class="value-settings">
+                                <div>
+                                    <p>Velocity</p>
+                                    <p>
+                                        P: <input step="0.01" type="number" value="0" id="pid-v-p" class="p">
+                                        I: <input step="0.01" type="number" value="0" id="pid-v-i" class="i">
+                                        D: <input step="0.01" type="number" value="0" id="pid-v-d" class="d">
+                                    </p>
+                                </div>
+                                <div class="buttons">
                                     <button class="send" type="button">Write Values</button>
                                     <button class="get" type="button">Get values</button>
-                                </p>
+                                </div>
                             </div>
-                            <div id="pitch">
+                            <div id="pitch" class="value-settings">
+                                <div>
                                 <p>Pitch</p>
-                                <p>
-                                    P: <input step="0.01" type="number" value="0" id="pid-p-p" class="p">
-                                    I: <input step="0.01" type="number" value="0" id="pid-p-i" class="i">
-                                    D: <input step="0.01" type="number" value="0" id="pid-p-d" class="d">
+                                    <p>
+                                        P: <input step="0.01" type="number" value="0" id="pid-p-p" class="p">
+                                        I: <input step="0.01" type="number" value="0" id="pid-p-i" class="i">
+                                        D: <input step="0.01" type="number" value="0" id="pid-p-d" class="d">
+                                    </p>
+                                    </div>
+                                <div class="buttons">
                                     <button class="send" type="button">Write Values</button>
                                     <button class="get" type="button">Get values</button>
-                                </p>
+                                </div>
                             </div>
-                            <div id="roll">
-                                <p>Roll</p>
-                                <p>
-                                    P: <input step="0.01" type="number" value="0" id="pid-r-p" class="p">
-                                    I: <input step="0.01" type="number" value="0" id="pid-r-i" class="i">
-                                    D: <input step="0.01" type="number" value="0" id="pid-r-d" class="d">
+                            <div id="roll" class="value-settings">
+                                <div>
+                                    <p>Roll</p>
+                                    <p>
+                                        P: <input step="0.01" type="number" value="0" id="pid-r-p" class="p">
+                                        I: <input step="0.01" type="number" value="0" id="pid-r-i" class="i">
+                                        D: <input step="0.01" type="number" value="0" id="pid-r-d" class="d">
+                                    </p>
+                                </div>
+                                <div class="buttons">
                                     <button class="send" type="button">Write Values</button>
                                     <button class="get" type="button">Get values</button>
-                                </p>
+                                </div>
                             </div>
                         </div>
 
-                        <div id="target-ranges">
-                            <p>Target Ranges (+-)</p>
-                            <p>
-                                Max Vertical Velocity: <input step="0.01" type="number" value="0" id="target-ranges-velocity">m/s
-                                Max Pitch: <input step="0.01" type="number" value="0" id="target-ranges-pitch">&deg;
-                                Max Roll: <input step="0.01" type="number" value="0" id="target-ranges-roll">&deg;
+                        <div id="target-ranges" class="value-settings">
+                            <div>
+                                <p>Target Ranges</p>
+                                <p>
+                                    Max Vertical Velocity: &plusmn;<input step="0.01" type="number" value="0" id="target-ranges-velocity">m/s
+                                    Max Pitch: &plusmn;<input step="0.01" type="number" value="0" id="target-ranges-pitch">&deg;
+                                    Max Roll: &plusmn;<input step="0.01" type="number" value="0" id="target-ranges-roll">&deg;
+                                </p>
+                            </div>
+                            <div class="buttons">
                                 <button class="send" type="button">Write Values</button>
                                 <button class="get" type="button">Get values</button>
-                            </p>
+                            </div>
                         </div>
                     </div>
                 </div>

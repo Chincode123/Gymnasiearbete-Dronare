@@ -133,6 +133,20 @@ div {
     font-size: larger;
 }
 
-#buttons button:hover {
+button:hover {
     background: lightgray;
+}
+
+.value-settings {
+    display: grid;
+    grid-template-rows: 75% 25%;
+}
+
+.value-settings .buttons {
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+
+.value-settings .buttons button {
+    width: 100%;
 }
