@@ -1,8 +1,16 @@
-# Radiostyrd Drönare
+# Remote-Controlled Drone
+
+This repository contains the software-part of a multi-person project with the goal of creating a remote-controlled drone using arduino microcontrollers, basic components, and 3D-printers
 
 ## Table of Contents
 
-....
+- [Remote-Controlled Drone](#remote-controlled-drone)
+  - [Table of Contents](#table-of-contents)
+  - [Abstract](#abstract)
+  - [Drone](#drone)
+    - [How `Drone.ino` Works](#how-droneino-works)
+      - [Setup](#setup)
+      - [Main-Loop](#main-loop)
 
 ## Abstract
 
@@ -46,7 +54,7 @@ void setup() {
 Firstly, the radio tranceiver is configured:
 - `radio.begin()`, from the [`RF24`](https://github.com/nRF24/RF24) class, is called to initialize the radio transceiver
 - `configureRadio(radio)` is called to configure the tranceiver's settings
-- Writing and reading pipes are open with adresses defined in [`RadioData.h`](DroneLibrary/RadioData.h)
+- Writing and reading pipes are opened with adresses defined in [`RadioData.h`](DroneLibrary/RadioData.h)
 - `radio.startListening()` is called for the tranceiver to start listening for instructions
 
 ```cpp
@@ -68,7 +76,7 @@ void setup() {
 ```
 Secondly, the motors are configured
 - First, values for the [`MotorController`](DroneLibrary/MotorController.h) class are set
-- Then, the pinmode's for the motor pins are set to ouput
+- Then, the pin-mode's for the motor-pins are set to ouput
 
 ```cpp
 void setup() {
@@ -84,4 +92,4 @@ void setup() {
 ```
 Lastley, the time variable is initialized and a message is pushed that will send immediately when the drone is connected to the controller 
 
-#### loop
+#### Main-Loop
