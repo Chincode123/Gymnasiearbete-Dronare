@@ -116,3 +116,23 @@ div {
 #values {
     overflow-y: scroll;
 }
+
+#buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+#buttons button {
+    height: 100%;
+    width: 100%;
+
+    border-left: solid black  1px; 
+    border-right: solid black 1px;
+
+    font-size: larger;
+}
+
+#buttons button:hover {
+    background: lightgray;
+}
