@@ -1,39 +1,37 @@
 #include <SmoothValue.h>
 
-SmoothValue::SmoothValue(float initialValue, float smoothingFactor) {
-    this->value = initialValue;
-    this->smoothingFactor = smoothingFactor;
-}
+SmoothValue::SmoothValue(float smoothingFactor) : value(0), smoothingFactor(smoothingFactor) {}
+
+SmoothValue::SmoothValue(float smoothingFactor, float initialValue) : value(initialValue), smoothingFactor(smoothingFactor) {}
 
 SmoothValue::operator float() {
     return value;
 }
 
 SmoothValue& SmoothValue::operator=(float newValue) {
-    value = value * (1 - smoothingFactor) + newValue * smoothingFactor;
-    return *this;
+    value = newValue;
 }
 
 SmoothValue& SmoothValue::operator+=(float increment) {
-    *this = value + increment;
+    set(value + increment);
     return *this;
 }
 
 SmoothValue& SmoothValue::operator-=(float decrement) {
-    *this = value - decrement;
+    set(value - decrement);
     return *this;
 }
 
 SmoothValue& SmoothValue::operator*=(float factor) {
-    *this = value * factor;
+    set(value * factor);
     return *this;
 }
 
 SmoothValue& SmoothValue::operator/=(float divisor) {
-    *this = value / divisor;
+    set(value / divisor);
     return *this;
 }
 
 void SmoothValue::set(float newValue) {
-    value = newValue;
+    value = value * (1 - smoothingFactor) + newValue * smoothingFactor;
 }

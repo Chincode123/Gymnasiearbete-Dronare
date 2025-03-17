@@ -11,8 +11,9 @@ class Orientation {
     vector3<float> accelerationOffset;
     vector3<float> accelerationAngleOffset;
     
-    vector3<float> angleError;
-    vector3<float> accelerationError;
+    vector3<float> rawAngularVelocity;
+    vector3<float> previousAccelerationAngles;
+    vector3<SmoothValue> anglularVelocityError;
 
     void readFromIMU(vector3<float>& acceleration, vector3<float>& angularVelocity);
     void readFromIMU();
@@ -23,6 +24,8 @@ class Orientation {
 
     void calculateAngles(float deltaTime);
     void calculateVelocity(float deltaTime);
+
+    float limitAngle(float angle);
 public:
     Orientation(uint8_t MPU);
 

@@ -2,7 +2,8 @@ class SmoothValue {
     float value;
     float smoothingFactor;
 public:
-    SmoothValue(float initialValue, float smoothingFactor);
+    SmoothValue(float smoothingFactor);
+    SmoothValue(float smoothingFactor, float initialValue);
     
     operator float();
     

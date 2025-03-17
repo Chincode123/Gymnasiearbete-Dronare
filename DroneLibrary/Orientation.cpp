@@ -2,19 +2,11 @@
 #include <Wire.h>
 #include <Arduino.h>
 
-Orientation::Orientation(uint8_t MPU) {
-    this->MPU = MPU;
-    angles({
-        SmoothValue(0, 0.1),
-        SmoothValue(0, 0.1),
-        SmoothValue(0, 0.1)
-    });
-    velocity({
-        SmoothValue(0, 0.1),
-        SmoothValue(0, 0.1),
-        SmoothValue(0, 0.1)
-    });
-}
+Orientation::Orientation(uint8_t MPU) : 
+    MPU(MPU),
+    angles({SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}),
+    velocity({SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}),
+    anglularVelocityError({SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}) { }
 
 void Orientation::begin() {
     begin(300);
@@ -39,8 +31,8 @@ void Orientation::end() {
     angularVelocityOffset = {0, 0 ,0};
     accelerationOffset = {0, 0 ,0};
     accelerationAngleOffset = {0, 0 ,0};
-    angleError = {0, 0 ,0};
-    accelerationError = {0, 0 ,0};
+    rawAngularVelocity = {0, 0 ,0};
+    previousAccelerationAngles = {0, 0 ,0};
     angularVelocity = {0, 0 ,0};
     angles = {0, 0 ,0};
     acceleration = {0, 0 ,0};
@@ -93,10 +85,10 @@ void Orientation::readFromIMU(vector3<float>& acceleration, vector3<float>& angu
 }
 
 void Orientation::readFromIMU() {
-    readFromIMU(acceleration, angularVelocity);
+    readFromIMU(acceleration, rawAngularVelocity);
     
     acceleration -= accelerationOffset;
-    angularVelocity -= angularVelocityOffset;
+    rawAngularVelocity -= angularVelocityOffset;
 
     // #ifdef Serial
     //     Serial.print("Acceleration: ");
@@ -127,7 +119,7 @@ vector3<float> Orientation::calculateAccelerationAngles(const vector3<float>& ac
             atan2(acceleration.y, acceleration.x) * 180 / PI};
 }
 
-float limitAngle(float angle) {
+float Orientation::limitAngle(float angle) {
     while (angle > 180) {
         angle -= 360;
     }
@@ -138,16 +130,17 @@ float limitAngle(float angle) {
 }
 
 void Orientation::calculateAngles(float deltaTime) {
-    vector3<float> accelerationAngles = (calculateAccelerationAngles(acceleration) - accelerationAngleOffset);
+    vector3<float> accelerationAngles = calculateAccelerationAngles(acceleration) - accelerationAngleOffset;
 
-    angles += ((angularVelocity * deltaTime) + angleError);
+    angles += angularVelocity * deltaTime;
 
-    angles.x.set(limitAngle(angles.x));
-    angles.y.set(limitAngle(angles.y));
-    angles.z.set(limitAngle(angles.z));
+    angles.x = limitAngle(angles.x);
+    angles.y = limitAngle(angles.y);
+    angles.z = limitAngle(angles.z);
 
-    accelerationError += ((accelerationAngles - angles) * deltaTime);
-    angleError = (accelerationAngles + accelerationError - angles);
+    anglularVelocityError.set(rawAngularVelocity - ((accelerationAngles - previousAccelerationAngles) / deltaTime));
+    previousAccelerationAngles = accelerationAngles;
+    angularVelocity = rawAngularVelocity + anglularVelocityError;
 }
 
 void Orientation::calculateVelocity(float deltaTime) {
