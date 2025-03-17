@@ -198,7 +198,7 @@ class Terminal {
 
 		output.innerHTML = `<div><span>1</span>|${log}</div>` + output.innerHTML;
 		this.previousLog = log;
-		if (output.children.length > 40) {
+		if (output.children.length > 100) {
 			output.removeChild(output.lastChild);
 		}
 	}

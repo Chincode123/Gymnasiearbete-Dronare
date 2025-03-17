@@ -1,4 +1,8 @@
-html, body {
+html {
+    background: rgb(31, 31, 31);
+}
+
+* {
     max-height: 98vh;
     font-family: sans-serif;
 }
@@ -83,7 +87,7 @@ div {
     height: 100%;
     display: flex; 
     flex-direction: column-reverse; 
-    overflow: hidden;
+    overflow-y: auto;
 }
 
 #output div {
