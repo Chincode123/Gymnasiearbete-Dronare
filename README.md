@@ -84,12 +84,13 @@ void setup() {
 
     previousTime = micros();
 
-    radioLog("Connected", true);
+    radioLogPush("Connected");
 
     ...
 }
 
 ```
-Lastley, the time variable is initialized and a message is pushed that will send immediately when the drone is connected to the controller 
+Lastley, the time-variable is initialized and a message is pushed that will send immediately when the drone is connected to the controller 
 
 #### Main-Loop
+

@@ -89,7 +89,7 @@ void setup() {
     // Initial time
     previousTime = micros();
 
-    radioLog("Connected", true);
+    radioLogPush("Connected");
 
     #ifdef DEBUG
       Serial.println("completed setup");
@@ -104,9 +104,6 @@ void loop() {
         #ifdef DEBUG
           Serial.println("radio available");
         #endif
-
-        // scope variables
-        TargetRangeInstructions targetRanges;
         
         radio.read(&readBuffer, sizeof(readBuffer));
         memcpy(&messageIn, &readBuffer, sizeof(messageIn));
@@ -179,19 +176,20 @@ void loop() {
                 sendStack.push(messageOut);
                 break;
             case _MSG_SET_TARGET_RANGES:
-                memcpy(&targetRanges, messageIn.dataBuffer, sizeof(targetRanges));
-                maxVelocity = targetRanges.verticalVelocityMax;
-                maxPitch = targetRanges.pitchMax;
-                maxRoll = targetRanges.rollMax;
+                TargetRangeInstructions targetRangesIn;
+                memcpy(&targetRangesIn, messageIn.dataBuffer, sizeof(targetRangesIn));
+                maxVelocity = targetRangesIn.verticalVelocityMax;
+                maxPitch = targetRangesIn.pitchMax;
+                maxRoll = targetRangesIn.rollMax;
                 break;
             case _MSG_REQUEST_TARGET_RANGES:
-                targetRanges = {maxPitch, maxRoll, maxVelocity};
-                memcpy(messageOut.dataBuffer, &targetRanges, sizeof(targetRanges));
+                TargetRangeInstructions targetRangesOut; = {maxPitch, maxRoll, maxVelocity};
+                memcpy(messageOut.dataBuffer, &targetRangesOut, sizeof(targetRangesOut));
                 messageOut.messageType = _MSG_SET_TARGET_RANGES;
                 sendStack.push(messageOut);
                 break;
             default:
-                radioLog("Error interpreting messageType", false);
+                radioLogQueue("Error interpreting messageType");
                 break;
         }
     }
@@ -221,7 +219,7 @@ void loop() {
         #endif
 
         if (millis() % 1000 == 0) {
-            radioLog("Waiting for activation", true);
+            radioLogPush("Waiting for activation");
         }
     }
 
@@ -283,18 +281,22 @@ void sendRadio() {
     #endif
 }
 
-void radioLog(const char* message, bool important) {
-    #define DRONE_LOG
+void radioLogPush(const char* message) {
     RadioMessage logMessage;
     logMessage.messageType = _MSG_DRONE_LOG;
     uint8_t messageLength = strlen(message);
     messageLength = (messageLength < 31) ? messageLength : 31;
     memcpy(logMessage.dataBuffer, message, messageLength);
-    
-    if (important)
-        sendStack.push(logMessage);
-    else
-        sendStack.queue(logMessage);
+    sendStack.push(logMessage);
+}
+
+void radioLogQueue(const char* message) {
+  RadioMessage logMessage;
+  logMessage.messageType = _MSG_DRONE_LOG;
+  uint8_t messageLength = strlen(message);
+  messageLength = (messageLength < 31) ? messageLength : 31;
+  memcpy(logMessage.dataBuffer, message, messageLength);
+  sendStack.push(logMessage);
 }
 
 #ifdef DEBUG
@@ -330,7 +332,7 @@ void activate() {
   }
   #endif
 
-  radioLog("Activation complete", true);
+  radioLogPush("Activation complete");
 }
 
 void deactivate() {
@@ -355,7 +357,7 @@ void deactivate() {
   digitalWrite(MOTOR_TR_Pin, LOW);
   digitalWrite(MOTOR_BR_Pin, LOW);
   digitalWrite(MOTOR_BL_Pin, LOW);
-  radioLog("Deactivated", true);
+  radioLogPush("Deactivated");
 }
 
 template<typename T>
