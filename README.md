@@ -21,6 +21,7 @@ This repository contains the software-part of a multi-person project with the go
     - [Other Important Classes](#other-important-classes)
       - [`PID`](#pid)
       - [`MotorController`](#motorcontroller)
+      - [`Orientation`](#orientation)
 
 ## Abstract
 
@@ -335,4 +336,57 @@ private:
 To use the class, first create an object by passing references to the motor power variables. Then, use the `setTargetValues` method to set pointers to the target values for velocity, pitch, and roll. Use the `setVelocityConstants`, `setPitchConstants`, and `setRollConstants` methods to set the PID constants for each respective controller. Lastly, to calculate the motor power values, use the `calculatePower` method by passing the current velocity, pitch, roll, and delta time.
 
 > **_NOTE:_** Pointers are used with the `setTargetValues` and PID constant methods to simplify code when changing values.
+
+#### `Orientation`
+
+The [`Orientation`](DroneLibrary/Orientation.h) class is used to collect data from a connected `MPU60X0` gyroscope-accelerometer and process it into usable acceleration, velocity, and Euler-angle vectors.
+
+```cpp
+class Orientation {
+    uint8_t MPU;
+
+    vector3<float> angularVelocityOffset;
+    vector3<float> accelerationOffset;
+    vector3<float> accelerationAngleOffset;
+    
+    vector3<float> rawAngularVelocity;
+    vector3<float> previousAccelerationAngles;
+    vector3<SmoothValue> angularVelocityError;
+
+    void readFromIMU(vector3<float>& acceleration, vector3<float>& angularVelocity);
+    void readFromIMU();
+
+    void calculateOffsets(uint16_t cycles);
+
+    vector3<float> calculateAccelerationAngles(const vector3<float>& acceleration);
+
+    void calculateAngles(float deltaTime);
+    void calculateVelocity(float deltaTime);
+
+    float limitAngle(float angle);
+public:
+    Orientation(uint8_t MPUAddress);
+
+    void begin();
+    void begin(uint16_t errorCycles);
+    void end();
+
+    vector3<float> angularVelocity;
+    vector3<SmoothValue> angles;
+
+    vector3<float> acceleration;
+    vector3<float> adjustedAcceleration;
+    vector3<SmoothValue> velocity;
+
+    void update(float deltaTime);
+};
+```
+
+To use the class, first create an object by passing the MPU address. Then, use the `begin` method to initialize the MPU and calculate stationary offsets. Use the `update` method to read data from the MPU and update the orientation. Finally, use the public member variables to access the calculated orientation data:
+- `angularVelocity`: degrees per second (**&deg;/s**)
+- `angles`: Euler angles (**&deg;**) 
+- `acceleration` and `adjustedAcceleration`: acceleration (meters per second squared, **m/s²**)
+- `velocity`: velocity (meters per second, **m/s**)
+
+> **_NOTE:_** The `adjustedAcceleration` is an acceleration vector that is adjusted to fixed axes', that are set when `begin` is called
 
