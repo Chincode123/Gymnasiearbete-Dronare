@@ -15,7 +15,6 @@
 
 // Radio
 RF24 radio(CE_PIN, CSN_PIN, 4000000);
-uint8_t readBuffer[32];
 RadioSendStack sendStack;
 RadioMessage messageIn, messageOut;
 
@@ -106,8 +105,7 @@ void loop() {
           Serial.println("radio available");
         #endif
         
-        radio.read(&readBuffer, sizeof(readBuffer));
-        memcpy(&messageIn, &readBuffer, sizeof(messageIn));
+        radio.read(&messageIn, sizeof(messageIn));
 
         #ifdef DEBUG
           printRadioMessage(messageIn);
@@ -208,6 +206,7 @@ void loop() {
 
         orientation.update(deltaTime);
         motorController.calculatePower(orientation.velocity.z, orientation.angles.x, orientation.angles.y, deltaTime);
+
         #ifndef DEBUG
           analogWrite(MOTOR_TL_Pin, uint8_t(127 + motorPowerTL));   
           analogWrite(MOTOR_TR_Pin, uint8_t(127 + motorPowerTR));   
