@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Serial Communicator</title>
+    <title>Drone Controll Panel</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -50,14 +50,14 @@
                             <p>Velocity <strong>(x | y | z)</strong></p>
                             <p>Angular velocity <strong>(x | y | z)</strong></p>
                             <p>Rotation <strong>(Pitch | Roll | Yaw)</strong></p>
-                            <p>Update rate <strong>(Drone | Receiver)</strong></p>
+                            <p>Update rate <strong>(Drone | Receiver | App)</strong></p>
                         </div>
                         <div>
                             <p><strong><span id="acc-x">0.00</span>m/s²</strong> | <strong><span id="acc-y">0.00</span>m/s²</strong> | <strong><span id="acc-z">0.00</span>m/s²</strong></p>
                             <p><strong><span id="vel-x">0.00</span>m/s</strong> | <strong><span id="vel-y">0.00</span>m/s</strong> | <strong><span id="vel-z">0.00</span>m/s</strong></p>
                             <p><strong><span id="angular-vel-x">0.00</span>&deg;/s</strong> | <strong><span id="angular-vel-y">0.00</span>&deg;/s</strong> | <strong><span id="angular-vel-z">0.00</span>&deg;/s</strong></p>
                             <p><strong><span id="pitch-value">0.00</span>&deg;</strong> | <strong><span id="roll-value">0.00</span>&deg;</strong> | <strong><span id="yaw-value">0.00</span>&deg;</strong></p>
-                            <p><strong><span id="drone-update">0</span></strong> | <strong><span id="receiver-update">0</span></strong></p>
+                            <p><strong><span id="drone-update">0</span></strong> | <strong><span id="receiver-update">0</span></strong> | <strong><span id="app-update">0</span></strong></p>
                         </div>
                     </div>
 
@@ -142,5 +142,24 @@
     <script src="js/communication.js"></script>
     <script src="js/controller.js"></script>
     <script src="js/flight_data.js"></script>
+    <script>
+        let lastTime = performance.now();
+        let frameCount = 0;
+
+        function updateFPS() {
+            const now = performance.now();
+            frameCount++;
+            const delta = now - lastTime;
+            if (delta >= 1000) {
+                const fps = Math.round((frameCount * 1000) / delta);
+                document.getElementById('app-update').textContent = fps;
+                frameCount = 0;
+                lastTime = now;
+            }
+            requestAnimationFrame(updateFPS);
+        }
+
+        requestAnimationFrame(updateFPS);
+    </script>
 </body>
 </html>

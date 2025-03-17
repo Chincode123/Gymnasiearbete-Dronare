@@ -19,8 +19,8 @@ function stopCollectingFlightData() {
     clearInterval(collection);
     const endTime = new Date();
     const dataToSave = {
-        startDateTime: startTime,
-        endDateTime: endTime,
+        startDateTime: startTime.toISOString(), // ISO 8601 format
+        endDateTime: endTime.toISOString(), // ISO 8601 format
         data: flightData
     };
     saveFlightDataToFile(dataToSave);
@@ -74,6 +74,11 @@ function collectFlightData() {
         joystick: {
             x: parseFloat(document.getElementById("joystick-x-info").innerText),
             y: parseFloat(document.getElementById("joystick-y-info").innerText)
+        },
+        fps: {
+            app: parseInt(document.getElementById("app-update").innerText),
+            drone: parseInt(document.getElementById("drone-update").innerText),
+            receiver: parseInt(document.getElementById("receiver-update").innerText)
         }
     };
 
