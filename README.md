@@ -14,7 +14,10 @@ This repository contains the software-part of a multi-person project with the go
         - [Radio-Input](#radio-input)
         - [Fight-Control](#fight-control)
         - [Radio-Output](#radio-output)
-      - [Additional Classes and Functions](#additional-classes-and-functions)
+      - [Important Helper-Functions](#important-helper-functions)
+        - [`setDeltaTime`](#setdeltatime)
+        - [`sendRadio`](#sendradio)
+        - [Activation and De-activation Functions](#activation-and-de-activation-functions)
 
 ## Abstract
 
@@ -92,7 +95,7 @@ Lastley, the time-variable is initialized and a message is pushed that will send
 
 #### Main-Loop
 
-The main controll-flow is found within the `loop`-function and can be devided up into three sections: radio-input, flight-control, and radio-output
+The main controll-flow is found within the `loop`-function and can be devided up into three sections: radio-input, flight-control, and radio-output, but before that, at the top of the block, the `setDeltaTime` function is used to set the current time-delta.
 
 ##### Radio-Input
 
@@ -181,5 +184,98 @@ void sequenceTelemetry() {
 }
 ```
 
-#### Additional Classes and Functions
+#### Important Helper-Functions
 
+##### `setDeltaTime`
+
+```cpp
+void setDeltaTime() {
+    unsigned long currentTime = micros();
+    if (currentTime < previousTime) {
+        deltaTime = (float)(currentTime + (0xFFFFFFFF - previousTime)) / 1000000;
+    } else {
+        deltaTime = (float)(currentTime - previousTime) / 1000000;
+    }
+    previousTime = currentTime;
+    if (deltaTime == 0) {
+        deltaTime = 0.000001;
+    }
+}
+```
+It is used in order to set the current time-delta using the `Arduino's` `micros`-function.
+
+##### `sendRadio`
+
+```cpp
+void sendRadio() {
+    radio.stopListening();
+    while (sendStack.getCount() > 0) {
+        RadioMessage message = sendStack.pop();
+        bool result = radio.write(&message, sizeof(message));
+
+        if (!result){
+            sendStack.push(message);
+            break;
+        }
+    }
+    radio.startListening();
+}
+```
+It begins by stoping the radio-device from listening to messages, which is required in order to write messages, and enters into a loop that continues until either:
+- There are no more messages to send.
+- A message fails to send.
+
+It ends by reactivating the listening capabilities of the radio-device.
+
+##### Activation and De-activation Functions
+
+```cpp
+void activate() {
+  if (activated) return;
+  activated = true;
+  orientation.begin(500);
+  #ifndef DEBUG
+  // Ramp up motors to 50%
+  uint8_t power = 0;
+  float time = 0;
+  while (time < 1) {
+      setDeltaTime();
+      analogWrite(MOTOR_TL_Pin, power);
+      analogWrite(MOTOR_TR_Pin, power);
+      analogWrite(MOTOR_BR_Pin, power);
+      analogWrite(MOTOR_BL_Pin, power);
+      time += deltaTime;
+      power = 128 * time;
+  }
+  #endif
+
+  radioLogPush("Activation complete");
+}
+
+void deactivate() {
+  if (!activated) return;
+  activated = false;
+  orientation.end();
+  #ifndef DEBUG
+  // Ramp down motors to 0%
+  uint8_t power = 0;
+  float time = 0;
+  while (time < 1) {
+      setDeltaTime();
+      analogWrite(MOTOR_TL_Pin, power);
+      analogWrite(MOTOR_TR_Pin, power);
+      analogWrite(MOTOR_BR_Pin, power);
+      analogWrite(MOTOR_BL_Pin, power);
+      time += deltaTime;
+      power = 128 * (1 - time);
+  }
+  #endif
+  digitalWrite(MOTOR_TL_Pin, LOW);
+  digitalWrite(MOTOR_TR_Pin, LOW);
+  digitalWrite(MOTOR_BR_Pin, LOW);
+  digitalWrite(MOTOR_BL_Pin, LOW);
+  radioLogPush("Deactivated");
+}
+```
+
+The activation and de-activation functions start of by calling the begin and end methods on the [`Orientation`](DroneLibrary/Orientation.h)-class respectively, and sets an activation-flag to be either true or false respectively. After, they proceed to either ramp up or down the motors to or from 50% respectively. They end of by queueing a message to be sent by radio, informing the user that the drone is either activated or deactivated. Additionally, the deactivation function also ensures that all the motor-pins are turned off completely.
