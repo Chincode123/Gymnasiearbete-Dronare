@@ -1,6 +1,6 @@
 # Remote-Controlled Drone
 
-This repository contains the software-part of a multi-person project with the goal of creating a remote-controlled drone using arduino microcontrollers, basic components, and 3D-printers
+This repository contains the software-part of a multi-person project with the goal of creating a remote controlled drone using arduino microcontrollers, basic components, and 3D-printers
 
 ## Table of Contents
 
@@ -14,10 +14,12 @@ This repository contains the software-part of a multi-person project with the go
         - [Radio-Input](#radio-input)
         - [Fight-Control](#fight-control)
         - [Radio-Output](#radio-output)
-      - [Important Helper-Functions](#important-helper-functions)
+      - [Important Helper Functions](#important-helper-functions)
         - [`setDeltaTime`](#setdeltatime)
         - [`sendRadio`](#sendradio)
         - [Activation and De-activation Functions](#activation-and-de-activation-functions)
+    - [Other Important Classes](#other-important-classes)
+      - [`PID`](#pid)
 
 ## Abstract
 
@@ -31,11 +33,11 @@ This repository contains the software-part of a multi-person project with the go
 
 ### How [`Drone.ino`](Drone/Drone.ino) Works
 
-[`Drone.ino`](Drone/Drone.ino) is the sketch-file for the drone and, by using both public `Arduino` libraries and the custom-made [`DroneLibrary`](DroneLibrary), it handles the control flow for the drone.
+[`Drone.ino`](Drone/Drone.ino) is the sketch file for the drone and, by using both public `Arduino` libraries and the custom-made [`DroneLibrary`](DroneLibrary), it handles the control flow for the drone.
 
 #### Setup
 
-As with most `Arduino`-sketches, the [`Drone.ino`](Drone/Drone.ino)-file includes a setup-function.
+As with most `Arduino` sketches, the [`Drone.ino`](Drone/Drone.ino) file includes a setup-function.
 
 ```cpp
 void setup() {
@@ -91,11 +93,11 @@ void setup() {
 }
 
 ```
-Lastley, the time-variable is initialized and a message is pushed that will send immediately when the drone is connected to the controller 
+Lastley, the time variable is initialized and a message is pushed that will send immediately when the drone is connected to the controller 
 
 #### Main-Loop
 
-The main controll-flow is found within the `loop`-function and can be devided up into three sections: radio-input, flight-control, and radio-output, but before that, at the top of the block, the `setDeltaTime` function is used to set the current time-delta.
+The main controll-flow is found within the `loop` function and can be devided up into three sections: radio input, flight control, and radio output, but before that, at the top of the block, the `setDeltaTime` function is used to set the current time-delta.
 
 ##### Radio-Input
 
@@ -119,7 +121,7 @@ void loop() {
 }
 ```
 
-This part of the code periodically checks if a radio message is available and, if so, it reads it and interperates the message. The messages are passed through a switch that checks their message-type (as defined in [`RadioData.h`](DroneLibrary/RadioData.h)) and executes a set of instructions based on what type of message it is.
+This part of the code periodically checks if a radio message is available and, if so, it reads it and interperates the message. The messages are passed through a switch that checks their message type (as defined in [`RadioData.h`](DroneLibrary/RadioData.h)) and executes a set of instructions based on what type of message it is.
 
 ##### Fight-Control
 
@@ -146,9 +148,9 @@ void loop() {
 }
 ```
 This part of the code updates the drone's sensor readings and calculates the required power for each motor, if the drone is activated. 
-- Firstly, the `update`-method from the [Orientation](DroneLibrary/Orientation.h)-class is called in order to collect, and proccess, data from the drone's gyroscope.
-- Secondly, the new values are passed into the [`MotorController`](DroneLibrary/MotorController.h)-class' `calculatePower`-method in order to calculate the optimal motor-powers for the current moment.
-- Lastley, the `Arduino` `analogWrite`-function is used with digital pins in order to create a `PWM`-signal to the motors.
+- Firstly, the `update` method from the [Orientation](DroneLibrary/Orientation.h) class is called in order to collect, and proccess, data from the drone's gyroscope.
+- Secondly, the new values are passed into the [`MotorController`](DroneLibrary/MotorController.h) class' `calculatePower`-method in order to calculate the optimal motor powers for the current moment.
+- Lastley, the `Arduino` `analogWrite` function is used with digital pins in order to create a `PWM` signal to the motors.
 
 If the drone isn't activated, it periodically sends a message to the controller which displays that it is connected and ready to be activated.
 
@@ -166,7 +168,7 @@ void loop() {
 }
 ```
 
-This part of the code controlls the radio-output of the drone. It periodically sends its saved up output-messages, saved in a [`RadioSendStack`](DroneLibrary/RadioSendStack.h)-object, and sequences new telemetry-messages with the `sequenceTelemetry`-function.
+This part of the code controlls the radio-output of the drone. It periodically sends its saved up output-messages, saved in a [`RadioSendStack`](DroneLibrary/RadioSendStack.h) object, and sequences new telemetry messages with the `sequenceTelemetry` function.
 
 ```cpp
 void sequenceTelemetry() {
@@ -184,7 +186,7 @@ void sequenceTelemetry() {
 }
 ```
 
-#### Important Helper-Functions
+#### Important Helper Functions
 
 ##### `setDeltaTime`
 
@@ -221,11 +223,11 @@ void sendRadio() {
     radio.startListening();
 }
 ```
-It begins by stoping the radio-device from listening to messages, which is required in order to write messages, and enters into a loop that continues until either:
+It begins by stoping the radio device from listening to messages, which is required in order to write messages, and enters into a loop that continues until either:
 - There are no more messages to send.
 - A message fails to send.
 
-It ends by reactivating the listening capabilities of the radio-device.
+It ends by reactivating the listening capabilities of the radio device.
 
 ##### Activation and De-activation Functions
 
@@ -278,4 +280,16 @@ void deactivate() {
 }
 ```
 
-The activation and de-activation functions start of by calling the begin and end methods on the [`Orientation`](DroneLibrary/Orientation.h)-class respectively, and sets an activation-flag to be either true or false respectively. After, they proceed to either ramp up or down the motors to or from 50% respectively. They end of by queueing a message to be sent by radio, informing the user that the drone is either activated or deactivated. Additionally, the deactivation function also ensures that all the motor-pins are turned off completely.
+The activation and de-activation functions start of by calling the begin and end methods on the [`Orientation`](DroneLibrary/Orientation.h) class respectively, and sets an activation flag to be either true or false respectively. After, they proceed to either ramp up or down the motors to or from 50% respectively. They end of by queueing a message to be sent by radio, informing the user that the drone is either activated or deactivated. Additionally, the deactivation function also ensures that all the motor pins are turned off completely.
+
+### Other Important Classes
+
+For the drone to function propperly, multiple classes were created to handle critical tasks.
+
+#### `PID`
+
+The [`PID`](DroneLibrary/PIDController.h) class implements a standard PID-controller with a scalar value for each of the current **proportional** error, the cumulative **integral** of the error, and the current **dirivitive** of the error
+
+To use the class, first create an object. Then, use the `setConstants` method to set a pointer the scalar values, and use the `setTarget` method to set a pointer to the PID-controllers target value. Lastly, to aquire the controllers output, use the `calculate` method.
+
+> **_NOTE:_** Pointers are used with the `setConstants` and `setTarget` methods to simplify code when changeing values
