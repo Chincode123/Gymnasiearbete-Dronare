@@ -20,6 +20,7 @@ This repository contains the software-part of a multi-person project with the go
         - [Activation and De-activation Functions](#activation-and-de-activation-functions)
     - [Other Important Classes](#other-important-classes)
       - [`PID`](#pid)
+      - [`MotorController`](#motorcontroller)
 
 ## Abstract
 
@@ -78,7 +79,7 @@ void setup() {
 }
 ```
 Secondly, the motors are configured
-- First, values for the [`MotorController`](DroneLibrary/MotorController.h) class are set
+- First, values for the [`MotorController`](#motorcontroller) class are set
 - Then, the pin-mode's for the motor-pins are set to ouput
 
 ```cpp
@@ -149,7 +150,7 @@ void loop() {
 ```
 This part of the code updates the drone's sensor readings and calculates the required power for each motor, if the drone is activated. 
 - Firstly, the `update` method from the [Orientation](DroneLibrary/Orientation.h) class is called in order to collect, and proccess, data from the drone's gyroscope.
-- Secondly, the new values are passed into the [`MotorController`](DroneLibrary/MotorController.h) class' `calculatePower`-method in order to calculate the optimal motor powers for the current moment.
+- Secondly, the new values are passed into the [`MotorController`](#motorcontroller) class' `calculatePower` method in order to calculate the optimal motor powers for the current moment.
 - Lastley, the `Arduino` `analogWrite` function is used with digital pins in order to create a `PWM` signal to the motors.
 
 If the drone isn't activated, it periodically sends a message to the controller which displays that it is connected and ready to be activated.
@@ -290,6 +291,48 @@ For the drone to function propperly, multiple classes were created to handle cri
 
 The [`PID`](DroneLibrary/PIDController.h) class implements a standard PID-controller with a scalar value for each of the current **proportional** error, the cumulative **integral** of the error, and the current **dirivitive** of the error
 
+```cpp
+class PID {
+    const float *p, *i, *d;
+    float *targetValue;
+    float previousError;
+    float integral;
+public:
+    float calculate(float inputValue, float deltaTime);
+    void setTarget(float *targetValue);
+    void setConstants(const float *p, const float *i, const float *d);
+};
+```
+
 To use the class, first create an object. Then, use the `setConstants` method to set a pointer the scalar values, and use the `setTarget` method to set a pointer to the PID-controllers target value. Lastly, to aquire the controllers output, use the `calculate` method.
 
 > **_NOTE:_** Pointers are used with the `setConstants` and `setTarget` methods to simplify code when changeing values
+
+#### `MotorController`
+
+The [`MotorController`](DroneLibrary/MotorController.h) class combines multiple [`PID-controllers`](#pid) to handle the pitch, roll, and vertical velocity of the drone.
+
+```cpp
+class MotorController {
+public:    
+    MotorController(int8_t& motorPowerTL, int8_t& motorPowerTR, int8_t& motorPowerBR, int8_t& motorPowerBL);
+
+    void setTargetValues(float *targetVelocity, float *targetPitch, float *targetRoll);
+    void setVelocityConstants(const PID_Instructions &values);
+    void setPitchConstants(const PID_Instructions &values);
+    void setRollConstants(const PID_Instructions &values);
+
+    void calculatePower(float velocity, float pitch, float roll, float deltaTime);
+private:
+    int8_t &motorPowerTL, &motorPowerTR, &motorPowerBR, &motorPowerBL;
+
+    PID velocityController;
+    PID pitchController;
+    PID rollController;
+};
+```
+
+To use the class, first create an object by passing references to the motor power variables. Then, use the `setTargetValues` method to set pointers to the target values for velocity, pitch, and roll. Use the `setVelocityConstants`, `setPitchConstants`, and `setRollConstants` methods to set the PID constants for each respective controller. Lastly, to calculate the motor power values, use the `calculatePower` method by passing the current velocity, pitch, roll, and delta time.
+
+> **_NOTE:_** Pointers are used with the `setTargetValues` and PID constant methods to simplify code when changing values.
+
