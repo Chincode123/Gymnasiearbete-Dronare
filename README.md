@@ -1,10 +1,10 @@
-# Remote-Controlled Drone
+# Remote Controlled Drone
 
 This repository contains the software-part of a multi-person project with the goal of creating a remote controlled drone using arduino microcontrollers, basic components, and 3D-printers
 
 ## Table of Contents
 
-- [Remote-Controlled Drone](#remote-controlled-drone)
+- [Remote Controlled Drone](#remote-controlled-drone)
   - [Table of Contents](#table-of-contents)
   - [Abstract](#abstract)
   - [Drone](#drone)
