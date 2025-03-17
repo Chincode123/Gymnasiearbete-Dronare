@@ -42,6 +42,9 @@ bool Message::set(uint8_t type) {
         case _MSG_RECEIVER_DELTATIME:
             length = _MSG_LENGTH_DELTATIME;
             break;
+        case _MSG_DRONE_MOTOR_POWERS:
+            length = _MSG_LENGTH_MOTOR_POWERS;
+            break;
         case _MSG_ACKNOWLEDGE:
             length = _MSG_LEGNTH_ACKNOWLEDGE;
         break;

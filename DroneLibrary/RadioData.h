@@ -26,6 +26,7 @@
 #define _MSG_DRONE_ANGLES 16
 #define _MSG_DRONE_DELTATIME 17
 #define _MSG_RECEIVER_DELTATIME 18
+#define _MSG_DRONE_MOTOR_POWERS 19
 
 // message length in bytes
 #define _MSG_LENGHT_CONTROLLER 3
@@ -39,6 +40,7 @@
 #define _MSG_LENGTH_ANGLES 12
 #define _MSG_LENGTH_DELTATIME 4
 #define _MSG_LEGNTH_ACKNOWLEDGE 1
+#define _MSG_LENGTH_MOTOR_POWERS 4
 
 struct controllerInstructions {
     int8_t stick_X;
@@ -57,6 +59,10 @@ struct TargetRangeInstructions {
 struct RadioMessage {
     uint8_t messageType;
     uint8_t dataBuffer[31];
+};
+
+struct MotorPowers {
+    int8_t TL, TR, BR, BL;
 };
 
 bool configureRadio(RF24& radio);

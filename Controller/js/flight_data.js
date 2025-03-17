@@ -79,6 +79,12 @@ function collectFlightData() {
             app: parseInt(document.getElementById("app-update").innerText),
             drone: parseInt(document.getElementById("drone-update").innerText),
             receiver: parseInt(document.getElementById("receiver-update").innerText)
+        },
+        motorPowers: {
+            frontLeft: parseFloat(document.getElementById("motor-fl").innerText.replace('%', '')),
+            frontRight: parseFloat(document.getElementById("motor-fr").innerText.replace('%', '')),
+            backLeft: parseFloat(document.getElementById("motor-bl").innerText.replace('%', '')),
+            backRight: parseFloat(document.getElementById("motor-br").innerText.replace('%', ''))
         }
     };
 

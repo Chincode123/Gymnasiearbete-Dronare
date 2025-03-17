@@ -20,4 +20,9 @@ Each flight data file contains the following structure:
     - `app`: The application update rate.
     - `drone`: The drone update rate.
     - `receiver`: The receiver update rate.
+  - `motorPowers`: The motor power values for each motor as a percentage between 0% and 100%:
+    - `frontLeft`: The power of the front-left motor.
+    - `frontRight`: The power of the front-right motor.
+    - `backLeft`: The power of the back-left motor.
+    - `backRight`: The power of the back-right motor.
 

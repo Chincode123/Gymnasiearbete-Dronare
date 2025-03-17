@@ -385,4 +385,9 @@ void sequenceTelemetry() {
   messageOut.messageType = _MSG_DRONE_DELTATIME;
   memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));
   sendStack.push(messageOut);
+
+  messageOut.messageType = _MSG_DRONE_MOTOR_POWERS;
+  MotorPowers motorPowers = {motorPowerTL, motorPowerTR, motorPowerBR, motorPowerBL};
+  memcpy(messageOut.dataBuffer, motorPowers, sizeof(motorPowers));
+  sendStack.push(messageOut);
 }

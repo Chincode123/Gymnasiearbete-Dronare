@@ -26,7 +26,8 @@ class SerialMessage {
 		[15, "drone-angular-velocity"],
 		[16, "drone-angles"],
 		[17, "drone-delta-time"],
-		[18, "receiver-delta-time"]
+		[18, "receiver-delta-time"],
+		[19, "drone-motor-powers"]
 	]);
 
 	static messageTypeFromName = new Map([
@@ -48,7 +49,8 @@ class SerialMessage {
 		["drone-angular-velocity", 15],
 		["drone-angles", 16],
 		["drone-delta-time", 17],
-		["receiver-delta-time", 18]
+		["receiver-delta-time", 18],
+		["drone-motor-powers", 19]
 	]);
 
 	static messageLengths = new Map([
@@ -70,7 +72,8 @@ class SerialMessage {
 		[SerialMessage.messageTypeFromName.get("drone-angular-velocity"), 12],
 		[SerialMessage.messageTypeFromName.get("drone-angles"), 12],
 		[SerialMessage.messageTypeFromName.get("drone-delta-time"), 4],
-		[SerialMessage.messageTypeFromName.get("receiver-delta-time"), 4]
+		[SerialMessage.messageTypeFromName.get("receiver-delta-time"), 4],
+		[SerialMessage.messageTypeFromName.get("drone-motor-powers"), 4]
 	]);
 
 	set(type) {
@@ -149,6 +152,16 @@ class SerialReader {
 	readDeltaTime(data) {
 		const floatValues = new Float32Array(data.buffer);
 		return floatValues[0];
+	}
+
+	readMotorPowers(data) {
+		const powers = new Int8Array(data.buffer);
+		return {
+			top_rigth: powers[0],
+			top_left: powers[1],
+			bottom_left: powers[2],
+			bottom_right: powers[3]
+		}
 	}
 }
 const serialReader = new SerialReader();
@@ -401,6 +414,8 @@ async function read() {
 								document.getElementById("roll-value").innerHTML = angles.y.toFixed(2);
 								document.getElementById("yaw-value").innerHTML = angles.z.toFixed(2);
 							}
+
+							// update rates
 							else if (result.messageTypeName == "drone-delta-time") {
 								const updateRate = 1 / serialReader.readDeltaTime(result.data);
 								document.getElementById("drone-update").innerHTML = updateRate.toFixed(0);
@@ -408,6 +423,15 @@ async function read() {
 							else if (result.messageTypeName == "receiver-delta-time") {
 								const updateRate = 1 / serialReader.readDeltaTime(result.data);
 								document.getElementById("receiver-update").innerHTML = updateRate.toFixed(0);
+							}
+
+							// motor powers
+							else if (result.messageTypeName == "drone-motor-powers") {
+								const motorPowers = serialReader.readMotorPowers(result.data);
+								document.getElementById("motor-fl").innerHTML = ((motorPowers.top_left + 127) / 255 * 100).toFixed(0) + "%";
+								document.getElementById("motor-fr").innerHTML = ((motorPowers.top_rigth + 127) / 255 * 100).toFixed(0) + "%";
+								document.getElementById("motor-bl").innerHTML = ((motorPowers.bottom_left + 127) / 255 * 100).toFixed(0) + "%";
+								document.getElementById("motor-br").innerHTML = ((motorPowers.bottom_right + 127) / 255 * 100).toFixed(0) + "%";
 							}
 						}
 					}
