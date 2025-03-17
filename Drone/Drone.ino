@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
@@ -77,9 +78,9 @@ void setup() {
 
     // Set up motor controller
     motorController.setTargetValues(&targetVelocity, &targetPitch, &targetRoll);
-    motorController.setVelocityConstants(&PID_Velocity);
-    motorController.setPitchConstants(&PID_Pitch);
-    motorController.setRollConstants(&PID_Roll);
+    motorController.setVelocityConstants(PID_Velocity);
+    motorController.setPitchConstants(PID_Pitch);
+    motorController.setRollConstants(PID_Roll);
 
     pinMode(MOTOR_TL_Pin, OUTPUT);
     pinMode(MOTOR_TR_Pin, OUTPUT);
@@ -183,7 +184,8 @@ void loop() {
                 maxRoll = targetRangesIn.rollMax;
                 break;
             case _MSG_REQUEST_TARGET_RANGES:
-                TargetRangeInstructions targetRangesOut; = {maxPitch, maxRoll, maxVelocity};
+                TargetRangeInstructions targetRangesOut;
+                targetRangesOut = {maxPitch, maxRoll, maxVelocity};
                 memcpy(messageOut.dataBuffer, &targetRangesOut, sizeof(targetRangesOut));
                 messageOut.messageType = _MSG_SET_TARGET_RANGES;
                 sendStack.push(messageOut);
@@ -363,9 +365,12 @@ void deactivate() {
 template<typename T>
 void sequenceVector(vector3<T> vector, uint8_t messageType) {
   messageOut.messageType = messageType;
-  memcpy(messageOut.dataBuffer + sizeof(float) * 0, (void*)(float(vector.x)), sizeof(float));
-  memcpy(messageOut.dataBuffer + sizeof(float) * 1, (void*)(float(vector.y)), sizeof(float));
-  memcpy(messageOut.dataBuffer + sizeof(float) * 2, (void*)(float(vector.z)), sizeof(float));
+  float x = float(vector.x);
+  float y = float(vector.y);
+  float z = float(vector.z);
+  memcpy(messageOut.dataBuffer + sizeof(float) * 0, &x, sizeof(float));
+  memcpy(messageOut.dataBuffer + sizeof(float) * 1, &y, sizeof(float));
+  memcpy(messageOut.dataBuffer + sizeof(float) * 2, &z, sizeof(float));
   sendStack.push(messageOut);
 }
 

@@ -1,6 +1,7 @@
 #ifndef MOTORCONTROL_H_
 #define MOTORCONTROL_H_
 
+#include <Arduino.h>
 #include "PIDController.h"
 #include "RadioData.h"
 

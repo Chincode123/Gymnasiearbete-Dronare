@@ -1,6 +1,7 @@
 #ifndef ORIENTATION_H_
 #define ORIENTATION_H_
 
+#include <Arduino.h>
 #include "Vectors.h"
 #include "SmoothValue.h"
 
@@ -13,7 +14,7 @@ class Orientation {
     
     vector3<float> rawAngularVelocity;
     vector3<float> previousAccelerationAngles;
-    vector3<SmoothValue> anglularVelocityError;
+    vector3<SmoothValue> angularVelocityError;
 
     void readFromIMU(vector3<float>& acceleration, vector3<float>& angularVelocity);
     void readFromIMU();
@@ -27,7 +28,7 @@ class Orientation {
 
     float limitAngle(float angle);
 public:
-    Orientation(uint8_t MPU);
+    Orientation(uint8_t MPUAddress);
 
     void begin();
     void begin(uint16_t errorCycles);

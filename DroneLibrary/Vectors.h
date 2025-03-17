@@ -1,68 +1,105 @@
 #ifndef VECTORS_H_
 #define VECTORS_H_
 
-// 3-Dimensional vector
+#include <Arduino.h>
+
 template<typename T>
 struct vector3 {
     T x, y, z;
 
-    float magnitude();
+    float magnitude() {
+        return sqrt((*this) * (*this));
+    }
 
-    // Assignment operator
     template<typename U>
-    vector3<T>& operator=(const vector3<U>& other);
+    vector3<T>& operator=(const vector3<U>& other) {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
 };
 
-// Add two vectors
-// return: u + v 
 template<typename T, typename U>
-vector3<T> operator+(const vector3<T>& u, const vector3<U>& v);
-template<typename T, typename U>
-vector3<T>& operator+=(vector3<T>& u, const vector3<U>& v);
+vector3<T> operator+(const vector3<T>& u, const vector3<U>& v) {
+    return {u.x + v.x, u.y + v.y, u.z + v.z};
+}
 
-// Subtract two vectors
-// return: u - v 
 template<typename T, typename U>
-vector3<T> operator-(const vector3<T>& u, const vector3<U>& v);
+vector3<T>& operator+=(vector3<T>& u, const vector3<U>& v) {
+    u.x += v.x;
+    u.y += v.y;
+    u.z += v.z;
+    return u;
+}
+
 template<typename T, typename U>
-vector3<T>& operator-=(vector3<T>& u, const vector3<U>& v);
+vector3<T> operator-(const vector3<T>& u, const vector3<U>& v) {
+    return {u.x - v.x, u.y - v.y, u.z - v.z};
+}
 
-// Dot product of two vectors
-// return: u *(dot) v 
 template<typename T, typename U>
-float operator*(const vector3<T>& u, const vector3<U>& v);
+vector3<T>& operator-=(vector3<T>& u, const vector3<U>& v) {
+    u.x -= v.x;
+    u.y -= v.y;
+    u.z -= v.z;
+    return u;
+}
 
-// Multiplies a vector with a scalar
-// return: (vector)u * (scalar)v 
-template<typename T>
-vector3<T> operator*(const vector3<T>& u, float a);
-template<typename T>
-vector3<T>& operator*=(vector3<T>& u, float a);
-
-// Divides a vector with a scalar
-// return: (vector)u / (scalar)a 
-template<typename T>
-vector3<T> operator/(const vector3<T>& u, float a);
-template<typename T>
-vector3<T>& operator/=(vector3<T>& u, float a);
-
-// Add vectors: a and b
 template<typename T, typename U>
-vector3<T> addVectors(const vector3<T>& a, const vector3<U>& b);
-
-// Subtracts vector: b from vector: a
-template<typename T, typename U>
-vector3<T> subtractVectors(const vector3<T>& a, const vector3<U>& b);
-
-// Dot product of vectors: a and b
-template<typename T, typename U>
-float dotProduct(const vector3<T>& a, const vector3<U>& b);
+float operator*(const vector3<T>& u, const vector3<U>& v) {
+    return u.x * v.x + u.y * v.y + u.z * v.z;
+}
 
 template<typename T>
-float vectorMagnitude(const vector3<T>& a);
+vector3<T> operator*(const vector3<T>& u, float a) {
+    return {u.x * a, u.y * a, u.z * a};
+}
 
-// Projects vector: a on vector: b
+template<typename T>
+vector3<T>& operator*=(vector3<T>& u, float a) {
+    u.x *= a;
+    u.y *= a;
+    u.z *= a;
+    return u;
+}
+
+template<typename T>
+vector3<T> operator/(const vector3<T>& u, float a) {
+    return {u.x / a, u.y / a, u.z / a};
+}
+
+template<typename T>
+vector3<T>& operator/=(vector3<T>& u, float a) {
+    u.x /= a;
+    u.y /= a;
+    u.z /= a;
+    return u;
+}
+
 template<typename T, typename U>
-vector3<T> projectVector(const vector3<T>& a, const vector3<U>& b);
+vector3<T> addVectors(const vector3<T>& a, const vector3<U>& b) {
+    return a + b;
+}
+
+template<typename T, typename U>
+vector3<T> subtractVectors(const vector3<T>& a, const vector3<U>& b) {
+    return a - b;
+}
+
+template<typename T, typename U>
+float dotProduct(const vector3<T>& a, const vector3<U>& b) {
+    return a * b;
+}
+
+template<typename T>
+float vectorMagnitude(const vector3<T>& a) {
+    return a.magnitude();
+}
+
+template<typename T, typename U>
+vector3<T> projectVector(const vector3<T>& a, const vector3<U>& b) {
+    return b * (a * b / (b * b));
+}
 
 #endif

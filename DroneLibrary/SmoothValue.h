@@ -5,7 +5,7 @@ public:
     SmoothValue(float smoothingFactor);
     SmoothValue(float smoothingFactor, float initialValue);
     
-    operator float();
+    operator float() const;
     
     SmoothValue& operator=(float newValue);
     

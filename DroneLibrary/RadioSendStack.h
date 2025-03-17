@@ -22,7 +22,7 @@ public:
     RadioSendStack() : firstElement(nullptr), lastElement(nullptr), count(0) {}
     ~RadioSendStack();
 
-    uint8_t getCount();
+    uint8_t getCount() const;
 
     bool push(const RadioMessage& data);
     bool queue(const RadioMessage& data);

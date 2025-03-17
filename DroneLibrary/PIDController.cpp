@@ -15,7 +15,7 @@ void PID::setTarget(float *targetValue) {
     this->targetValue = targetValue;
 }
 
-void PID::setConstants(float *p, float *i, float *d) {
+void PID::setConstants(const float *p, const float *i, const float *d) {
     this->p = p;
     this->i = i;
     this->d = d;

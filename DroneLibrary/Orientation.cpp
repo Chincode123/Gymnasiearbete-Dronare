@@ -2,11 +2,12 @@
 #include <Wire.h>
 #include <Arduino.h>
 
-Orientation::Orientation(uint8_t MPU) : 
-    MPU(MPU),
-    angles({SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}),
-    velocity({SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}),
-    anglularVelocityError({SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}) { }
+Orientation::Orientation(uint8_t MPUAddress) : 
+    MPU(MPUAddress),
+    angles(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}),
+    velocity(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}),
+    angularVelocityError(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)})
+{ }
 
 void Orientation::begin() {
     begin(300);
@@ -138,9 +139,12 @@ void Orientation::calculateAngles(float deltaTime) {
     angles.y = limitAngle(angles.y);
     angles.z = limitAngle(angles.z);
 
-    anglularVelocityError.set(rawAngularVelocity - ((accelerationAngles - previousAccelerationAngles) / deltaTime));
+    vector3<float> unsmothedAngularVelocityError = rawAngularVelocity - ((accelerationAngles - previousAccelerationAngles) / deltaTime);
+    angularVelocityError.x.set(unsmothedAngularVelocityError.x);
+    angularVelocityError.y.set(unsmothedAngularVelocityError.y);
+    angularVelocityError.z.set(unsmothedAngularVelocityError.z);
     previousAccelerationAngles = accelerationAngles;
-    angularVelocity = rawAngularVelocity + anglularVelocityError;
+    angularVelocity = rawAngularVelocity + angularVelocityError;
 }
 
 void Orientation::calculateVelocity(float deltaTime) {

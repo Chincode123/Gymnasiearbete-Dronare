@@ -4,7 +4,7 @@ SmoothValue::SmoothValue(float smoothingFactor) : value(0), smoothingFactor(smoo
 
 SmoothValue::SmoothValue(float smoothingFactor, float initialValue) : value(initialValue), smoothingFactor(smoothingFactor) {}
 
-SmoothValue::operator float() {
+SmoothValue::operator float() const {
     return value;
 }
 
