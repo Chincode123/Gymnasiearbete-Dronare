@@ -1,23 +1,23 @@
 # Remote Controlled Drone
 
-This repository contains the software-part of a multi-person project with the goal of creating a remote controlled drone using arduino microcontrollers, basic components, and 3D-printers
+This repository contains the software part of a multi-person project with the goal of creating a remote-controlled drone using Arduino microcontrollers, basic components, and 3D printers.
 
 ## Table of Contents
 
 - [Remote Controlled Drone](#remote-controlled-drone)
   - [Table of Contents](#table-of-contents)
-  - [Abstract](#abstract)
+  - [Project Abstract](#project-abstract)
   - [Drone](#drone)
     - [Basic Structure](#basic-structure)
       - [Setup](#setup)
-      - [Main-Loop](#main-loop)
-        - [Radio-Input](#radio-input)
-        - [Fight-Control](#fight-control)
-        - [Radio-Output](#radio-output)
+      - [Main Loop](#main-loop)
+        - [Radio Input](#radio-input)
+        - [Flight Control](#flight-control)
+        - [Radio Output](#radio-output)
       - [Important Helper Functions](#important-helper-functions)
         - [`setDeltaTime`](#setdeltatime)
         - [`sendRadio`](#sendradio)
-        - [Activation and De-activation Functions](#activation-and-de-activation-functions)
+        - [Activation and Deactivation Functions](#activation-and-deactivation-functions)
     - [Important Classes](#important-classes)
       - [`PID`](#pid)
       - [`MotorController`](#motorcontroller)
@@ -27,20 +27,20 @@ This repository contains the software-part of a multi-person project with the go
         - [`vector3<T>`](#vector3t)
         - [`SmoothValue`](#smoothvalue)
         - [Other](#other)
-    - [Summery of Drone](#summery-of-drone)
+    - [Summary of Drone](#summary-of-drone)
   - [Receiver](#receiver)
     - [Basic Structure](#basic-structure-1)
       - [Setup](#setup-1)
-      - [Main-Loop](#main-loop-1)
+      - [Main Loop](#main-loop-1)
         - [Serial Input](#serial-input)
         - [Radio Input](#radio-input-1)
     - [Important Classes](#important-classes-1)
       - [`InstructionHandler`](#instructionhandler)
-    - [Summery of Receiver](#summery-of-receiver)
+    - [Summary of Receiver](#summary-of-receiver)
   - [Control Panel](#control-panel)
     - [Basic Structure](#basic-structure-2)
       - [Setup](#setup-2)
-      - [Main-Loop](#main-loop-2)
+      - [Main Loop](#main-loop-2)
         - [User Input](#user-input)
         - [Serial Communication](#serial-communication)
         - [Data Collection](#data-collection)
@@ -55,17 +55,17 @@ This repository contains the software-part of a multi-person project with the go
     - [How to Use](#how-to-use)
     - [Notes](#notes)
     - [Summary of Simulation](#summary-of-simulation)
-  - [Summery](#summery)
+  - [Summary](#summary)
 
-## Abstract
+## Project Abstract
 
 ....
 
 ## Drone
 
-[`Drone.ino`](Drone/Drone.ino) is intended to be used with an `Arduino MKR Zero` alongside: an `MPU 6050` gyroscope/accelerometer, an `nRF24L01` radio device, and a set of `DarwinFPV 1104` brushless motors.
+[`Drone.ino`](Drone/Drone.ino) is intended to be used with an `Arduino MKR Zero` alongside an [`MPU 6050`](https://www.invensense.com/products/motion-tracking/6-axis/mpu-6050/) gyroscope/accelerometer, an [`nRF24L01`](https://github.com/nRF24/RF24) radio device, and a set of `DarwinFPV 1104` brushless motors.
 
->**_NOTE:_**  Will likely work with other components, with some minor modifications to the code
+> **_NOTE:_** It will likely work with other components, with some minor modifications to the code.
 
 ### Basic Structure
 
@@ -73,14 +73,14 @@ This repository contains the software-part of a multi-person project with the go
 
 #### Setup
 
-As with most `Arduino` sketches, the [`Drone.ino`](Drone/Drone.ino) file includes a setup-function.
+As with most `Arduino` sketches, the [`Drone.ino`](Drone/Drone.ino) file includes a setup function.
 
 ```cpp
 void setup() {
     ...
 
-    while(!radio.begin()) { }
-    while(!configureRadio(radio)) { }
+    while (!radio.begin()) { }
+    while (!configureRadio(radio)) { }
     radio.openWritingPipe(DRONE_ADDRESS);
     radio.openReadingPipe(1, RECEIVER_ADDRESS);
     radio.startListening();
@@ -88,13 +88,14 @@ void setup() {
     ...
 }
 ```
-Firstly, the radio tranceiver is configured:
-- `radio.begin()`, from the [`RF24`](https://github.com/nRF24/RF24) class, is called in order to initialize the radio transceiver
-- `configureRadio(radio)` is called in order to configure the tranceiver's settings
-- Writing and reading pipes are opened with adresses defined in [`RadioData.h`](DroneLibrary/RadioData.h)
-- `radio.startListening()` is called for the tranceiver to start listening for instructions
 
-> **_NOTE:_** The tranceiver's begin and configuration functions are placed into while loops in order to stop the porgramme from proceeding if any part fails.
+Firstly, the radio transceiver is configured:
+- `radio.begin()`, from the [`RF24`](https://github.com/nRF24/RF24) class, is called to initialize the radio transceiver.
+- `configureRadio(radio)` is called to configure the transceiver's settings.
+- Writing and reading pipes are opened with addresses defined in [`RadioData.h`](DroneLibrary/RadioData.h).
+- `radio.startListening()` is called for the transceiver to start listening for instructions.
+
+> **_NOTE:_** The transceiver's begin and configuration functions are placed into while loops to prevent the program from proceeding if any part fails.
 
 ```cpp
 void setup() {
@@ -113,9 +114,9 @@ void setup() {
     ...
 }
 ```
-Secondly, the motors are configured
-- First, values for the [`MotorController`](#motorcontroller) class are set
-- Then, the pin-mode's for the motor-pins are set to ouput
+Secondly, the motors are configured:
+- First, values for the [`MotorController`](#motorcontroller) class are set.
+- Then, the pin modes for the motor pins are set to output.
 
 ```cpp
 void setup() {
@@ -127,21 +128,20 @@ void setup() {
 
     ...
 }
-
 ```
-Lastley, the time variable is initialized and a message is pushed that will send immediately when the drone is connected to the controller 
+Lastly, the time variable is initialized and a message is pushed that will send immediately when the drone is connected to the controller.
 
-#### Main-Loop
+#### Main Loop
 
-The main controll-flow is found within the `loop` function and can be devided up into three sections: radio input, flight control, and radio output, but before that, at the top of the block, the `setDeltaTime` function is used to set the current time-delta.
+The main control flow is found within the `loop` function and can be divided into three sections: radio input, flight control, and radio output. At the top of the block, the `setDeltaTime` function is used to set the current time delta.
 
-##### Radio-Input
+##### Radio Input
 
 ```cpp
 void loop() {
   ...
 
-  while (radio.available() && millis() % 20 != 0){
+  while (radio.available() && millis() % 20 != 0) {
     radio.read(&messageIn, sizeof(messageIn));
     switch (messageIn.messageType) {
       case _MSG_CONTROLLER_INPUT:
@@ -157,9 +157,9 @@ void loop() {
 }
 ```
 
-This part of the code periodically checks if a radio message is available and, if so, it reads it and interperates the message. The messages are passed through a switch that checks their message type (as defined in [`RadioData.h`](DroneLibrary/RadioData.h)) and executes a set of instructions based on what type of message it is.
+This part of the code periodically checks if a radio message is available and, if so, it reads it and interprets the message. The messages are passed through a switch that checks their message type (as defined in [`RadioData.h`](DroneLibrary/RadioData.h)) and executes a set of instructions based on what type of message it is.
 
-##### Fight-Control
+##### Flight Control
 
 ```cpp
 void loop() {
@@ -183,14 +183,14 @@ void loop() {
   ...
 }
 ```
-This part of the code updates the drone's sensor readings and calculates the required power for each motor, if the drone is activated. 
-- Firstly, the `update` method from the [Orientation](DroneLibrary/Orientation.h) class is called in order to collect, and proccess, data from the drone's gyroscope.
-- Secondly, the new values are passed into the [`MotorController`](#motorcontroller) class' `calculatePower` method in order to calculate the optimal motor powers for the current moment.
-- Lastley, the `Arduino` `analogWrite` function is used with digital pins in order to create a `PWM` signal to the motors.
+This part of the code updates the drone's sensor readings and calculates the required power for each motor if the drone is activated. 
+- Firstly, the `update` method from the [Orientation](DroneLibrary/Orientation.h) class is called to collect and process data from the drone's gyroscope.
+- Secondly, the new values are passed into the [`MotorController`](#motorcontroller) class' `calculatePower` method to calculate the optimal motor powers for the current moment.
+- Lastly, the `Arduino` `analogWrite` function is used with digital pins to create a `PWM` signal to the motors.
 
 If the drone isn't activated, it periodically sends a message to the controller which displays that it is connected and ready to be activated.
 
-##### Radio-Output
+##### Radio Output
 
 ```cpp
 void loop() {
@@ -200,11 +200,11 @@ void loop() {
 
   sequenceTelemetry();
 
-...
+  ...
 }
 ```
 
-This part of the code controlls the radio-output of the drone. It periodically sends its saved up output-messages, saved in a [`RadioSendStack`](#radiosendstack) object, and sequences new telemetry messages with the `sequenceTelemetry` function.
+This part of the code controls the radio output of the drone. It periodically sends its saved up output messages, saved in a [`RadioSendStack`](#radiosendstack) object, and sequences new telemetry messages with the `sequenceTelemetry` function.
 
 ```cpp
 void sequenceTelemetry() {
@@ -240,7 +240,7 @@ void setDeltaTime() {
     }
 }
 ```
-It is used in order to set the current time-delta using the `Arduino's` `micros`-function.
+It is used to set the current time delta using the `Arduino's` `micros` function.
 
 ##### `sendRadio`
 
@@ -251,7 +251,7 @@ void sendRadio() {
         RadioMessage message = sendStack.pop();
         bool result = radio.write(&message, sizeof(message));
 
-        if (!result){
+        if (!result) {
             sendStack.push(message);
             break;
         }
@@ -259,13 +259,15 @@ void sendRadio() {
     radio.startListening();
 }
 ```
-It begins by stoping the radio device from listening to messages, which is required in order to write messages, and enters into a loop that continues until either:
+It begins by stopping the radio device from listening to messages, which is required to write messages, and enters into a loop that continues until either:
 - There are no more messages to send.
 - A message fails to send.
 
 It ends by reactivating the listening capabilities of the radio device.
 
-##### Activation and De-activation Functions
+- A reference to the [`RadioSendStack`](#radiosendstack) class is used to manage the list of messages.
+
+##### Activation and Deactivation Functions
 
 ```cpp
 void activate() {
@@ -316,22 +318,22 @@ void deactivate() {
 }
 ```
 
-The activation and de-activation functions start of by calling the begin and end methods on the [`Orientation`](DroneLibrary/Orientation.h) class respectively, and sets an activation flag to be either true or false respectively. After, they proceed to either ramp up or down the motors to or from 50% respectively. They end of by queueing a message to be sent by radio, informing the user that the drone is either activated or deactivated. Additionally, the deactivation function also ensures that all the motor pins are turned off completely.
+The activation and deactivation functions start by calling the begin and end methods on the [`Orientation`](DroneLibrary/Orientation.h) class respectively, and set an activation flag to be either true or false respectively. After, they proceed to either ramp up or down the motors to or from 50% respectively. They end by queuing a message to be sent by radio, informing the user that the drone is either activated or deactivated. Additionally, the deactivation function also ensures that all the motor pins are turned off completely.
 
 ### Important Classes
 
-For the drone to function propperly, multiple classes were created to handle critical tasks.
+For the drone to function properly, multiple classes were created to handle critical tasks.
 
 #### `PID`
 
-The [`PID`](DroneLibrary/PIDController.h) class implements a standard PID-controller with a scalar value for each of the current **proportional** error, the cumulative **integral** of the error, and the current **dirivitive** of the error
+The [`PID`](DroneLibrary/PIDController.h) class implements a standard PID controller with a scalar value for each of the current **proportional** error, the cumulative **integral** of the error, and the current **derivative** of the error.
 
 **To use the class:**
 1. First, create an object. 
    ```cpp
     PID pid;
    ```
-2. Then, use the `setConstants` method to set a pointer to the scalar values, and use the `setTarget` method to set a pointer to the PID-controller's target value. 
+2. Then, use the `setConstants` method to set a pointer to the scalar values, and use the `setTarget` method to set a pointer to the PID controller's target value. 
    ```cpp
     float p = ...
     float i = ...
@@ -377,7 +379,7 @@ The [`MotorController`](DroneLibrary/MotorController.h) class combines multiple 
 
 #### `Orientation`
 
-The [`Orientation`](DroneLibrary/Orientation.h) class is used to collect data from a connected `MPU60X0` gyroscope-accelerometer and process it into usable acceleration, velocity, and Euler-angle vectors.
+The [`Orientation`](DroneLibrary/Orientation.h) class is used to collect data from a connected [`MPU60X0`](https://www.invensense.com/products/motion-tracking/6-axis/mpu-6050/) gyroscope-accelerometer and process it into usable acceleration, velocity, and Euler-angle vectors.
 
 **To use the class:**
 1. First, create an object by passing the MPU address.
@@ -432,15 +434,15 @@ The [`RadioSendStack`](DroneLibrary/RadioSendStack.h) class is used to handle a 
 #### Custom Data Types
 
 ##### `vector3<T>`
-The [`vector3<T>`](DroneLibrary/Vectors.h) struct is a 3-dimensional vector that can be made up of values of any type. It also defines basic vector opperations.
+The [`vector3<T>`](DroneLibrary/Vectors.h) struct is a 3-dimensional vector that can be made up of values of any type. It also defines basic vector operations.
 
 ##### `SmoothValue`
-The [`SmoothValue`](DroneLibrary/SmoothValue.h) class reperesents a floating-point value, but with operations that function like a lerp function, that set the new value somewhere between the current value and the desired value acording to a `smoothingFactor`. 
-> **_NOTE:_** There is also a method to directly set the value without any smoothing
+The [`SmoothValue`](DroneLibrary/SmoothValue.h) class represents a floating-point value, but with operations that function like a lerp function, that set the new value somewhere between the current value and the desired value according to a `smoothingFactor`. 
+> **_NOTE:_** There is also a method to directly set the value without any smoothing.
 
 ##### Other
 
-There are also a few structs defined in [`RadioData.h`](DroneLibrary/RadioData.h) to simplify data handling
+There are also a few structs defined in [`RadioData.h`](DroneLibrary/RadioData.h) to simplify data handling:
 
 - `controllerInstructions` for handling controller input
 ```cpp
@@ -451,14 +453,14 @@ struct controllerInstructions {
 };
 ```
 
-- `PID_Instructions` for handling PID-settings
+- `PID_Instructions` for handling PID settings
 ```cpp
 struct PID_Instructions {
     float k_p, k_i, k_d;
 };
 ```
 
-- `TargetRangeInstructions` for handling the different ranges that the drons target values can reside in
+- `TargetRangeInstructions` for handling the different ranges that the drone's target values can reside in
 ```cpp
 struct TargetRangeInstructions {
     float pitchMax, rollMax, verticalVelocityMax;
@@ -473,13 +475,13 @@ struct RadioMessage {
 };
 ```
 
-### Summery of [Drone](#drone)
+### Summary of [Drone](#drone)
 
-The `Drone.ino` sketch is designed for an Arduino MKR Zero and integrates with various components like the MPU 6050 gyroscope/accelerometer, nRF24L01 radio device, and DarwinFPV 1104 brushless motors. The setup function initializes the radio transceiver and motor configurations, while the main loop handles radio input, flight control, and radio output. Important helper functions include `setDeltaTime` for time calculations and `sendRadio` for managing radio communications. The drone's functionality is supported by several key classes such as `PID`, `MotorController`, `Orientation`, and `RadioSendStack`, which manage tasks like PID control, motor power calculations, orientation data processing, and radio message handling. Custom data types like `vector3<T>` and `SmoothValue` are also used to facilitate data management.
+The `Drone.ino` sketch is designed for an Arduino MKR Zero and integrates with various components like the [`MPU 6050`](https://www.invensense.com/products/motion-tracking/6-axis/mpu-6050/), [`nRF24L01`](https://github.com/nRF24/RF24) radio device, and DarwinFPV 1104 brushless motors. The setup function initializes the radio transceiver and motor configurations, while the main loop handles radio input, flight control, and radio output. Important helper functions include `setDeltaTime` for time calculations and `sendRadio` for managing radio communications. The drone's functionality is supported by several key classes such as `PID`, `MotorController`, `Orientation`, and `RadioSendStack`, which manage tasks like PID control, motor power calculations, orientation data processing, and radio message handling. Custom data types like `vector3<T>` and `SmoothValue` are also used to facilitate data management.
 
 ## Receiver
 
-[`Receiver.ino`](Receiver/Receiver.ino) is intended to be used with an `Arduino UNO` alongside an `nRF24L01` radio device, connected by USB to a computer that is running the [`Control Panel`](#control-panel) program.
+[`Receiver.ino`](Receiver/Receiver.ino) is intended to be used with an `Arduino UNO` alongside an [`nRF24L01`](https://github.com/nRF24/RF24) radio device, connected by USB to a computer that is running the [`Control Panel`](#control-panel) program.
 
 ### Basic Structure
 
@@ -487,7 +489,7 @@ The `Drone.ino` sketch is designed for an Arduino MKR Zero and integrates with v
 
 #### Setup
 
-As with most `Arduino` sketches, the [`Receiver.ino`](Receiver/Receiver.ino) file includes a setup-function.
+As with most `Arduino` sketches, the [`Receiver.ino`](Receiver/Receiver.ino) file includes a setup function.
 
 ```cpp
 void setup() {
@@ -510,16 +512,16 @@ void setup() {
 ```
 
 Firstly, the radio transceiver is configured:
-- `radio.begin()`, from the [`RF24`](https://github.com/nRF24/RF24) class, is called in order to initialize the radio transceiver.
-- `configureRadio(radio)` is called in order to configure the transceiver's settings.
+- `radio.begin()`, from the [`RF24`](https://github.com/nRF24/RF24) class, is called to initialize the radio transceiver.
+- `configureRadio(radio)` is called to configure the transceiver's settings.
 - Writing and reading pipes are opened with addresses defined in [`RadioData.h`](DroneLibrary/RadioData.h).
 - `radio.startListening()` is called for the transceiver to start listening for instructions.
 
-> **_NOTE:_** The transceiver's begin and configuration functions are placed into while loops in order to stop the program from proceeding if any part fails.
+> **_NOTE:_** The transceiver's begin and configuration functions are placed into while loops to prevent the program from proceeding if any part fails.
 
-#### Main-Loop
+#### Main Loop
 
-The main control-flow is found within the `loop` function and can be divided up into two sections: serial input and radio input.
+The main control flow is found within the `loop` function and can be divided into two sections: serial input and radio input.
 
 ##### Serial Input
 
@@ -601,9 +603,9 @@ The [`InstructionHandler`](DroneLibrary/InstructionHandler.h) class is used to m
    instructionHandler.acknowledge(messageType);
    ```
 
-### Summery of [Receiver](#receiver)
+### Summary of [Receiver](#receiver)
 
-The `Receiver.ino` sketch acts as a bridge between the drone and the controller. It uses an `nRF24L01` radio device to communicate with the drone and a serial connection to communicate with the controller. The sketch relies on the `InstructionHandler` class to manage serial communication and ensures that messages are properly relayed between the two systems. The setup function initializes the radio transceiver, while the main loop handles serial input, radio communication, and message forwarding. Additionally, the receiver ensures acknowledgment of serial messages and processes drone logs for better debugging and monitoring.
+The `Receiver.ino` sketch acts as a bridge between the drone and the controller. It uses an [`nRF24L01`](https://github.com/nRF24/RF24) radio device to communicate with the drone and a serial connection to communicate with the controller. The sketch relies on the `InstructionHandler` class to manage serial communication and ensures that messages are properly relayed between the two systems. The setup function initializes the radio transceiver, while the main loop handles serial input, radio communication, and message forwarding. Additionally, the receiver ensures acknowledgment of serial messages and processes drone logs for better debugging and monitoring.
 
 ## Control Panel
 
@@ -621,7 +623,7 @@ The setup process involves initializing the serial connection and setting up eve
 - Periodic read and write operations are scheduled to handle communication with the receiver.
 - A message is logged to the terminal upon successful connection.
 
-#### Main-Loop
+#### Main Loop
 
 The main control flow is divided into two sections: user input and serial communication.
 
@@ -809,4 +811,16 @@ The simulation is a Unity-based project designed to calibrate the PID settings f
 
 The simulation provides a virtual environment for testing and calibrating the drone's PID settings. It allows users to adjust parameters like proportional, integral, and derivative constants, as well as the drone's mass and center of mass, in real-time. By visualizing propeller forces, velocity, and orientation, users can refine the drone's stability and behavior before applying changes to the physical hardware. While not a substitute for real-world testing, the simulation serves as a valuable tool for approximating and optimizing flight performance.
 
-## Summery
+## Summary
+
+This project involves the development of a remote-controlled drone using Arduino microcontrollers, basic components, and 3D-printed parts. The software is divided into four main components:
+
+1. **Drone**: The core flight system, implemented on an Arduino MKR Zero, integrates sensors like the MPU 6050 and nRF24L01 radio for communication. It uses custom classes for PID control, motor management, and orientation tracking to ensure stable flight.
+
+2. **Receiver**: Acts as a bridge between the drone and the control panel, using an Arduino UNO and nRF24L01 radio to relay messages. It manages serial communication with the control panel and radio communication with the drone.
+
+3. **Control Panel**: A web-based application that provides an interface for controlling the drone, adjusting PID values, and monitoring telemetry. It supports multiple input methods and includes features for data collection and analysis.
+
+4. **Simulation**: A Unity-based virtual environment for testing and calibrating PID settings. It allows users to visualize and refine the drone's behavior before applying changes to the physical hardware.
+
+The project emphasizes modularity, with reusable classes and data structures, and provides tools for both real-world and simulated testing to optimize drone performance.
