@@ -39,8 +39,17 @@ This repository contains the software-part of a multi-person project with the go
     - [Summery of Receiver](#summery-of-receiver)
   - [Controller](#controller)
     - [Basic Structure](#basic-structure-2)
+      - [Setup](#setup-2)
+      - [Main-Loop](#main-loop-2)
+        - [User Input](#user-input)
+        - [Serial Communication](#serial-communication)
+        - [Data Collection](#data-collection)
     - [Important Classes](#important-classes-2)
-    - [Summery of Controller](#summery-of-controller)
+      - [`SerialMessage`](#serialmessage)
+      - [`SerialReader`](#serialreader)
+      - [`Terminal`](#terminal)
+      - [`WritingHandler`](#writinghandler)
+    - [Summary of Controller](#summary-of-controller)
   - [Simulation](#simulation)
   - [Summery](#summery)
 
@@ -590,15 +599,178 @@ The [`InstructionHandler`](DroneLibrary/InstructionHandler.h) class is used to m
 
 ### Summery of [Receiver](#receiver)
 
-The `Receiver.ino` sketch acts as a bridge between the drone and the controller. It uses an `nRF24L01` radio device to communicate with the drone and a serial connection to communicate with the controller. The sketch relies on the `InstructionHandler` class to manage serial communication and ensures that messages are properly relayed between the two systems. The setup function initializes the radio transceiver, while the main loop handles serial input, radio communication, and message forwarding.
+The `Receiver.ino` sketch acts as a bridge between the drone and the controller. It uses an `nRF24L01` radio device to communicate with the drone and a serial connection to communicate with the controller. The sketch relies on the `InstructionHandler` class to manage serial communication and ensures that messages are properly relayed between the two systems. The setup function initializes the radio transceiver, while the main loop handles serial input, radio communication, and message forwarding. Additionally, the receiver ensures acknowledgment of serial messages and processes drone logs for better debugging and monitoring.
 
 ## Controller
 
+The `Controller` is a web-based application designed to interact with the drone via the [`Receiver`](#receiver). It provides a graphical interface for controlling the drone, adjusting PID values, and monitoring telemetry data.
+
 ### Basic Structure
+
+The `Controller` application is built using HTML, CSS, and JavaScript. It handles the control flow for interacting with the drone and receiver by using both browser APIs and custom JavaScript classes.
+
+#### Setup
+
+The setup process involves initializing the serial connection and setting up event listeners for user interactions:
+- A button allows the user to select a serial port using the browser's Web Serial API.
+- Once a port is selected, it is opened with predefined settings.
+- Periodic read and write operations are scheduled to handle communication with the receiver.
+- A message is logged to the terminal upon successful connection.
+
+#### Main-Loop
+
+The main control flow is divided into two sections: user input and serial communication.
+
+##### User Input
+
+- Handles keyboard input for controlling the joystick and power levels.
+- Updates the joystick position and power level based on user input.
+- Supports additional input methods such as mouse and gamepad for controlling the drone.
+
+##### Serial Communication
+
+- Sends instructions to the receiver via the serial port.
+- Uses a dedicated class to manage outgoing messages and ensure proper communication flow.
+
+##### Data Collection
+
+The `Controller` application includes functionality for collecting flight data during the drone's operation. This data is periodically gathered and saved in a structured format for analysis. The data includes information such as time, acceleration, velocity, angular velocity, rotation, power, joystick position, FPS, and motor powers.
+
+Once data collection stops, the collected data is saved as a `JSON` file with a timestamped filename in the `FlightData` folder.
+
+For a detailed explanation of the flight data format and structure, refer to the [Flight Data README](FlightData/README.md).
+
+This feature allows users to analyze the drone's performance and behavior during flights.
 
 ### Important Classes
 
-### Summery of [Controller](#controller)
+For the controller to function properly, multiple classes were created to handle critical tasks.
+
+#### `SerialMessage`
+
+The `SerialMessage` class defines the structure of messages exchanged between the `Controller` and the `Receiver`.
+
+**To use the class:**
+1. First, create an object.
+   ```javascript
+   const message = new SerialMessage();
+   ```
+2. Use the `set` method to initialize a message with a specific type.
+   ```javascript
+   message.set(type);
+   ```
+3. Use the `reset` method to reset the message state.
+   ```javascript
+   message.reset();
+   ```
+
+#### `SerialReader`
+
+The `SerialReader` class handles reading and parsing incoming serial data.
+
+**To use the class:**
+1. First, create an object.
+   ```javascript
+   const reader = new SerialReader();
+   ```
+2. Use the `read` method to process incoming bytes.
+   ```javascript
+   const result = reader.read(byte);
+   ```
+   - **Structure of `result`:**
+     - `done` (boolean): Indicates whether a complete message has been read.
+     - `reading` (boolean): Indicates whether the reader is currently processing a message.
+     - `data` (Uint8Array): Contains the raw data of the message (only available when `done` is `true`).
+     - `messageType` (number): The numeric type of the message (only available when `done` is `true`).
+     - `messageTypeName` (string): The name of the message type (only available when `done` is `true`).
+
+     Example:
+     ```javascript
+     const result = serialReader.read(byte);
+     if (result.done) {
+         console.log(result.messageTypeName); // e.g., "pid-velocity"
+         console.log(result.data); // Uint8Array containing the message data
+     }
+     ```
+3. Use specialized methods to parse specific data types:
+   - `readPIDInstruction(data)`
+   - `readTargetRanges(data)`
+   - `readVector(data)`
+   - `readDeltaTime(data)`
+   - `readMotorPowers(data)`
+
+#### `Terminal`
+
+The `Terminal` class manages the display of logs and messages in the terminal section of the interface.
+
+**To use the class:**
+1. First, create an object.
+   ```javascript
+   const terminal = new Terminal();
+   ```
+2. Use the `addToTerminal` method to add a log entry.
+   ```javascript
+   terminal.addToTerminal(log);
+   ```
+3. Use the `clear` method to clear the terminal.
+   ```javascript
+   terminal.clear();
+   ```
+
+#### `WritingHandler`
+
+The `WritingHandler` class manages outgoing instructions to the `Receiver`.
+
+**To use the class:**
+1. First, create an object.
+   ```javascript
+   const handler = new WritingHandler();
+   ```
+2. Use the `set` or `setWithConfirm` method to set the current instructions and type.
+   ```javascript
+   handler.set(instructions, type);
+   handler.setWithConfirm(instructions, type, value);
+   ```
+   - **Details:**
+     - `set`: Sets the current instructions and their type. Marks the handler as having instructions to send.
+       Example:
+       ```javascript
+       const instructions = getControllerInstructions(joystick.x, joystick.y, power);
+       writingHandler.set(instructions, SerialMessage.messageTypeFromName.get("controller-instructions"));
+       ```
+     - `setWithConfirm`: Similar to `set`, but also sets a confirmation value to ensure the data is acknowledged before proceeding. Used when the data requires confirmation from the receiver.
+       Example:
+       ```javascript
+       const pidValues = { p: 1.0, i: 0.5, d: 0.1 };
+       const instructions = getPIDInstructions(pidValues, "velocity");
+       writingHandler.setWithConfirm(instructions, SerialMessage.messageTypeFromName.get("pid-velocity"), pidValues);
+       ```
+3. Use the `get` method to retrieve the current instructions if available.
+   ```javascript
+   const instructions = handler.get();
+   ```
+   - **Details:**
+     - Retrieves the current instructions if available.
+     - If no instructions are set, it defaults to sending controller instructions.
+     - Example:
+       ```javascript
+       const instructions = writingHandler.get();
+       ```
+4. Use the `acceptAcknowledge` method to handle acknowledgment messages.
+   ```javascript
+   handler.acceptAcknowledge(messageType);
+   ```
+   - **Details:**
+     - Handles acknowledgment messages from the receiver.
+     - If the acknowledgment matches the current instructions type, it clears the current instructions.
+     - Example:
+       ```javascript
+       writingHandler.acceptAcknowledge(SerialMessage.messageTypeFromName.get("pid-velocity"));
+       ```
+
+### Summary of [Controller](#controller)
+
+The `Controller` application provides an intuitive interface for controlling the drone and monitoring its telemetry. It uses the `SerialMessage`, `SerialReader`, `Terminal`, and `WritingHandler` classes to manage communication with the `Receiver`. The application supports joystick, keyboard, and gamepad inputs for controlling the drone and allows real-time adjustments to PID constants and target ranges. The `WritingHandler` class ensures proper acknowledgment of instructions sent to the receiver, improving communication reliability. Additionally, the application collects and saves flight data for post-flight analysis, enabling users to evaluate the drone's performance and behavior during flights.
 
 ## Simulation
 
