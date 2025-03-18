@@ -8,7 +8,7 @@ This repository contains the software-part of a multi-person project with the go
   - [Table of Contents](#table-of-contents)
   - [Abstract](#abstract)
   - [Drone](#drone)
-    - [How `Drone.ino` Works](#how-droneino-works)
+    - [Basic Structure](#basic-structure)
       - [Setup](#setup)
       - [Main-Loop](#main-loop)
         - [Radio-Input](#radio-input)
@@ -29,11 +29,16 @@ This repository contains the software-part of a multi-person project with the go
         - [Other](#other)
     - [Summery of Drone](#summery-of-drone)
   - [Receiver](#receiver)
-    - [How ´Receiver.ino\` Works](#how-receiverino-works)
+    - [Basic Structure](#basic-structure-1)
     - [Important Classes](#important-classes-1)
       - [`InstructionHandler`](#instructionhandler)
     - [Summery of Receiver](#summery-of-receiver)
   - [Controller](#controller)
+    - [Basic Structure](#basic-structure-2)
+    - [Important Classes](#important-classes-2)
+    - [Summery of Controller](#summery-of-controller)
+  - [Simulation](#simulation)
+  - [Summery](#summery)
 
 ## Abstract
 
@@ -41,11 +46,11 @@ This repository contains the software-part of a multi-person project with the go
 
 ## Drone
 
-[`Drone.ino`](#how-droneino-works) is intended to be used with an `Arduino MKR Zero` alongside: an `MPU 6050` gyroscope/accelerometer, an `nRF24L01` radio device, and a set of `DarwinFPV 1104` brushless motors.
+[`Drone.ino`](Drone/Drone.ino) is intended to be used with an `Arduino MKR Zero` alongside: an `MPU 6050` gyroscope/accelerometer, an `nRF24L01` radio device, and a set of `DarwinFPV 1104` brushless motors.
 
 >**_NOTE:_**  Will likely work with other components, with some minor modifications to the code
 
-### How [`Drone.ino`](Drone/Drone.ino) Works
+### Basic Structure
 
 [`Drone.ino`](Drone/Drone.ino) is the sketch file for the drone and, by using both public `Arduino` libraries and the custom-made [`DroneLibrary`](DroneLibrary), it handles the control flow for the drone.
 
@@ -457,9 +462,9 @@ The `Drone.ino` sketch is designed for an Arduino MKR Zero and integrates with v
 
 ## Receiver
 
-[`Receiver.ino`](#how-receiverino-works) is intended to be used with an `Arduino UNO` alongside an `nRF24L01` radio device, connected by USB to a computer that is running the [`Controller`](#controller) program.
+[`Receiver.ino`](Receiver/Receiver.ino) is intended to be used with an `Arduino UNO` alongside an `nRF24L01` radio device, connected by USB to a computer that is running the [`Controller`](#controller) program.
 
-### How ´Receiver.ino` Works
+### Basic Structure
 
 ### Important Classes
 
@@ -469,3 +474,12 @@ The `Drone.ino` sketch is designed for an Arduino MKR Zero and integrates with v
 
 ## Controller
 
+### Basic Structure
+
+### Important Classes
+
+### Summery of [Controller](#controller)
+
+## Simulation
+
+## Summery
