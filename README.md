@@ -37,7 +37,7 @@ This repository contains the software-part of a multi-person project with the go
     - [Important Classes](#important-classes-1)
       - [`InstructionHandler`](#instructionhandler)
     - [Summery of Receiver](#summery-of-receiver)
-  - [Controller](#controller)
+  - [Control Panel](#control-panel)
     - [Basic Structure](#basic-structure-2)
       - [Setup](#setup-2)
       - [Main-Loop](#main-loop-2)
@@ -49,7 +49,7 @@ This repository contains the software-part of a multi-person project with the go
       - [`SerialReader`](#serialreader)
       - [`Terminal`](#terminal)
       - [`WritingHandler`](#writinghandler)
-    - [Summary of Controller](#summary-of-controller)
+    - [Summary of Control Panel](#summary-of-control-panel)
   - [Simulation](#simulation)
     - [Features](#features)
     - [How to Use](#how-to-use)
@@ -479,7 +479,7 @@ The `Drone.ino` sketch is designed for an Arduino MKR Zero and integrates with v
 
 ## Receiver
 
-[`Receiver.ino`](Receiver/Receiver.ino) is intended to be used with an `Arduino UNO` alongside an `nRF24L01` radio device, connected by USB to a computer that is running the [`Controller`](#controller) program.
+[`Receiver.ino`](Receiver/Receiver.ino) is intended to be used with an `Arduino UNO` alongside an `nRF24L01` radio device, connected by USB to a computer that is running the [`Control Panel`](#control-panel) program.
 
 ### Basic Structure
 
@@ -605,13 +605,13 @@ The [`InstructionHandler`](DroneLibrary/InstructionHandler.h) class is used to m
 
 The `Receiver.ino` sketch acts as a bridge between the drone and the controller. It uses an `nRF24L01` radio device to communicate with the drone and a serial connection to communicate with the controller. The sketch relies on the `InstructionHandler` class to manage serial communication and ensures that messages are properly relayed between the two systems. The setup function initializes the radio transceiver, while the main loop handles serial input, radio communication, and message forwarding. Additionally, the receiver ensures acknowledgment of serial messages and processes drone logs for better debugging and monitoring.
 
-## Controller
+## Control Panel
 
-The `Controller` is a web-based application designed to interact with the drone via the [`Receiver`](#receiver). It provides a graphical interface for controlling the drone, adjusting PID values, and monitoring telemetry data.
+The `Control Panel` is a web-based application designed to interact with the drone via the [`Receiver`](#receiver). It provides a graphical interface for controlling the drone, adjusting PID values, and monitoring telemetry data.
 
 ### Basic Structure
 
-The `Controller` application is built using HTML, CSS, and JavaScript. It handles the control flow for interacting with the drone and receiver by using both browser APIs and custom JavaScript classes.
+The `Control Panel` application is built using HTML, CSS, and JavaScript. It handles the control flow for interacting with the drone and receiver by using both browser APIs and custom JavaScript classes.
 
 #### Setup
 
@@ -638,7 +638,7 @@ The main control flow is divided into two sections: user input and serial commun
 
 ##### Data Collection
 
-The `Controller` application includes functionality for collecting flight data during the drone's operation. This data is periodically gathered and saved in a structured format for analysis. The data includes information such as time, acceleration, velocity, angular velocity, rotation, power, joystick position, FPS, and motor powers.
+The `Control Panel` application includes functionality for collecting flight data during the drone's operation. This data is periodically gathered and saved in a structured format for analysis. The data includes information such as time, acceleration, velocity, angular velocity, rotation, power, joystick position, FPS, and motor powers.
 
 Once data collection stops, the collected data is saved as a `JSON` file with a timestamped filename in the `FlightData` folder.
 
@@ -648,11 +648,11 @@ This feature allows users to analyze the drone's performance and behavior during
 
 ### Important Classes
 
-For the controller to function properly, multiple classes were created to handle critical tasks.
+For the `Control Panel` to function properly, multiple classes were created to handle critical tasks.
 
 #### `SerialMessage`
 
-The `SerialMessage` class defines the structure of messages exchanged between the `Controller` and the `Receiver`.
+The `SerialMessage` class defines the structure of messages exchanged between the `Control Panel` and the `Receiver`.
 
 **To use the class:**
 1. First, create an object.
@@ -772,9 +772,9 @@ The `WritingHandler` class manages outgoing instructions to the `Receiver`.
        writingHandler.acceptAcknowledge(SerialMessage.messageTypeFromName.get("pid-velocity"));
        ```
 
-### Summary of [Controller](#controller)
+### Summary of [Control Panel](#control-panel)
 
-The `Controller` application provides an intuitive interface for controlling the drone and monitoring its telemetry. It uses the `SerialMessage`, `SerialReader`, `Terminal`, and `WritingHandler` classes to manage communication with the `Receiver`. The application supports joystick, keyboard, and gamepad inputs for controlling the drone and allows real-time adjustments to PID constants and target ranges. The `WritingHandler` class ensures proper acknowledgment of instructions sent to the receiver, improving communication reliability. Additionally, the application collects and saves flight data for post-flight analysis, enabling users to evaluate the drone's performance and behavior during flights.
+The `Control Panel` application provides an intuitive interface for controlling the drone and monitoring its telemetry. It uses the `SerialMessage`, `SerialReader`, `Terminal`, and `WritingHandler` classes to manage communication with the `Receiver`. The application supports joystick, keyboard, and gamepad inputs for controlling the drone and allows real-time adjustments to PID constants and target ranges. The `WritingHandler` class ensures proper acknowledgment of instructions sent to the receiver, improving communication reliability. Additionally, the application collects and saves flight data for post-flight analysis, enabling users to evaluate the drone's performance and behavior during flights.
 
 ## Simulation
 
