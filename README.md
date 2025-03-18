@@ -488,6 +488,7 @@ struct RadioMessage {
 
 ### Summery of [Drone](#drone)
 
+The `Drone.ino` sketch is designed for an Arduino MKR Zero and integrates with various components like the MPU 6050 gyroscope/accelerometer, nRF24L01 radio device, and DarwinFPV 1104 brushless motors. The setup function initializes the radio transceiver and motor configurations, while the main loop handles radio input, flight control, and radio output. Important helper functions include `setDeltaTime` for time calculations and `sendRadio` for managing radio communications. The drone's functionality is supported by several key classes such as `PID`, `MotorController`, `Orientation`, and `RadioSendStack`, which manage tasks like PID control, motor power calculations, orientation data processing, and radio message handling. Custom data types like `vector3<T>` and `SmoothValue` are also used to facilitate data management.
 
 ## Receiver
 
