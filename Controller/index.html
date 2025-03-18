@@ -157,7 +157,7 @@
             const now = performance.now();
             frameCount++;
             const delta = now - lastTime;
-            if (delta >= 1000) {
+            if (delta >= 100) {
                 const fps = Math.round((frameCount * 1000) / delta);
                 document.getElementById('app-update').textContent = fps;
                 frameCount = 0;
