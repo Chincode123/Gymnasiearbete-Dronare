@@ -22,6 +22,7 @@ This repository contains the software-part of a multi-person project with the go
       - [`PID`](#pid)
       - [`MotorController`](#motorcontroller)
       - [`Orientation`](#orientation)
+      - [`RadioSendStack`](#radiosendstack)
 
 ## Abstract
 
@@ -170,7 +171,7 @@ void loop() {
 }
 ```
 
-This part of the code controlls the radio-output of the drone. It periodically sends its saved up output-messages, saved in a [`RadioSendStack`](DroneLibrary/RadioSendStack.h) object, and sequences new telemetry messages with the `sequenceTelemetry` function.
+This part of the code controlls the radio-output of the drone. It periodically sends its saved up output-messages, saved in a [`RadioSendStack`](#radiosendstack) object, and sequences new telemetry messages with the `sequenceTelemetry` function.
 
 ```cpp
 void sequenceTelemetry() {
@@ -388,5 +389,46 @@ To use the class, first create an object by passing the MPU address. Then, use t
 - `acceleration` and `adjustedAcceleration`: acceleration (meters per second squared, **m/s²**)
 - `velocity`: velocity (meters per second, **m/s**)
 
-> **_NOTE:_** The `adjustedAcceleration` is an acceleration vector that is adjusted to fixed axes', that are set when `begin` is called
+> **_NOTE:_** The `adjustedAcceleration` and veloctiy vectors are adjusted to fixed axes' that are set when `begin` is called
+
+#### `RadioSendStack`
+
+The [`RadioSendStack`](DroneLibrary/RadioSendStack.h) class is used to handle a list of messages to be sent by radio and does this by implementing a linked list structure.
+
+```cpp
+class RadioSendStack {
+    radioStackElement *firstElement, *lastElement;
+    uint8_t count;
+
+    radioStackElement* create(const RadioMessage& data);
+    bool removeAt(uint8_t index);
+
+    radioStackElement* get(uint8_t index);
+    radioStackElement* get(radioStackElement* currentElement, uint8_t curentIndex, uint8_t targetIndex);
+public:
+    RadioSendStack();
+    ~RadioSendStack();
+
+    uint8_t getCount() const;
+
+    bool push(const RadioMessage& data);
+    bool queue(const RadioMessage& data);
+
+    RadioMessage pop();
+    RadioMessage pop(uint8_t index);
+
+    void clear();
+};
+```
+
+The `radioStackElement` struct is a struct that contains a `RadioMessage` and a pointer to the next element in the list.
+
+```cpp
+struct radioStackElement {
+    RadioMessage value;
+    radioStackElement* next;
+};
+```
+
+To use the `RadioSendStack` class, first, instantiate an object of the class. Then, when you want to add a message, use either the `push` or `queue` methods to either add a new message to the front of the list or back of the list, respecively. Finally, when you want to collect a message, use the `pop` method to collect and remove a message from the list. It can be used without any arguments to simply collect the first element in the list, or you can pass in an a specific index to collect the element at that place. Additionaly, the `getCount` method can be used to retreive the total number of messages in the list, and the `clear` method can be used to clear all the elements from the list.
 

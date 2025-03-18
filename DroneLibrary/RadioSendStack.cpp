@@ -1,5 +1,7 @@
 #include "RadioSendStack.h"
 
+RadioSendStack::RadioSendStack() : firstElement(nullptr), lastElement(nullptr), count(0) {}
+
 RadioSendStack::~RadioSendStack() {
     clear();
 }

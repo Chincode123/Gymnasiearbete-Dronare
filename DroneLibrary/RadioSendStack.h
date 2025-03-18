@@ -19,7 +19,7 @@ class RadioSendStack {
     radioStackElement* get(uint8_t index);
     radioStackElement* get(radioStackElement* currentElement, uint8_t curentIndex, uint8_t targetIndex);
 public:
-    RadioSendStack() : firstElement(nullptr), lastElement(nullptr), count(0) {}
+    RadioSendStack();
     ~RadioSendStack();
 
     uint8_t getCount() const;
