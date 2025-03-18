@@ -23,6 +23,10 @@ This repository contains the software-part of a multi-person project with the go
       - [`MotorController`](#motorcontroller)
       - [`Orientation`](#orientation)
       - [`RadioSendStack`](#radiosendstack)
+      - [Custom Data Types](#custom-data-types)
+        - [`vector3<T>`](#vector3t)
+        - [`SmoothValue`](#smoothvalue)
+        - [Other](#other)
 
 ## Abstract
 
@@ -432,3 +436,46 @@ struct radioStackElement {
 
 To use the `RadioSendStack` class, first, instantiate an object of the class. Then, when you want to add a message, use either the `push` or `queue` methods to either add a new message to the front of the list or back of the list, respecively. Finally, when you want to collect a message, use the `pop` method to collect and remove a message from the list. It can be used without any arguments to simply collect the first element in the list, or you can pass in an a specific index to collect the element at that place. Additionaly, the `getCount` method can be used to retreive the total number of messages in the list, and the `clear` method can be used to clear all the elements from the list.
 
+#### Custom Data Types
+
+##### `vector3<T>`
+The [`vector3<T>`](DroneLibrary/Vectors.h) struct is a 3-dimensional vector that can be made up of values of any type. It also defines basic vector opperations.
+
+##### `SmoothValue`
+The [`SmoothValue`](DroneLibrary/SmoothValue.h) class reperesents a floating-point value, but with operations that function like a `lerp` function, that set the new value somewhere between the current value and the desired value acording to a `smoothingFactor`. 
+> **_NOTE:_** There is also a method to directly set the value without any smoothing
+
+##### Other
+
+There are also a few structs defined in [`RadioData.h`](DroneLibrary/RadioData.h) to simplify data handling
+
+- `controllerInstructions` for handling controller input
+```cpp
+struct controllerInstructions {
+    int8_t stick_X;
+    int8_t stick_Y;
+    int8_t power;
+};
+```
+
+- `PID_Instructions` for handling PID-settings
+```cpp
+struct PID_Instructions {
+    float k_p, k_i, k_d;
+};
+```
+
+- `TargetRangeInstructions` for handling the different ranges that the drons target values can reside in
+```cpp
+struct TargetRangeInstructions {
+    float pitchMax, rollMax, verticalVelocityMax;
+};
+```
+
+- `RadioMessage` for storing a message to be sent by radio with its associated `messageType`
+```cpp
+struct RadioMessage {
+    uint8_t messageType;
+    uint8_t dataBuffer[31];
+};
+```

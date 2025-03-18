@@ -77,6 +77,16 @@ vector3<T>& operator/=(vector3<T>& u, float a) {
     return u;
 }
 
+templaye<typename T>
+vector3<T> operator-(const vector3<T>& u) {
+    return {-u.x, -u.y, -u.z};
+}
+
+template<typename T>
+vector3<T> crossProduct(const vector3<T>& u, const vector3<T>& v) {
+    return {u.y * v.z - u.z * v.y, u.z * v.x - u.x * v.z, u.x * v.y - u.y * v.x};
+}
+
 template<typename T, typename U>
 vector3<T> addVectors(const vector3<T>& a, const vector3<U>& b) {
     return a + b;
