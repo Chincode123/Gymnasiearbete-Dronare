@@ -33,6 +33,7 @@ This repository contains the software-part of a multi-person project with the go
     - [Important Classes](#important-classes-1)
       - [`InstructionHandler`](#instructionhandler)
     - [Summery of Receiver](#summery-of-receiver)
+  - [Controller](#controller)
 
 ## Abstract
 
@@ -303,144 +304,108 @@ For the drone to function propperly, multiple classes were created to handle cri
 
 The [`PID`](DroneLibrary/PIDController.h) class implements a standard PID-controller with a scalar value for each of the current **proportional** error, the cumulative **integral** of the error, and the current **dirivitive** of the error
 
-```cpp
-class PID {
-    const float *p, *i, *d;
-    float *targetValue;
-    float previousError;
-    float integral;
-public:
-    float calculate(float inputValue, float deltaTime);
-    void setTarget(float *targetValue);
-    void setConstants(const float *p, const float *i, const float *d);
-};
-```
+**To use the class:**
+1. First, create an object. 
+   ```cpp
+    PID pid();
+   ```
+2. Then, use the `setConstants` method to set a pointer to the scalar values, and use the `setTarget` method to set a pointer to the PID-controller's target value. 
+   ```cpp
+    float p = ...
+    float i = ...
+    float d = ...
+    pid.setConstants(&p, &i, &d);
 
-To use the class, first create an object. Then, use the `setConstants` method to set a pointer the scalar values, and use the `setTarget` method to set a pointer to the PID-controllers target value. Lastly, to aquire the controllers output, use the `calculate` method.
+    float target = ...
 
-> **_NOTE:_** Pointers are used with the `setConstants` and `setTarget` methods to simplify code when changeing values
+    pid.setTarget(&target);
+   ```
+> **_NOTE:_** Pointers are used with the `setConstants` and `setTarget` methods to simplify the changing of values.
+3. Lastly, to acquire the controller's output, use the `calculate` method.
+   ```cpp
+    float output = pid.calculate(inputValue, deltaTime);
+   ```
 
 #### `MotorController`
 
-The [`MotorController`](DroneLibrary/MotorController.h) class combines multiple [`PID-controllers`](#pid) to handle the pitch, roll, and vertical velocity of the drone.
+The [`MotorController`](DroneLibrary/MotorController.h) class combines multiple [`PID`](#pid) controllers to handle the pitch, roll, and vertical velocity of the drone.
 
-```cpp
-class MotorController {
-public:    
-    MotorController(int8_t& motorPowerTL, int8_t& motorPowerTR, int8_t& motorPowerBR, int8_t& motorPowerBL);
-
-    void setTargetValues(float *targetVelocity, float *targetPitch, float *targetRoll);
-    void setVelocityConstants(const PID_Instructions &values);
-    void setPitchConstants(const PID_Instructions &values);
-    void setRollConstants(const PID_Instructions &values);
-
-    void calculatePower(float velocity, float pitch, float roll, float deltaTime);
-private:
-    int8_t &motorPowerTL, &motorPowerTR, &motorPowerBR, &motorPowerBL;
-
-    PID velocityController;
-    PID pitchController;
-    PID rollController;
-};
-```
-
-To use the class, first create an object by passing references to the motor power variables. Then, use the `setTargetValues` method to set pointers to the target values for velocity, pitch, and roll. Use the `setVelocityConstants`, `setPitchConstants`, and `setRollConstants` methods to set the PID constants for each respective controller. Lastly, to calculate the motor power values, use the `calculatePower` method by passing the current velocity, pitch, roll, and delta time.
-
-> **_NOTE:_** Pointers are used with the `setTargetValues` and PID constant methods to simplify code when changing values.
+**To use the class:**
+1. First, create an object by passing references to the motor power variables.
+   ```cpp
+    int8_t motorPowerTL, motorPowerTR, motorPowerBR, motorPowerBL;
+    MotorController motorController(motorPowerTL, motorPowerTR, motorPowerBR, motorPowerBL);
+   ```
+2. Then, use the `setTargetValues` method to set pointers to the target values for velocity, pitch, and roll.
+   ```cpp
+    float targetVelocity = ..., targetPitch = ..., targetRoll = ...;
+    motorController.setTargetValues(&targetVelocity, &targetPitch, &targetRoll);
+   ```
+3. Use the `setVelocityConstants`, `setPitchConstants`, and `setRollConstants` methods to set the PID constants for each respective controller.
+   ```cpp
+    PID_Instructions velocityConstants = ..., pitchConstants = ..., rollConstants = ...;
+    motorController.setVelocityConstants(velocityConstants);
+    motorController.setPitchConstants(pitchConstants);
+    motorController.setRollConstants(rollConstants);
+   ```
+4. Lastly, to calculate the motor power values, use the `calculatePower` method by passing the current velocity, pitch, roll, and delta time.
+   ```cpp
+    motorController.calculatePower(currentVelocity, currentPitch, currentRoll, deltaTime);
+   ```
 
 #### `Orientation`
 
 The [`Orientation`](DroneLibrary/Orientation.h) class is used to collect data from a connected `MPU60X0` gyroscope-accelerometer and process it into usable acceleration, velocity, and Euler-angle vectors.
 
-```cpp
-class Orientation {
-    uint8_t MPU;
+**To use the class:**
+1. First, create an object by passing the MPU address.
+   ```cpp
+    Orientation orientation(MPUAddress);
+   ```
+2. Then, use the `begin` method to initialize the MPU and calculate stationary offsets.
+   ```cpp
+    orientation.begin();
+   ```
+3. Use the `update` method to read data from the MPU and update the orientation.
+   ```cpp
+    orientation.update(deltaTime);
+   ```
+4. Finally, use the public member variables to access the calculated orientation data:
+   - `angularVelocity`: degrees per second (**°/s**)
+   - `angles`: Euler angles (**°**) 
+   - `acceleration` and `adjustedAcceleration`: acceleration (meters per second squared, **m/s²**)
+   - `velocity`: velocity (meters per second, **m/s**)
 
-    vector3<float> angularVelocityOffset;
-    vector3<float> accelerationOffset;
-    vector3<float> accelerationAngleOffset;
-    
-    vector3<float> rawAngularVelocity;
-    vector3<float> previousAccelerationAngles;
-    vector3<SmoothValue> angularVelocityError;
-
-    void readFromIMU(vector3<float>& acceleration, vector3<float>& angularVelocity);
-    void readFromIMU();
-
-    void calculateOffsets(uint16_t cycles);
-
-    vector3<float> calculateAccelerationAngles(const vector3<float>& acceleration);
-
-    void calculateAngles(float deltaTime);
-    void calculateVelocity(float deltaTime);
-
-    float limitAngle(float angle);
-public:
-    Orientation(uint8_t MPUAddress);
-
-    void begin();
-    void begin(uint16_t errorCycles);
-    void end();
-
-    vector3<float> angularVelocity;
-    vector3<SmoothValue> angles;
-
-    vector3<float> acceleration;
-    vector3<float> adjustedAcceleration;
-    vector3<SmoothValue> velocity;
-
-    void update(float deltaTime);
-};
-```
-
-To use the class, first create an object by passing the MPU address. Then, use the `begin` method to initialize the MPU and calculate stationary offsets. Use the `update` method to read data from the MPU and update the orientation. Finally, use the public member variables to access the calculated orientation data:
-- `angularVelocity`: degrees per second (**&deg;/s**)
-- `angles`: Euler angles (**&deg;**) 
-- `acceleration` and `adjustedAcceleration`: acceleration (meters per second squared, **m/s²**)
-- `velocity`: velocity (meters per second, **m/s**)
-
-> **_NOTE:_** The `adjustedAcceleration` and veloctiy vectors are adjusted to fixed axes' that are set when `begin` is called
+> **_NOTE:_** The `adjustedAcceleration` and velocity vectors are adjusted to fixed axes that are set when `begin` is called.
 
 #### `RadioSendStack`
 
 The [`RadioSendStack`](DroneLibrary/RadioSendStack.h) class is used to handle a list of messages to be sent by radio and does this by implementing a linked list structure.
 
-```cpp
-class RadioSendStack {
-    radioStackElement *firstElement, *lastElement;
-    uint8_t count;
-
-    radioStackElement* create(const RadioMessage& data);
-    bool removeAt(uint8_t index);
-
-    radioStackElement* get(uint8_t index);
-    radioStackElement* get(radioStackElement* currentElement, uint8_t curentIndex, uint8_t targetIndex);
-public:
-    RadioSendStack();
-    ~RadioSendStack();
-
-    uint8_t getCount() const;
-
-    bool push(const RadioMessage& data);
-    bool queue(const RadioMessage& data);
-
-    RadioMessage pop();
-    RadioMessage pop(uint8_t index);
-
-    void clear();
-};
-```
-
-The `radioStackElement` struct is a struct that contains a `RadioMessage` and a pointer to the next element in the list.
-
-```cpp
-struct radioStackElement {
-    RadioMessage value;
-    radioStackElement* next;
-};
-```
-
-To use the `RadioSendStack` class, first, instantiate an object of the class. Then, when you want to add a message, use either the `push` or `queue` methods to either add a new message to the front of the list or back of the list, respecively. Finally, when you want to collect a message, use the `pop` method to collect and remove a message from the list. It can be used without any arguments to simply collect the first element in the list, or you can pass in an a specific index to collect the element at that place. Additionaly, the `getCount` method can be used to retreive the total number of messages in the list, and the `clear` method can be used to clear all the elements from the list.
+**To use the class:**
+1. First, create an object.
+   ```cpp
+    RadioSendStack sendStack;
+   ```
+2. Then, use the `push` or `queue` methods to add a new message to the front or back of the list, respectively.
+   ```cpp
+    RadioMessage message = ...;
+    sendStack.push(message);
+    // or
+    sendStack.queue(message);
+   ```
+3. Use the `pop` method to collect and remove a message from the list. It can be used without arguments to collect the first element or with an index to collect a specific element.
+   ```cpp
+    RadioMessage message = sendStack.pop();
+   ```
+4. Use the `getCount` method to retrieve the total number of messages in the list.
+   ```cpp
+    uint8_t count = sendStack.getCount();
+   ```
+5. Use the `clear` method to remove all elements from the list.
+   ```cpp
+    sendStack.clear();
+   ```
 
 #### Custom Data Types
 
@@ -448,7 +413,7 @@ To use the `RadioSendStack` class, first, instantiate an object of the class. Th
 The [`vector3<T>`](DroneLibrary/Vectors.h) struct is a 3-dimensional vector that can be made up of values of any type. It also defines basic vector opperations.
 
 ##### `SmoothValue`
-The [`SmoothValue`](DroneLibrary/SmoothValue.h) class reperesents a floating-point value, but with operations that function like a `lerp` function, that set the new value somewhere between the current value and the desired value acording to a `smoothingFactor`. 
+The [`SmoothValue`](DroneLibrary/SmoothValue.h) class reperesents a floating-point value, but with operations that function like a lerp function, that set the new value somewhere between the current value and the desired value acording to a `smoothingFactor`. 
 > **_NOTE:_** There is also a method to directly set the value without any smoothing
 
 ##### Other
@@ -501,3 +466,6 @@ The `Drone.ino` sketch is designed for an Arduino MKR Zero and integrates with v
 #### `InstructionHandler`
 
 ### Summery of [Receiver](#receiver)
+
+## Controller
+
