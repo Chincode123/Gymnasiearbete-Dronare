@@ -18,7 +18,7 @@ This repository contains the software-part of a multi-person project with the go
         - [`setDeltaTime`](#setdeltatime)
         - [`sendRadio`](#sendradio)
         - [Activation and De-activation Functions](#activation-and-de-activation-functions)
-    - [Other Important Classes](#other-important-classes)
+    - [Important Classes](#important-classes)
       - [`PID`](#pid)
       - [`MotorController`](#motorcontroller)
       - [`Orientation`](#orientation)
@@ -27,6 +27,12 @@ This repository contains the software-part of a multi-person project with the go
         - [`vector3<T>`](#vector3t)
         - [`SmoothValue`](#smoothvalue)
         - [Other](#other)
+    - [Summery of Drone](#summery-of-drone)
+  - [Receiver](#receiver)
+    - [How ´Receiver.ino\` Works](#how-receiverino-works)
+    - [Important Classes](#important-classes-1)
+      - [`InstructionHandler`](#instructionhandler)
+    - [Summery of Receiver](#summery-of-receiver)
 
 ## Abstract
 
@@ -34,7 +40,7 @@ This repository contains the software-part of a multi-person project with the go
 
 ## Drone
 
-[`Drone.ino`](Drone/Drone.ino) is intended to be used with an `Arduino MKR Zero` alongside: an `MPU 6050` gyroscope/accelerometer, an `nRF24L01` radio device, and a set of `DarwinFPV 1104` brushless motors.
+[`Drone.ino`](#how-droneino-works) is intended to be used with an `Arduino MKR Zero` alongside: an `MPU 6050` gyroscope/accelerometer, an `nRF24L01` radio device, and a set of `DarwinFPV 1104` brushless motors.
 
 >**_NOTE:_**  Will likely work with other components, with some minor modifications to the code
 
@@ -289,7 +295,7 @@ void deactivate() {
 
 The activation and de-activation functions start of by calling the begin and end methods on the [`Orientation`](DroneLibrary/Orientation.h) class respectively, and sets an activation flag to be either true or false respectively. After, they proceed to either ramp up or down the motors to or from 50% respectively. They end of by queueing a message to be sent by radio, informing the user that the drone is either activated or deactivated. Additionally, the deactivation function also ensures that all the motor pins are turned off completely.
 
-### Other Important Classes
+### Important Classes
 
 For the drone to function propperly, multiple classes were created to handle critical tasks.
 
@@ -479,3 +485,18 @@ struct RadioMessage {
     uint8_t dataBuffer[31];
 };
 ```
+
+### Summery of [Drone](#drone)
+
+
+## Receiver
+
+[`Receiver.ino`](#how-receiverino-works) is intended to be used with an `Arduino UNO` alongside an `nRF24L01` radio device, connected by USB to a computer that is running the [`Controller`](#controller) program.
+
+### How ´Receiver.ino` Works
+
+### Important Classes
+
+#### `InstructionHandler`
+
+### Summery of [Receiver](#receiver)
