@@ -51,6 +51,10 @@ This repository contains the software-part of a multi-person project with the go
       - [`WritingHandler`](#writinghandler)
     - [Summary of Controller](#summary-of-controller)
   - [Simulation](#simulation)
+    - [Features](#features)
+    - [How to Use](#how-to-use)
+    - [Notes](#notes)
+    - [Summary of Simulation](#summary-of-simulation)
   - [Summery](#summery)
 
 ## Abstract
@@ -773,5 +777,36 @@ The `WritingHandler` class manages outgoing instructions to the `Receiver`.
 The `Controller` application provides an intuitive interface for controlling the drone and monitoring its telemetry. It uses the `SerialMessage`, `SerialReader`, `Terminal`, and `WritingHandler` classes to manage communication with the `Receiver`. The application supports joystick, keyboard, and gamepad inputs for controlling the drone and allows real-time adjustments to PID constants and target ranges. The `WritingHandler` class ensures proper acknowledgment of instructions sent to the receiver, improving communication reliability. Additionally, the application collects and saves flight data for post-flight analysis, enabling users to evaluate the drone's performance and behavior during flights.
 
 ## Simulation
+
+The simulation is a Unity-based project designed to calibrate the PID settings for the drone. It provides a virtual environment where the drone's behavior can be tested and adjusted without requiring physical hardware. The simulation is intended to be run in the Unity editor, as the PID values and other settings can only be updated through the Inspector.
+
+### Features
+
+- **PID Calibration**: Adjust the proportional, integral, and derivative constants for pitch, roll, and velocity in real-time.
+- **Propeller Visualization**: Displays the forces applied by each propeller using Gizmos for better understanding of the drone's behavior.
+- **Center of Mass Adjustment**: Allows visualization and adjustment of the drone's center of mass to observe its impact on stability.
+- **Velocity and Orientation Feedback**: Provides visual feedback on the drone's velocity and orientation using Gizmos.
+
+### How to Use
+
+1. Open the Unity project located in the `Simulation/ga-drone-simulation` folder.
+2. Select the GameObject in the scene with the `DroneController` component.
+3. Use the Inspector to adjust the PID constants (`P`, `I`, `D`) for pitch, roll, and velocity, and the drones mass and center of mass.
+4. Play the scene in the Unity editor to observe the drone's behavior.
+5. Use the keyboard or a game controller to provide input:
+   - **Throttle**: `Left Shift` or `Left Trigger` to decrease, and `Space` or `Right Trigger` to increase.
+   - **Pitch**: `W` (forward) and `S` (backward).
+   - **Roll**: `A` (left) and `D` (right).
+6. Observe the drone's response and adjust the PID values as needed to achieve stable flight.
+
+### Notes
+
+- The simulation uses a custom `DroneController` script to emulate the drone's physics and control logic.
+- The `CameraController` script ensures the camera smoothly follows the drone for better visualization.
+- The simulation is not a replacement for real-world testing but serves as a tool to approximate and refine PID settings before applying them to the physical drone.
+
+### Summary of Simulation
+
+The simulation provides a virtual environment for testing and calibrating the drone's PID settings. It allows users to adjust parameters like proportional, integral, and derivative constants, as well as the drone's mass and center of mass, in real-time. By visualizing propeller forces, velocity, and orientation, users can refine the drone's stability and behavior before applying changes to the physical hardware. While not a substitute for real-world testing, the simulation serves as a valuable tool for approximating and optimizing flight performance.
 
 ## Summery
