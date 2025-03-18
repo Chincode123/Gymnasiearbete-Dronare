@@ -30,6 +30,10 @@ This repository contains the software-part of a multi-person project with the go
     - [Summery of Drone](#summery-of-drone)
   - [Receiver](#receiver)
     - [Basic Structure](#basic-structure-1)
+      - [Setup](#setup-1)
+      - [Main-Loop](#main-loop-1)
+        - [Serial Input](#serial-input)
+        - [Radio Input](#radio-input-1)
     - [Important Classes](#important-classes-1)
       - [`InstructionHandler`](#instructionhandler)
     - [Summery of Receiver](#summery-of-receiver)
@@ -312,7 +316,7 @@ The [`PID`](DroneLibrary/PIDController.h) class implements a standard PID-contro
 **To use the class:**
 1. First, create an object. 
    ```cpp
-    PID pid();
+    PID pid;
    ```
 2. Then, use the `setConstants` method to set a pointer to the scalar values, and use the `setTarget` method to set a pointer to the PID-controller's target value. 
    ```cpp
@@ -466,11 +470,127 @@ The `Drone.ino` sketch is designed for an Arduino MKR Zero and integrates with v
 
 ### Basic Structure
 
+[`Receiver.ino`](Receiver/Receiver.ino) is the sketch file for the receiver and, by using both public `Arduino` libraries and the custom-made [`DroneLibrary`](DroneLibrary), it handles the control flow for relaying messages between the drone and the controller.
+
+#### Setup
+
+As with most `Arduino` sketches, the [`Receiver.ino`](Receiver/Receiver.ino) file includes a setup-function.
+
+```cpp
+void setup() {
+    ...
+
+    if (!radio.begin()) {
+        Serial.println(F("Radio hardware not responding!"));
+        while (true);
+    }
+    if (!configureRadio(radio)) {
+        Serial.println("Radio configuration failed");
+        while (true);
+    }
+    radio.openWritingPipe(RECEIVER_ADDRESS);
+    radio.openReadingPipe(1, DRONE_ADDRESS);
+    radio.startListening();
+
+    ...
+}
+```
+
+Firstly, the radio transceiver is configured:
+- `radio.begin()`, from the [`RF24`](https://github.com/nRF24/RF24) class, is called in order to initialize the radio transceiver.
+- `configureRadio(radio)` is called in order to configure the transceiver's settings.
+- Writing and reading pipes are opened with addresses defined in [`RadioData.h`](DroneLibrary/RadioData.h).
+- `radio.startListening()` is called for the transceiver to start listening for instructions.
+
+> **_NOTE:_** The transceiver's begin and configuration functions are placed into while loops in order to stop the program from proceeding if any part fails.
+
+#### Main-Loop
+
+The main control-flow is found within the `loop` function and can be divided up into two sections: serial input and radio input.
+
+##### Serial Input
+
+```cpp
+void loop() {
+    ...
+
+    if (instructionHandler.read()) {
+        uint8_t messageType = instructionHandler.getData(readBuffer);
+        messageOut.messageType = messageType;
+        memcpy(messageOut.dataBuffer, &readBuffer, sizeof(messageOut.dataBuffer));
+
+        bool result;
+        if (millis() % 5 == 0)
+            result = send();
+        if (result)
+            instructionHandler.acknowledge(messageType);
+
+        ...
+    }
+
+    ...
+}
+```
+
+This part of the code checks for incoming serial messages from the controller using the [`InstructionHandler`](#instructionhandler) class. If a message is received, it processes the message, sends it to the drone via the radio, and acknowledges the message if the transmission is successful.
+
+##### Radio Input
+
+```cpp
+void loop() {
+    ...
+
+    if (radio.available() && millis() % 5 != 0) {
+        radio.read(&messageIn, sizeof(messageIn));
+
+        switch (messageIn.messageType) {
+            case _MSG_DRONE_LOG:
+                dronePrint((const char*)messageIn.dataBuffer);
+                break;
+            default:
+                instructionHandler.write(messageIn.dataBuffer, messageIn.messageType);
+        }
+    }
+
+    ...
+}
+```
+
+This part of the code checks for incoming radio messages from the drone. If a message is received, it processes the message based on its type and forwards it to the controller via the serial connection.
+
 ### Important Classes
 
 #### `InstructionHandler`
 
+The [`InstructionHandler`](DroneLibrary/InstructionHandler.h) class is used to manage serial communication between the receiver and the controller. It handles reading, writing, and acknowledging messages.
+
+**To use the class:**
+1. Create an object.
+   ```cpp
+   InstructionHandler instructionHandler;
+   ```
+2. Use the `read` method to check if a new message has been received via serial.
+   ```cpp
+   if (instructionHandler.read()) {
+       // Process the message
+   }
+   ```
+3. Use the `getData` method to retrieve the message data and type.
+   ```cpp
+   uint8_t messageType = instructionHandler.getData(buffer);
+   ```
+4. Use the `write` method to send a message via serial.
+   ```cpp
+   instructionHandler.write(data, messageType);
+   ```
+5. Use the `acknowledge` method to send an acknowledgment for a received message.
+   ```cpp
+   instructionHandler.acknowledge(messageType);
+   ```
+
 ### Summery of [Receiver](#receiver)
+
+The `Receiver.ino` sketch acts as a bridge between the drone and the controller. It uses an `nRF24L01` radio device to communicate with the drone and a serial connection to communicate with the controller. The sketch relies on the `InstructionHandler` class to manage serial communication and ensures that messages are properly relayed between the two systems. The setup function initializes the radio transceiver, while the main loop handles serial input, radio communication, and message forwarding.
 
 ## Controller
 
