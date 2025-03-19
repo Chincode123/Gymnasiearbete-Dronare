@@ -89,13 +89,21 @@ bool RadioSendStack::queue(const RadioMessage& data) {
     return true;
 }
 
+RadioMessage RadioSendStack::peek() {
+    return peek(0);
+}
+
+RadioMessage RadioSendStack::peek(uint8_t index) {
+    radioStackElement* element = get(index);
+    return element->value;
+}
+
 RadioMessage RadioSendStack::pop() {
     return pop(0);
 }
 
 RadioMessage RadioSendStack::pop(uint8_t index) {
-    radioStackElement* element = get(index);
-    RadioMessage value = element->value;
+    RadioMessage value = peek(index);
     removeAt(index);
     return value;
 }

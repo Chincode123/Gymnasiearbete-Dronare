@@ -42,14 +42,14 @@
 #define _MSG_LEGNTH_ACKNOWLEDGE 1
 #define _MSG_LENGTH_MOTOR_POWERS 4
 
-struct controllerInstructions {
-    int8_t stick_X;
-    int8_t stick_Y;
+struct ControllerInstructions {
+    int8_t x;
+    int8_t y;
     int8_t power;
 };
 
 struct PID_Instructions {
-    float k_p, k_i, k_d;
+    float p, i, d;
 };
 
 struct TargetRangeInstructions {

@@ -112,21 +112,21 @@ void loop() {
 
         switch (messageIn.messageType) {
             case _MSG_CONTROLLER_INPUT:
-                controllerInstructions controller;
+                ControllerInstructions controller;
                 memcpy(&controller, messageIn.dataBuffer, sizeof(controller));
                 
                 #ifdef DEBUG
                   Serial.print("x:");
-                  Serial.print((float)controller.stick_X / 127);
+                  Serial.print((float)controller.x / 127);
                   Serial.print(" y:");
-                  Serial.print((float)controller.stick_Y / 127);
+                  Serial.print((float)controller.y / 127);
                   Serial.print(" power:");
                   Serial.println((float)controller.power / 127);
                 #endif
 
                 targetVelocity = maxVelocity * (float)controller.power / 127;
-                targetPitch = maxPitch * ((float)controller.stick_X / 127);
-                targetRoll = maxRoll * ((float)controller.stick_Y / 127);
+                targetPitch = maxPitch * ((float)controller.x / 127);
+                targetRoll = maxRoll * ((float)controller.y / 127);
                 break;
             case _MSG_ACTIVATE:
                 activate();
@@ -139,11 +139,11 @@ void loop() {
 
                 #ifdef DEBUG
                   Serial.print("PID-V: p:");
-                  Serial.print(PID_Velocity.k_p);
+                  Serial.print(PID_Velocity.p);
                   Serial.print(" i:");
-                  Serial.print(PID_Velocity.k_i);
+                  Serial.print(PID_Velocity.i);
                   Serial.print(" d:");
-                  Serial.println(PID_Velocity.k_d);
+                  Serial.println(PID_Velocity.d);
                 #endif
 
                 break;

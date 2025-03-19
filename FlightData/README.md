@@ -14,7 +14,7 @@ Each flight data file contains the following structure:
   - `velocity`: The velocity values along the x, y, and z axes.
   - `angularVelocity`: The angular velocity values along the x, y, and z axes.
   - `rotation`: The rotation values (pitch, roll, yaw).
-  - `power`: The power information.
+  - `controllerPower`: The user-inputted power value.
   - `joystick`: The joystick position values along the x and y axes.
   - `fps`: The frames-per-second values for:
     - `app`: The application update rate.

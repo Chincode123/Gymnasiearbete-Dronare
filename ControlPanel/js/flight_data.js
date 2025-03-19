@@ -70,7 +70,7 @@ function collectFlightData() {
             roll: parseFloat(document.getElementById("roll-value").innerText),
             yaw: parseFloat(document.getElementById("yaw-value").innerText)
         },
-        power: parseFloat(document.getElementById("power-info").innerText),
+        controllerPower: parseFloat(document.getElementById("power-info").innerText),
         joystick: {
             x: parseFloat(document.getElementById("joystick-x-info").innerText),
             y: parseFloat(document.getElementById("joystick-y-info").innerText)

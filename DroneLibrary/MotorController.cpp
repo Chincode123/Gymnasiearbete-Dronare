@@ -11,15 +11,15 @@ void MotorController::setTargetValues(float *targetVelocity, float *targetPitch,
 }
 
 void MotorController::setVelocityConstants(const PID_Instructions &values) {
-    velocityController.setConstants(&values.k_p, &values.k_i, &values.k_d);
+    velocityController.setConstants(values);
 }
 
 void MotorController::setPitchConstants(const PID_Instructions &values) {
-    pitchController.setConstants(&values.k_p, &values.k_i, &values.k_d);
+    pitchController.setConstants(values);
 }
 
 void MotorController::setRollConstants(const PID_Instructions &values) {
-    rollController.setConstants(&values.k_p, &values.k_i, &values.k_d);
+    rollController.setConstants(values);
 }
 
 void MotorController::calculatePower(float velocity, float pitch, float roll, float deltaTime) {

@@ -6,7 +6,7 @@
 #include "SmoothValue.h"
 
 class Orientation {
-    uint8_t MPU;
+    const uint8_t MPU;
 
     vector3<float> angularVelocityOffset;
     vector3<float> accelerationOffset;
