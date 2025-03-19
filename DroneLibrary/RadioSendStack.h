@@ -27,6 +27,9 @@ public:
     bool push(const RadioMessage& data);
     bool queue(const RadioMessage& data);
 
+    RadioMessage peek();
+    RadioMessage peek(uint8_t index);
+    
     RadioMessage pop();
     RadioMessage pop(uint8_t index);
 

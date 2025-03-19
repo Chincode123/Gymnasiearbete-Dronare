@@ -65,13 +65,13 @@ void loop()
         switch (messageType) {
         case _MSG_CONTROLLER_INPUT:
             if (result) {
-                controllerInstructions controller;
+                ControllerInstructions controller;
                 memcpy(&controller, messageOut.dataBuffer, sizeof(controller));
                 #ifdef DEBUG
                   Serial.print("x:");
-                  Serial.print((float)controller.stick_X / 127);
+                  Serial.print((float)controller.x / 127);
                   Serial.print(" y:");
-                  Serial.print((float)controller.stick_Y / 127);
+                  Serial.print((float)controller.y / 127);
                   Serial.print(" power:");
                   Serial.println((float)controller.power / 127);
                 #endif

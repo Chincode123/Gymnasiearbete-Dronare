@@ -145,7 +145,7 @@ window.addEventListener("gamepadconnected", (event) => {
   setInterval(gamepadInputLoop);
 });
 
-function gamepadInputLoop () {
+function gamepadInputLoop() {
   const gamepad = navigator.getGamepads()[gamepad_index];
 
   gamepad.axes.forEach((axis) => {

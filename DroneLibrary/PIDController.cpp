@@ -20,3 +20,9 @@ void PID::setConstants(const float *p, const float *i, const float *d) {
     this->i = i;
     this->d = d;
 }
+
+void PID::setConstants(const PID_Instructions& pid) {
+    this->p = &pid.p;
+    this->i = &pid.i;
+    this->d = &pid.d;
+}

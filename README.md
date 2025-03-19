@@ -335,21 +335,25 @@ The [`PID`](DroneLibrary/PIDController.h) class implements a standard PID contro
    ```cpp
     PID pid;
    ```
-2. Then, use the `setConstants` method to set a pointer to the scalar values, and use the `setTarget` method to set a pointer to the PID controller's target value. 
+2. Then, use the `setConstants` method to set the PID constants. You can either:
+   - Pass pointers to the scalar values:
+     ```cpp
+     float p = ..., i = ..., d = ...;
+     pid.setConstants(&p, &i, &d);
+     ```
+   - Or pass a `PID_Instructions` struct:
+     ```cpp
+     PID_Instructions pidValues = {1.0, 0.5, 0.1};
+     pid.setConstants(pidValues);
+     ```
+3. Use the `setTarget` method to set a pointer to the PID controller's target value.
    ```cpp
-    float p = ...
-    float i = ...
-    float d = ...
-    pid.setConstants(&p, &i, &d);
-
-    float target = ...
-
-    pid.setTarget(&target);
+   float target = ...;
+   pid.setTarget(&target);
    ```
-> **_NOTE:_** Pointers are used with the `setConstants` and `setTarget` methods to simplify the changing of values.
-3. Lastly, to acquire the controller's output, use the `calculate` method.
+4. Lastly, to acquire the controller's output, use the `calculate` method.
    ```cpp
-    float output = pid.calculate(inputValue, deltaTime);
+   float output = pid.calculate(inputValue, deltaTime);
    ```
 
 #### `MotorController`
@@ -420,10 +424,15 @@ The [`RadioSendStack`](DroneLibrary/RadioSendStack.h) class is used to handle a 
     // or
     sendStack.queue(message);
    ```
-3. Use the `pop` method to collect and remove a message from the list. It can be used without arguments to collect the first element or with an index to collect a specific element.
-   ```cpp
-    RadioMessage message = sendStack.pop();
-   ```
+3. Use the `peek` and `pop` methods to retrieve messages from the list:
+   - `peek` retrieves a message without removing it. It can be used without arguments to retrieve the first element or with an index to retrieve a specific element.
+     ```cpp
+     RadioMessage message = sendStack.peek();
+     ```
+   - `pop` retrieves and removes a message from the list. It can be used without arguments to collect the first element or with an index to collect a specific element.
+     ```cpp
+     RadioMessage message = sendStack.pop();
+     ```
 4. Use the `getCount` method to retrieve the total number of messages in the list.
    ```cpp
     uint8_t count = sendStack.getCount();
@@ -446,11 +455,11 @@ The [`SmoothValue`](DroneLibrary/SmoothValue.h) class represents a floating-poin
 
 There are also a few structs defined in [`RadioData.h`](DroneLibrary/RadioData.h) to simplify data handling:
 
-- `controllerInstructions` for handling controller input
+- `ControllerInstructions` for handling controller input
 ```cpp
-struct controllerInstructions {
-    int8_t stick_X;
-    int8_t stick_Y;
+struct ControllerInstructions {
+    int8_t x;
+    int8_t y;
     int8_t power;
 };
 ```
@@ -642,7 +651,7 @@ The main control flow is divided into two sections: user input and serial commun
 
 ##### Data Collection
 
-The `Control Panel` application includes functionality for collecting flight data during the drone's operation. This data is periodically gathered and saved in a structured format for analysis. The data includes information such as time, acceleration, velocity, angular velocity, rotation, power, joystick position, FPS, and motor powers.
+The `Control Panel` application includes functionality for collecting flight data during the drone's operation. This data is periodically gathered and saved in a structured format for analysis. The data includes information such as time, acceleration, velocity, angular velocity, rotation, controller power, joystick position, FPS, and motor powers.
 
 Once data collection stops, the collected data is saved as a `JSON` file with a timestamped filename in the `FlightData` folder.
 
