@@ -71,6 +71,8 @@ This repository contains the software part of a multi-person project with the go
 
 [`Drone.ino`](Drone/Drone.ino) is the sketch file for the drone and, by using both public `Arduino` libraries and the custom-made [`DroneLibrary`](DroneLibrary), it handles the control flow for the drone.
 
+> **_NOTE:_** To use `DroneLibrary` with the Arduino IDE, copy the `DroneLibrary` folder into your `Arduino/libraries` directory
+
 #### Setup
 
 As with most `Arduino` sketches, the [`Drone.ino`](Drone/Drone.ino) file includes a setup function.
