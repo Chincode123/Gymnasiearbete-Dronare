@@ -36,5 +36,4 @@ public:
     void write(uint8_t* data, uint8_t type);
     void acknowledge(uint8_t messageType);
 };
-
 #endif

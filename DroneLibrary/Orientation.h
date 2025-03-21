@@ -12,7 +12,6 @@ class Orientation {
     vector3<float> accelerationOffset;
     vector3<float> accelerationAngleOffset;
     
-    vector3<float> rawAngularVelocity;
     vector3<float> previousAccelerationAngles;
     vector3<SmoothValue> angularVelocityError;
 
@@ -40,6 +39,7 @@ public:
     vector3<float> acceleration;
     vector3<float> adjustedAcceleration;
     vector3<SmoothValue> velocity;
+    vector3<float> rawAngularVelocity;
 
     void update(float deltaTime);
 };

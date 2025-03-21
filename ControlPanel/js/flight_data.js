@@ -97,5 +97,3 @@ function collectFlightData() {
 document.getElementById("on").addEventListener("click", startCollectingFlightData);
 
 document.getElementById("off").addEventListener("click", stopCollectingFlightData);
-
-window.addEventListener("beforeunload", stopCollectingFlightData);

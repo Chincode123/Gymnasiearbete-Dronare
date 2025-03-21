@@ -1,3 +1,6 @@
+#ifndef SMOOTHVALUE_H_
+#define SMOOTHVALUE_H_
+
 class SmoothValue {
     float value;
     float smoothingFactor;
@@ -19,3 +22,4 @@ public:
 
     void set(float newValue);
 };
+#endif

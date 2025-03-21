@@ -25,5 +25,4 @@ private:
     // PID controller for the roll of the drone
     PID rollController;
 };
-
 #endif
