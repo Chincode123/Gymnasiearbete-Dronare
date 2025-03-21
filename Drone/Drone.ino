@@ -7,7 +7,7 @@
 #include <Orientation.h>
 #include <RadioSendStack.h>
 
-#define DEBUG
+// #define DEBUG
 
 #define CE_PIN 7
 #define CSN_PIN 6
@@ -188,6 +188,8 @@ void loop() {
                 sendStack.push(messageOut);
                 break;
             default:
+                if (sendStack.getCount() > 10)
+                  sendStack.clear();
                 radioLogQueue("Error interpreting messageType");
                 break;
         }
@@ -219,6 +221,8 @@ void loop() {
         #endif
 
         if (millis() % 1000 == 0) {
+            if (sendStack.getCount() > 10)
+              sendStack.clear();
             radioLogPush("Waiting for activation");
         }
     }
@@ -366,6 +370,7 @@ void sequenceVector(vector3<T> vector, uint8_t messageType) {
   float x = float(vector.x);
   float y = float(vector.y);
   float z = float(vector.z);
+
   memcpy(messageOut.dataBuffer + sizeof(float) * 0, &x, sizeof(float));
   memcpy(messageOut.dataBuffer + sizeof(float) * 1, &y, sizeof(float));
   memcpy(messageOut.dataBuffer + sizeof(float) * 2, &z, sizeof(float));
@@ -378,7 +383,7 @@ void sequenceTelemetry() {
 
   sequenceVector(orientation.adjustedAcceleration, _MSG_DRONE_ACCELERATION);
   sequenceVector(orientation.velocity, _MSG_DRONE_VELOCITY);
-  sequenceVector(orientation.angularVelocity, _MSG_DRONE_ANGULAR_VELOCITY);
+  sequenceVector(orientation.rawAngularVelocity, _MSG_DRONE_ANGULAR_VELOCITY);
   sequenceVector(orientation.angles, _MSG_DRONE_ANGLES);
 
   messageOut.messageType = _MSG_DRONE_DELTATIME;
@@ -387,6 +392,6 @@ void sequenceTelemetry() {
 
   messageOut.messageType = _MSG_DRONE_MOTOR_POWERS;
   MotorPowers motorPowers = {motorPowerTL, motorPowerTR, motorPowerBR, motorPowerBL};
-  memcpy(messageOut.dataBuffer, motorPowers, sizeof(motorPowers));
+  memcpy(messageOut.dataBuffer, &motorPowers, sizeof(motorPowers));
   sendStack.push(messageOut);
 }

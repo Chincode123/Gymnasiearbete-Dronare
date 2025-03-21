@@ -15,5 +15,4 @@ public:
     void setConstants(const float *p, const float *i, const float *d);
     void setConstants(const PID_Instructions& pid);
 };
-
 #endif

@@ -18,6 +18,15 @@ void Orientation::begin(uint16_t cycles) {
     Wire.beginTransmission(MPU);
     Wire.write(0x6B);
     Wire.write(0x00);
+    Wire.endTransmission(false);
+
+    Wire.beginTransmission(MPU);
+    Wire.write(0x1B);
+    Wire.write(0);
+    Wire.endTransmission(false);
+    Wire.beginTransmission(MPU);
+    Wire.write(0x1C);
+    Wire.write(0);
     Wire.endTransmission(true);
 
     calculateOffsets(cycles);
@@ -47,10 +56,10 @@ void Orientation::readFromIMU(vector3<float>& acceleration, vector3<float>& angu
     Wire.endTransmission(false);
     Wire.requestFrom(MPU, 6, true);
 
-    // values are between -2(g) and 2(g)
-    acceleration.x = ((Wire.read() << 8 | Wire.read()) / 16384.0);
-    acceleration.y = ((Wire.read() << 8 | Wire.read()) / 16384.0);
-    acceleration.z = ((Wire.read() << 8 | Wire.read()) / 16384.0);
+    // Values are between -2(g) and 2(g)
+    acceleration.z = (int16_t(Wire.read() << 8 | Wire.read()) / 16384.0);
+    acceleration.y = -(int16_t(Wire.read() << 8 | Wire.read()) / 16384.0);
+    acceleration.x = -(int16_t(Wire.read() << 8 | Wire.read()) / 16384.0);
 
     float g = 9.82;
     acceleration *= g;
@@ -70,10 +79,10 @@ void Orientation::readFromIMU(vector3<float>& acceleration, vector3<float>& angu
     Wire.endTransmission(false);
     Wire.requestFrom(MPU, 6, true);
 
-    // value between -250 and 250 degrees per second
-    angularVelocity.x = (Wire.read() << 8 | Wire.read()) / 131.0;
-    angularVelocity.y = (Wire.read() << 8 | Wire.read()) / 131.0;
-    angularVelocity.z = (Wire.read() << 8 | Wire.read()) / 131.0;
+    // Values are between -250 and 250 degrees per second
+    angularVelocity.y = -(int16_t(Wire.read() << 8 | Wire.read()) / 131.0);
+    angularVelocity.z = (int16_t(Wire.read() << 8 | Wire.read()) / 131.0);
+    angularVelocity.x = -(int16_t(Wire.read() << 8 | Wire.read()) / 131.0);
 
     // #ifdef Serial
     //     Serial.print("      Angular velocity: ");
@@ -133,18 +142,18 @@ float Orientation::limitAngle(float angle) {
 void Orientation::calculateAngles(float deltaTime) {
     vector3<float> accelerationAngles = calculateAccelerationAngles(acceleration) - accelerationAngleOffset;
 
-    angles += angularVelocity * deltaTime;
+    angles += rawAngularVelocity * deltaTime;
 
     angles.x = limitAngle(angles.x);
     angles.y = limitAngle(angles.y);
     angles.z = limitAngle(angles.z);
 
-    vector3<float> unsmothedAngularVelocityError = rawAngularVelocity - ((accelerationAngles - previousAccelerationAngles) / deltaTime);
-    angularVelocityError.x.set(unsmothedAngularVelocityError.x);
-    angularVelocityError.y.set(unsmothedAngularVelocityError.y);
-    angularVelocityError.z.set(unsmothedAngularVelocityError.z);
-    previousAccelerationAngles = accelerationAngles;
-    angularVelocity = rawAngularVelocity + angularVelocityError;
+    // vector3<float> unsmothedAngularVelocityError = rawAngularVelocity - ((accelerationAngles - previousAccelerationAngles) / deltaTime);
+    // angularVelocityError.x.set(unsmothedAngularVelocityError.x);
+    // angularVelocityError.y.set(unsmothedAngularVelocityError.y);
+    // angularVelocityError.z.set(unsmothedAngularVelocityError.z);
+    // previousAccelerationAngles = accelerationAngles;
+    // angularVelocity = rawAngularVelocity + angularVelocityError;
 }
 
 void Orientation::calculateVelocity(float deltaTime) {
