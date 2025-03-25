@@ -141,21 +141,23 @@ The main control flow is found within the `loop` function and can be divided int
 
 ```cpp
 void loop() {
-  ...
+    sendCounter++;
 
-  while (radio.available() && millis() % 20 != 0) {
-    radio.read(&messageIn, sizeof(messageIn));
-    switch (messageIn.messageType) {
-      case _MSG_CONTROLLER_INPUT:
-        // code...
-      case _MSG_ACTIVATE:
-        // code...
-      case _MSG_SET_PID_P:
-        // code...
+    setDeltaTime();
+
+    if (radio.available() && sendCounter < 20) {
+        radio.read(&messageIn, sizeof(messageIn));
+        switch (messageIn.messageType) {
+            case _MSG_CONTROLLER_INPUT:
+                // code...
+            case _MSG_ACTIVATE:
+                // code...
+            case _MSG_SET_PID_P:
+                // code...
+        }
     }
-  }
 
-  ...
+    ...
 }
 ```
 
@@ -198,7 +200,8 @@ If the drone isn't activated, it periodically sends a message to the controller 
 void loop() {
   ...
 
-  if (millis() % 20 == 0) sendRadio();
+  // Output
+  if (sendCounter >= 20) if (sendRadio()) sendCounter = 0;
 
   sequenceTelemetry();
 
@@ -247,18 +250,19 @@ It is used to set the current time delta using the `Arduino's` `micros` function
 ##### `sendRadio`
 
 ```cpp
-void sendRadio() {
+bool sendRadio() {
+    bool result = false;
     radio.stopListening();
     while (sendStack.getCount() > 0) {
         RadioMessage message = sendStack.pop();
-        bool result = radio.write(&message, sizeof(message));
-
+        result = radio.write(&message, sizeof(message));
         if (!result) {
             sendStack.push(message);
             break;
         }
     }
     radio.startListening();
+    return result;
 }
 ```
 It begins by stopping the radio device from listening to messages, which is required to write messages, and enters into a loop that continues until either:

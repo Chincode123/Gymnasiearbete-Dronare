@@ -7,7 +7,7 @@
 #include <Orientation.h>
 #include <RadioSendStack.h>
 
-// #define DEBUG
+#define DEBUG
 
 #define CE_PIN 7
 #define CSN_PIN 6
@@ -53,6 +53,8 @@ Orientation orientation(MPU);
 
 bool activated = false;
 
+uint8_t sendCounter = 0;
+
 void setup() {
     #ifdef DEBUG
       Serial.begin(115200);
@@ -96,10 +98,12 @@ void setup() {
 }
 
 void loop() {
+    sendCounter++;
+  
     setDeltaTime();
     
     // Radio read
-    if (radio.available() && millis() % 20 != 0) {
+    if (radio.available() && sendCounter < 20) {
         #ifdef DEBUG
           Serial.println("radio available");
         #endif
@@ -228,8 +232,8 @@ void loop() {
     }
 
     // Output
-    if (millis() % 20 == 0) sendRadio();
-
+    if (sendCounter >= 20) if (sendRadio()) sendCounter = 0;
+    
     sequenceTelemetry();
 }
 
@@ -246,11 +250,13 @@ void setDeltaTime() {
     }
 }
 
-void sendRadio() {
+bool sendRadio() {
     #ifdef DEBUG
       Serial.print("(before) SendStack count: ");
       Serial.println(sendStack.getCount());
     #endif
+
+    bool result = false;
 
     radio.stopListening();
     while (sendStack.getCount() > 0) {
@@ -259,7 +265,7 @@ void sendRadio() {
         #endif
 
         RadioMessage message = sendStack.pop();
-        bool result = radio.write(&message, sizeof(message));
+        result = radio.write(&message, sizeof(message));
 
         #ifdef DEBUG
           printRadioMessage(message);
@@ -283,6 +289,8 @@ void sendRadio() {
       Serial.print("(after) SendStack count: ");
       Serial.println(sendStack.getCount());
     #endif
+
+    return result;
 }
 
 void radioLogPush(const char* message) {
