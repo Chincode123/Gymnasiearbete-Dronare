@@ -142,7 +142,7 @@ float Orientation::limitAngle(float angle) {
 void Orientation::calculateAngles(float deltaTime) {
     vector3<float> accelerationAngles = calculateAccelerationAngles(acceleration) - accelerationAngleOffset;
 
-    angles += rawAngularVelocity * deltaTime;
+    angles = angles + (rawAngularVelocity * deltaTime) * 0.98 + accelerationAngles * 0.02; 
 
     angles.x = limitAngle(angles.x);
     angles.y = limitAngle(angles.y);
