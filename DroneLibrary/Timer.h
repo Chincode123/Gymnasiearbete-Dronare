@@ -7,9 +7,11 @@ class Timer {
     long long startTime;
     long long timer;
 public:
+    Timer();
     void start(long long time);
     void stop();
     bool finished();
+    bool finished(long long time);
 }
 
 #endif
