@@ -127,7 +127,7 @@ div {
     justify-content: space-around;
 }
 
-#buttons button {
+#buttons button, #connection-status {
     height: 100%;
     width: 100%;
 
@@ -153,4 +153,13 @@ button:hover {
 
 .value-settings .buttons button {
     width: 100%;
+}
+
+#connection-status {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+
+    color: red;
 }
