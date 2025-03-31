@@ -2,6 +2,7 @@
 #include <RF24.h>
 #include <RadioData.h>
 #include <InstructionHandler.h>
+#include <Timer.h>
 
 // #define DEBUG
 
@@ -17,7 +18,8 @@ RadioMessage messageOut, messageIn;
 
 long previousTime;
 
-uint8_t sendCounter = 0;
+Timer sendTimer;
+long long sendTime = 5;
 
 void setup()
 {
@@ -37,12 +39,12 @@ void setup()
     radio.startListening();
 
     previousTime = micros();
+
+    sendTimer.start(sendTime);
 }
 
 void loop()
 {
-    sendCounter++;
-
     float deltaTime = (float)(micros() - previousTime) / 1000000;
     previousTime = micros();
     if (deltaTime == 0) {
@@ -61,8 +63,7 @@ void loop()
         #endif
 
         bool result;
-        if (sendCounter >= 5) 
-          sendCounter = 0;
+        if (sendTimer.finished(sendTime)) 
           result = send();
         if (result) 
           instructionHandler.acknowledge(messageType);
@@ -144,7 +145,7 @@ void loop()
     }
 
     // Radio input
-    if (radio.available() && sendCounter < 5) {
+    if (radio.available() && !sendTimer.finished()) {
         radio.read(&messageIn, sizeof(messageIn));
 
         switch (messageIn.messageType) {

@@ -6,6 +6,7 @@
 #include <Vectors.h>
 #include <Orientation.h>
 #include <RadioSendStack.h>
+#include <Timer.h>
 
 #define DEBUG
 
@@ -53,7 +54,10 @@ Orientation orientation(MPU);
 
 bool activated = false;
 
-uint8_t sendCounter = 0;
+Timer sendTimer;
+long long sendTime = 20;
+
+Timer miscTimer;
 
 void setup() {
     #ifdef DEBUG
@@ -90,6 +94,8 @@ void setup() {
     // Initial time
     previousTime = micros();
 
+    sendTimer.start(sendTime);
+
     radioLogPush("Connected");
 
     #ifdef DEBUG
@@ -98,12 +104,10 @@ void setup() {
 }
 
 void loop() {
-    sendCounter++;
-  
     setDeltaTime();
     
     // Radio read
-    if (radio.available() && sendCounter < 20) {
+    if (radio.available() && !sendTimer.finished()) {
         #ifdef DEBUG
           Serial.println("radio available");
         #endif
@@ -224,15 +228,17 @@ void loop() {
           Serial.println("not activated");
         #endif
 
-        if (millis() % 1000 == 0) {
+        if (miscTimer.finished(1000)) {
             if (sendStack.getCount() > 10)
               sendStack.clear();
             radioLogPush("Waiting for activation");
         }
+        else miscTimer.start(1000);
     }
 
     // Output
-    if (sendCounter >= 20) if (sendRadio()) sendCounter = 0;
+    if (sendTimer.finished(sendTime)) 
+      if (!sendRadio()) sendTimer.start(0); 
     
     sequenceTelemetry();
 }
