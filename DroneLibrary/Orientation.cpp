@@ -165,13 +165,9 @@ void Orientation::calculateVelocity(float deltaTime) {
     float cosYaw = cos(angles.z * PI / 180.0);
     
     /*
-        Acording to ChatGPT, this rotational matrix transforms the acceleration values to the world frame
-
         |cos(yaw)cos(pitch)     cos(yaw)sin(pitch)sin(roll)−sin(yaw)cos(roll)    cos(yaw)sin(pitch)cos(roll)+sin(yaw)sin(roll)|
 ​        |sin(yaw)cos(pitch)     sin(yaw)sin(pitch)sin(roll)+cos(yaw)cos(roll)   sin(yaw)sin(pitch)cos(roll)−cos(yaw)sin(roll) |
 ​        |−sin(pitch)                       cos(pitch)sin(roll)                             cos(pitch)cos(roll)                |
-​
-        Looks reasonable, but haven't confirmed
     */
 
     adjustedAcceleration = {

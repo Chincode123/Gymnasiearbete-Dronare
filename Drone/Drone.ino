@@ -229,9 +229,8 @@ void loop() {
         #endif
 
         if (miscTimer.finished(1000)) {
-            if (sendStack.getCount() > 10)
-              sendStack.clear();
-            radioLogPush("Waiting for activation");
+            if (sendStack.getCount() < 10)
+              radioLogPush("Waiting for activation");
         }
         else miscTimer.start(1000);
     }
