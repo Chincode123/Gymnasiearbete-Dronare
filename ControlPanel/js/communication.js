@@ -438,7 +438,7 @@ async function read() {
 							}
 							else if (result.messageTypeName == "connection-status") { 
 								const status = result.data[0];
-								const resetTime = 200;
+								const resetTime = 500;
 								
 								setReceiverStatus("connected");
 								status_reset_timers.receiver = setTimeout(setReceiverStatus("disconnected"), resetTime);
