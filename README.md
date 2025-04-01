@@ -23,6 +23,7 @@ This repository contains the software part of a multi-person project with the go
       - [`MotorController`](#motorcontroller)
       - [`Orientation`](#orientation)
       - [`RadioSendStack`](#radiosendstack)
+      - [`Timer` (drone)](#timer-drone)
       - [Custom Data Types](#custom-data-types)
         - [`vector3<T>`](#vector3t)
         - [`SmoothValue`](#smoothvalue)
@@ -36,6 +37,7 @@ This repository contains the software part of a multi-person project with the go
         - [Radio Input](#radio-input-1)
     - [Important Classes](#important-classes-1)
       - [`InstructionHandler`](#instructionhandler)
+      - [`Timer` (receiver)](#timer-receiver)
     - [Summary of Receiver](#summary-of-receiver)
   - [Control Panel](#control-panel)
     - [Basic Structure](#basic-structure-2)
@@ -446,6 +448,36 @@ The [`RadioSendStack`](DroneLibrary/RadioSendStack.h) class is used to handle a 
     sendStack.clear();
    ```
 
+#### `Timer` (drone)
+
+The [`Timer`](DroneLibrary/Timer.h) class is a utility for managing timed events. It allows you to start, stop, and check if a timer has finished. It is particularly useful for scheduling periodic tasks or delays.
+
+**To use the class:**
+1. Create a `Timer` object.
+   ```cpp
+   Timer timer;
+   ```
+2. Use the `start` method to initialize the timer with a duration (in milliseconds).
+   ```cpp
+   timer.start(1000); // 1 second
+   ```
+3. Use the `finished` method to check if the timer has completed.
+   ```cpp
+   if (timer.finished()) {
+       // Timer has finished
+   }
+   ```
+4. Optionally, use the overloaded `finished` method to restart the timer with a new duration if it has finished.
+   ```cpp
+   if (timer.finished(500)) {
+       // Timer has finished and restarted with a 500ms duration
+   }
+   ```
+5. Use the `stop` method to reset the timer.
+   ```cpp
+   timer.stop();
+   ```
+
 #### Custom Data Types
 
 ##### `vector3<T>`
@@ -617,6 +649,10 @@ The [`InstructionHandler`](DroneLibrary/InstructionHandler.h) class is used to m
    ```cpp
    instructionHandler.acknowledge(messageType);
    ```
+
+#### `Timer` (receiver)
+
+See [`Timer`](#timer-drone)
 
 ### Summary of [Receiver](#receiver)
 
