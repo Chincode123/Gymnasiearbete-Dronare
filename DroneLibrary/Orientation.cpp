@@ -3,10 +3,10 @@
 #include <Arduino.h>
 
 Orientation::Orientation(uint8_t MPUAddress) : 
-    MPU(MPUAddress),
-    angles(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}),
-    velocity(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}),
-    angularVelocityError(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)})
+    MPU(MPUAddress)
+    // angles(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}),
+    // velocity(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)})
+    // angularVelocityError(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)})
 { }
 
 void Orientation::begin() {
