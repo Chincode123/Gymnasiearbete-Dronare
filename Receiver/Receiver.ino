@@ -2,6 +2,7 @@
 #include <RF24.h>
 #include <RadioData.h>
 #include <InstructionHandler.h>
+#include <Timer.h>
 
 // #define DEBUG
 
@@ -16,6 +17,11 @@ uint8_t readBuffer[32];
 RadioMessage messageOut, messageIn;
 
 long previousTime;
+
+Timer sendTimer;
+long long sendTime = 5;
+
+uint8_t connectionStatus = 1;
 
 void setup()
 {
@@ -35,6 +41,8 @@ void setup()
     radio.startListening();
 
     previousTime = micros();
+
+    sendTimer.start(sendTime);
 }
 
 void loop()
@@ -44,6 +52,8 @@ void loop()
     if (deltaTime == 0) {
         deltaTime = 0.000001;
     }
+
+    connectionStatus = 1;
 
     // Serial input
     if (instructionHandler.read())
@@ -57,7 +67,7 @@ void loop()
         #endif
 
         bool result;
-        if (millis() % 5 == 0) {
+        if (sendTimer.finished(sendTime)) 
           result = send();
         }
         if (result) 
@@ -140,19 +150,27 @@ void loop()
     }
 
     // Radio input
-    if (radio.available() && millis() % 5 != 0) {
+    if (radio.available() && !sendTimer.finished()) {
+        connectonStatus = connectionStatus | 0b00000010;
+        
         radio.read(&messageIn, sizeof(messageIn));
 
         switch (messageIn.messageType) {
           case _MSG_DRONE_LOG:
             dronePrint((const char*)messageIn.dataBuffer);
             break;
+          case: _MSG_ACTIVATE:
+            connectionStatus = connectionStatus | 0b00000100;
+            break;
+          case _MSG_DEACTIVATE:
+            break;
           default:
             instructionHandler.write(messageIn.dataBuffer, messageIn.messageType);
         }
-    }
-
-    instructionHandler.write((uint8_t*)&deltaTime, _MSG_RECEIVER_DELTATIME);
+      }
+      
+      instructionHandler.write(&connectionStatus, _MSG_CONNECTION_STATUS);
+      instructionHandler.write((uint8_t*)&deltaTime, _MSG_RECEIVER_DELTATIME);
 }
 
 bool send()

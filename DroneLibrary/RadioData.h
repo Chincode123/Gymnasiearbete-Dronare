@@ -27,6 +27,7 @@
 #define _MSG_DRONE_DELTATIME 17
 #define _MSG_RECEIVER_DELTATIME 18
 #define _MSG_DRONE_MOTOR_POWERS 19
+#define _MSG_CONNECTION_STATUS 20
 
 // message length in bytes
 #define _MSG_LENGHT_CONTROLLER 3
@@ -41,6 +42,7 @@
 #define _MSG_LENGTH_DELTATIME 4
 #define _MSG_LEGNTH_ACKNOWLEDGE 1
 #define _MSG_LENGTH_MOTOR_POWERS 4
+#define _MSG_LENGTH_CONNECTION_STATUS 1
 
 struct ControllerInstructions {
     int8_t x;
