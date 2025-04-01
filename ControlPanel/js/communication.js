@@ -437,6 +437,25 @@ async function read() {
 								document.getElementById("motor-br").innerHTML = ((motorPowers.bottom_right + 127) / 255 * 100).toFixed(0) + "%";
 							}
 							else if (result.messageTypeName == "connection-status") { 
+								const status = result.data[0];
+								const resetTime = 200;
+								
+								setReceiverStatus("connected");
+								status_reset_timers.receiver = setTimeout(setReceiverStatus("disconnected"), resetTime);
+								
+								if (status & 0b010 == 0) {
+									setDroneConnectionStatus("disconnected");
+									return;
+								}
+								setDroneConnectionStatus("connected");
+								status_reset_timers.drone = setTimeout(setDroneConnectionStatus("disconnected"), resetTime);
+
+								if (status & 0b100 == 0) { 
+									setDroneActivivationStatus("disconnected");
+									return;
+								}
+								setDroneActivivationStatus("connected");
+								status_reset_timers.activated = setTimeout(setDroneActivivationStatus("disconnected"), resetTime);
 							}
 						}
 					}
@@ -717,3 +736,61 @@ function sendControllerInstructions() {
 
 
 document.getElementById("clear").addEventListener("click", terminal.clear);
+
+const status_colors = {
+	connected: "green",
+	disconnected: "red",
+	unknown: "grey",
+};
+
+function setDroneActivivationStatus(status) {
+	let color = status_colors.connected;
+	if (status == "disconnected") {
+		color = status_colors.disconnected;
+	}
+	else if (status == "unkown") {
+		color = status_colors.unknown;
+	}
+	
+	document.getElementById("drone-activation").style.color = color;
+}
+
+function setDroneConnectionStatus(status) {
+	let color = status_colors.connected;
+	if (status != "connected") {
+		setDroneActivivationStatus("unkown");
+
+		if (status == "disconnected") {
+			color = status_colors.disconnected;
+		}
+		else if (status == "unkown") {
+			color = status_colors.unknown;
+		}
+	}
+
+	document.getElementById("drone-connection").style.color = color;
+}
+
+function setReceiverStatus(status) {
+	let color = status_colors.connected;
+	if (status != "connected") {
+		setDroneConnectionStatus("unkown");
+		
+		if (status == "disconnected") {
+			color = status_colors.disconnected;
+		}
+		else if (status == "unkown") {
+			color = status_colors.unknown;
+		}
+	}
+
+	document.getElementById("receiver-connection").style.color = color;
+}
+
+const status_reset_timers = {
+	receiver: null,
+	drone: null,
+	activated: null,
+};
+
+setReceiverStatus("disconnected");

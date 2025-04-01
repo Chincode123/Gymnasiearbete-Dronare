@@ -151,7 +151,7 @@ void loop()
 
     // Radio input
     if (radio.available() && !sendTimer.finished()) {
-        connectonStatus = connectionStatus | 0b00000010;
+        connectonStatus = connectionStatus | 0b010;
         
         radio.read(&messageIn, sizeof(messageIn));
 
@@ -160,7 +160,7 @@ void loop()
             dronePrint((const char*)messageIn.dataBuffer);
             break;
           case: _MSG_ACTIVATE:
-            connectionStatus = connectionStatus | 0b00000100;
+            connectionStatus = connectionStatus | 0b100;
             break;
           case _MSG_DEACTIVATE:
             break;
