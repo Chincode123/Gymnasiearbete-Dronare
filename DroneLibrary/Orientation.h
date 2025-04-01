@@ -13,7 +13,7 @@ class Orientation {
     vector3<float> accelerationAngleOffset;
     
     vector3<float> previousAccelerationAngles;
-    vector3<SmoothValue> angularVelocityError;
+    vector3<float> angularVelocityError;
 
     void readFromIMU(vector3<float>& acceleration, vector3<float>& angularVelocity);
     void readFromIMU();
@@ -33,13 +33,13 @@ public:
     void begin(uint16_t errorCycles);
     void end();
 
+    vector3<float> rawAngularVelocity;
     vector3<float> angularVelocity;
-    vector3<SmoothValue> angles;
-
+    vector3<float> angles;
+    
     vector3<float> acceleration;
     vector3<float> adjustedAcceleration;
-    vector3<SmoothValue> velocity;
-    vector3<float> rawAngularVelocity;
+    vector3<float> velocity;
 
     void update(float deltaTime);
 };

@@ -53,7 +53,7 @@ Orientation orientation(MPU);
 
 bool activated = false;
 
-uint8_t sendCounter = 0;
+bool sending = false;
 
 void setup() {
     #ifdef DEBUG
@@ -98,12 +98,10 @@ void setup() {
 }
 
 void loop() {
-    sendCounter++;
-  
     setDeltaTime();
     
     // Radio read
-    if (radio.available() && sendCounter < 20) {
+    if (radio.available() && !sending) {
         #ifdef DEBUG
           Serial.println("radio available");
         #endif
@@ -232,7 +230,13 @@ void loop() {
     }
 
     // Output
-    if (sendCounter >= 20) if (sendRadio()) sendCounter = 0;
+    if (millis() % 20 == 0 || sending) 
+      sending = !sendRadio();
+
+    #ifdef DEBUG
+      Serial.print("Sending?: ");
+      Serial.println(sending);
+    #endif
     
     sequenceTelemetry();
 }

@@ -17,8 +17,6 @@ RadioMessage messageOut, messageIn;
 
 long previousTime;
 
-uint8_t sendCounter = 0;
-
 void setup()
 {
     Serial.begin(115200);
@@ -41,8 +39,6 @@ void setup()
 
 void loop()
 {
-    sendCounter++;
-
     float deltaTime = (float)(micros() - previousTime) / 1000000;
     previousTime = micros();
     if (deltaTime == 0) {
@@ -61,9 +57,9 @@ void loop()
         #endif
 
         bool result;
-        if (sendCounter >= 5) 
-          sendCounter = 0;
+        if (millis() % 5 == 0) {
           result = send();
+        }
         if (result) 
           instructionHandler.acknowledge(messageType);
 
@@ -144,7 +140,7 @@ void loop()
     }
 
     // Radio input
-    if (radio.available() && sendCounter < 5) {
+    if (radio.available() && millis() % 5 != 0) {
         radio.read(&messageIn, sizeof(messageIn));
 
         switch (messageIn.messageType) {
