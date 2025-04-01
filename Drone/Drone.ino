@@ -408,4 +408,7 @@ void sequenceTelemetry() {
   MotorPowers motorPowers = {motorPowerTL, motorPowerTR, motorPowerBR, motorPowerBL};
   memcpy(messageOut.dataBuffer, &motorPowers, sizeof(motorPowers));
   sendStack.push(messageOut);
+
+  messageOut.messageType = (activated) ? _MSG_ACTIVATE : _MSG_DEACTIVATE;
+  sendStack.push(messageOut);
 }

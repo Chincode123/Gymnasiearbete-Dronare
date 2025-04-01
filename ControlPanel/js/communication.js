@@ -27,7 +27,8 @@ class SerialMessage {
 		[16, "drone-angles"],
 		[17, "drone-delta-time"],
 		[18, "receiver-delta-time"],
-		[19, "drone-motor-powers"]
+		[19, "drone-motor-powers"],
+		[20, "connection-status"]
 	]);
 
 	static messageTypeFromName = new Map([
@@ -50,7 +51,8 @@ class SerialMessage {
 		["drone-angles", 16],
 		["drone-delta-time", 17],
 		["receiver-delta-time", 18],
-		["drone-motor-powers", 19]
+		["drone-motor-powers", 19],
+		["connection-status", 20]
 	]);
 
 	static messageLengths = new Map([
@@ -73,7 +75,8 @@ class SerialMessage {
 		[SerialMessage.messageTypeFromName.get("drone-angles"), 12],
 		[SerialMessage.messageTypeFromName.get("drone-delta-time"), 4],
 		[SerialMessage.messageTypeFromName.get("receiver-delta-time"), 4],
-		[SerialMessage.messageTypeFromName.get("drone-motor-powers"), 4]
+		[SerialMessage.messageTypeFromName.get("drone-motor-powers"), 4],
+		[SerialMessage.messageTypeFromName.get("connection-status"), 1]
 	]);
 
 	set(type) {
@@ -432,6 +435,8 @@ async function read() {
 								document.getElementById("motor-fr").innerHTML = ((motorPowers.top_rigth + 127) / 255 * 100).toFixed(0) + "%";
 								document.getElementById("motor-bl").innerHTML = ((motorPowers.bottom_left + 127) / 255 * 100).toFixed(0) + "%";
 								document.getElementById("motor-br").innerHTML = ((motorPowers.bottom_right + 127) / 255 * 100).toFixed(0) + "%";
+							}
+							else if (result.messageTypeName == "connection-status") { 
 							}
 						}
 					}
