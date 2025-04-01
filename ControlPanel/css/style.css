@@ -161,5 +161,5 @@ button:hover {
     justify-content: space-around;
     align-items: center;
 
-    color: red;
+    background: rgb(38, 38, 38);
 }
