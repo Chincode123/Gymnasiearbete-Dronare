@@ -45,6 +45,7 @@ This repository contains the software part of a multi-person project with the go
       - [Main Loop](#main-loop-2)
         - [User Input](#user-input)
         - [Serial Communication](#serial-communication)
+        - [Connection Status Indicators](#connection-status-indicators)
         - [Data Collection](#data-collection)
     - [Important Classes](#important-classes-2)
       - [`SerialMessage`](#serialmessage)
@@ -128,12 +129,14 @@ void setup() {
 
     previousTime = micros();
 
+    sendTimer.start(sendTime);
+
     radioLogPush("Connected");
 
     ...
 }
 ```
-Lastly, the time variable is initialized and a message is pushed that will send immediately when the drone is connected to the controller.
+Lastly, the time variable is initialized, a countdown timer for when to send and not send is activated, and a message is pushed that will send immediately when the drone is connected to the controller.
 
 #### Main Loop
 
@@ -143,11 +146,9 @@ The main control flow is found within the `loop` function and can be divided int
 
 ```cpp
 void loop() {
-    sendCounter++;
-
     setDeltaTime();
 
-    if (radio.available() && sendCounter < 20) {
+    if (radio.available() && !sendTimer.finished()) {
         radio.read(&messageIn, sizeof(messageIn));
         switch (messageIn.messageType) {
             case _MSG_CONTROLLER_INPUT:
@@ -181,9 +182,11 @@ void loop() {
       analogWrite(MOTOR_BL_Pin, uint8_t(127 + motorPowerBL));
     }
     else {
-      if (millis() % 1000 == 0) {
-        radioLogPush("Waiting for activation");
-      }
+      if (miscTimer.finished(1000)) {
+            if (sendStack.getCount() < 10)
+              radioLogPush("Waiting for activation");
+        }
+        else miscTimer.start(1000);
     }
 
   ...
@@ -203,15 +206,16 @@ void loop() {
   ...
 
   // Output
-  if (sendCounter >= 20) if (sendRadio()) sendCounter = 0;
-
+  if (sendTimer.finished(sendTime)) 
+    if (!sendRadio()) sendTimer.start(0); 
+    
   sequenceTelemetry();
 
   ...
 }
 ```
 
-This part of the code controls the radio output of the drone. It periodically sends its saved up output messages, saved in a [`RadioSendStack`](#radiosendstack) object, and sequences new telemetry messages with the `sequenceTelemetry` function.
+This part of the code controls the radio output of the drone. It periodically sends its saved-up output messages, stored in a [`RadioSendStack`](#radiosendstack) object, and sequences new telemetry messages with the `sequenceTelemetry` function.
 
 ```cpp
 void sequenceTelemetry() {
@@ -220,11 +224,19 @@ void sequenceTelemetry() {
 
   sequenceVector(orientation.adjustedAcceleration, _MSG_DRONE_ACCELERATION);
   sequenceVector(orientation.velocity, _MSG_DRONE_VELOCITY);
-  sequenceVector(orientation.angularVelocity, _MSG_DRONE_ANGULAR_VELOCITY);
+  sequenceVector(orientation.rawAngularVelocity, _MSG_DRONE_ANGULAR_VELOCITY);
   sequenceVector(orientation.angles, _MSG_DRONE_ANGLES);
 
   messageOut.messageType = _MSG_DRONE_DELTATIME;
   memcpy(messageOut.dataBuffer, &deltaTime, sizeof(deltaTime));
+  sendStack.push(messageOut);
+
+  messageOut.messageType = _MSG_DRONE_MOTOR_POWERS;
+  MotorPowers motorPowers = {motorPowerTL, motorPowerTR, motorPowerBR, motorPowerBL};
+  memcpy(messageOut.dataBuffer, &motorPowers, sizeof(motorPowers));
+  sendStack.push(messageOut);
+
+  messageOut.messageType = (activated) ? _MSG_ACTIVATE : _MSG_DEACTIVATE;
   sendStack.push(messageOut);
 }
 ```
@@ -402,15 +414,21 @@ The [`Orientation`](DroneLibrary/Orientation.h) class is used to collect data fr
    ```cpp
     orientation.begin();
    ```
+   - Optionally, pass the number of cycles for offset calculation:
+     ```cpp
+     orientation.begin(500);
+     ```
 3. Use the `update` method to read data from the MPU and update the orientation.
    ```cpp
-    orientation.update(deltaTime);
+   orientation.update(deltaTime);
    ```
 4. Finally, use the public member variables to access the calculated orientation data:
-   - `angularVelocity`: degrees per second (**°/s**)
-   - `angles`: Euler angles (**°**) 
-   - `acceleration` and `adjustedAcceleration`: acceleration (meters per second squared, **m/s²**)
-   - `velocity`: velocity (meters per second, **m/s**)
+   - `rawAngularVelocity`: Raw angular velocity from the gyroscope (**°/s**).
+   - `angularVelocity`: Adjusted angular velocity (**°/s**).
+   - `angles`: Euler angles (**°**).
+   - `acceleration`: Raw acceleration from the accelerometer (**m/s²**).
+   - `adjustedAcceleration`: Acceleration adjusted to the world frame (**m/s²**).
+   - `velocity`: Velocity calculated from the adjusted acceleration (**m/s**).
 
 > **_NOTE:_** The `adjustedAcceleration` and velocity vectors are adjusted to fixed axes that are set when `begin` is called.
 
@@ -542,6 +560,9 @@ As with most `Arduino` sketches, the [`Receiver.ino`](Receiver/Receiver.ino) fil
 void setup() {
     ...
 
+    Serial.begin(115200);
+    while (!Serial);
+
     if (!radio.begin()) {
         Serial.println(F("Radio hardware not responding!"));
         while (true);
@@ -554,15 +575,20 @@ void setup() {
     radio.openReadingPipe(1, DRONE_ADDRESS);
     radio.startListening();
 
+    previousTime = micros();
+
+    sendTimer.start(sendTime);
+
     ...
 }
 ```
-
-Firstly, the radio transceiver is configured:
-- `radio.begin()`, from the [`RF24`](https://github.com/nRF24/RF24) class, is called to initialize the radio transceiver.
-- `configureRadio(radio)` is called to configure the transceiver's settings.
-- Writing and reading pipes are opened with addresses defined in [`RadioData.h`](DroneLibrary/RadioData.h).
-- `radio.startListening()` is called for the transceiver to start listening for instructions.
+Firstly, Serial is configured with a baud rate of `115200`.
+Secondly, the radio transceiver is configured:
+  - `radio.begin()`, from the [`RF24`](https://github.com/nRF24/RF24) class, is called to initialize the radio transceiver.
+  - `configureRadio(radio)` is called to configure the transceiver's settings.
+  - Writing and reading pipes are opened with addresses defined in [`RadioData.h`](DroneLibrary/RadioData.h).
+  - `radio.startListening()` is called for the transceiver to start listening for instructions.
+Lastly, the time varibale and the send-countdown timer are initialized.
 
 > **_NOTE:_** The transceiver's begin and configuration functions are placed into while loops to prevent the program from proceeding if any part fails.
 
@@ -582,8 +608,8 @@ void loop() {
         memcpy(messageOut.dataBuffer, &readBuffer, sizeof(messageOut.dataBuffer));
 
         bool result;
-        if (millis() % 5 == 0)
-            result = send();
+        if (sendTimer.finished(sendTime)) 
+          result = send();
         if (result)
             instructionHandler.acknowledge(messageType);
 
@@ -602,17 +628,27 @@ This part of the code checks for incoming serial messages from the controller us
 void loop() {
     ...
 
-    if (radio.available() && millis() % 5 != 0) {
+    if (radio.available() && !sendTimer.finished()) {
+        connectionStatus = connectionStatus | 0b010;
+        
         radio.read(&messageIn, sizeof(messageIn));
 
         switch (messageIn.messageType) {
             case _MSG_DRONE_LOG:
                 dronePrint((const char*)messageIn.dataBuffer);
                 break;
+            case _MSG_ACTIVATE:
+                connectionStatus = connectionStatus | 0b100;
+                break;
+            case _MSG_DEACTIVATE:
+                break;
             default:
                 instructionHandler.write(messageIn.dataBuffer, messageIn.messageType);
         }
     }
+
+    instructionHandler.write(&connectionStatus, _MSG_CONNECTION_STATUS);
+    instructionHandler.write((uint8_t*)&deltaTime, _MSG_RECEIVER_DELTATIME);
 
     ...
 }
@@ -656,7 +692,7 @@ See [`Timer`](#timer-drone)
 
 ### Summary of [Receiver](#receiver)
 
-The `Receiver.ino` sketch acts as a bridge between the drone and the controller. It uses an [`nRF24L01`](https://github.com/nRF24/RF24) radio device to communicate with the drone and a serial connection to communicate with the controller. The sketch relies on the `InstructionHandler` class to manage serial communication and ensures that messages are properly relayed between the two systems. The setup function initializes the radio transceiver, while the main loop handles serial input, radio communication, and message forwarding. Additionally, the receiver ensures acknowledgment of serial messages and processes drone logs for better debugging and monitoring.
+The `Receiver.ino` sketch acts as a bridge between the drone and the controller. It uses an [`nRF24L01`](https://github.com/nRF24/RF24) radio device to communicate with the drone and a serial connection (115200 baud) to communicate with the controller. The sketch relies on the `InstructionHandler` class to manage serial communication and ensures that messages are properly relayed between the two systems. The setup function initializes the radio transceiver and serial communication, while the main loop handles serial input, radio communication, and message forwarding. The receiver monitors connection status for both the drone and its activation state, and uses timer-based message handling to improve communication reliability. Additionally, it ensures acknowledgment of serial messages and processes drone logs for better debugging and monitoring.
 
 ## Control Panel
 
@@ -688,6 +724,16 @@ The main control flow is divided into two sections: user input and serial commun
 
 - Sends instructions to the receiver via the serial port.
 - Uses a dedicated class to manage outgoing messages and ensure proper communication flow.
+
+##### Connection Status Indicators
+
+The `Control Panel` displays the connection status of the receiver, drone, and drone activation state using color-coded indicators:
+
+  - <span style="color:green;">connected</span>
+  - <span style="color:red;">disconnected</span>
+  - <span style="color:grey;">unkown</span>
+
+These indicators update dynamically based on received messages and reset to disconnected/unkown if no updates are received within a timeout period.
 
 ##### Data Collection
 
@@ -828,6 +874,7 @@ The `WritingHandler` class manages outgoing instructions to the `Receiver`.
 ### Summary of [Control Panel](#control-panel)
 
 The `Control Panel` application provides an intuitive interface for controlling the drone and monitoring its telemetry. It uses the `SerialMessage`, `SerialReader`, `Terminal`, and `WritingHandler` classes to manage communication with the `Receiver`. The application supports joystick, keyboard, and gamepad inputs for controlling the drone and allows real-time adjustments to PID constants and target ranges. The `WritingHandler` class ensures proper acknowledgment of instructions sent to the receiver, improving communication reliability. Additionally, the application collects and saves flight data for post-flight analysis, enabling users to evaluate the drone's performance and behavior during flights.
+
 
 ## Simulation
 
