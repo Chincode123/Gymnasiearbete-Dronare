@@ -48,6 +48,9 @@ bool Message::set(uint8_t type) {
         case _MSG_ACKNOWLEDGE:
             length = _MSG_LEGNTH_ACKNOWLEDGE;
         break;
+        case _MSG_CONNECTION_STATUS:
+            length = _MSG_LENGTH_CONNECTION_STATUS;
+            break;
         case _MSG_REQUEST_PID_V:
         case _MSG_REQUEST_PID_P:
         case _MSG_REQUEST_PID_R:

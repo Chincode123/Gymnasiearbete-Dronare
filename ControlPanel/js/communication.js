@@ -439,23 +439,23 @@ async function read() {
 							else if (result.messageTypeName == "connection-status") { 
 								const status = result.data[0];
 								const resetTime = 500;
-								
-								setReceiverStatus("connected");
-								status_reset_timers.receiver = setTimeout(setReceiverStatus("disconnected"), resetTime);
-								
-								if (status & 0b010 == 0) {
-									setDroneConnectionStatus("disconnected");
-									return;
-								}
-								setDroneConnectionStatus("connected");
-								status_reset_timers.drone = setTimeout(setDroneConnectionStatus("disconnected"), resetTime);
 
-								if (status & 0b100 == 0) { 
-									setDroneActivivationStatus("disconnected");
-									return;
+								console.log("connection status", status, {receiver: (status & 1 << 0) != 0, drone: (status & 1 << 1) != 0, activated: (status & 1 << 2) != 0});
+
+								setReceiverStatus("connected");
+								clearTimeout(status_reset_timers.receiver);
+								status_reset_timers.receiver = setTimeout(() => {setReceiverStatus("disconnected")}, resetTime);
+								
+								setDroneConnectionStatus("connected");
+								clearTimeout(status_reset_timers.drone);
+								status_reset_timers.drone = setTimeout(() => {setDroneConnectionStatus("disconnected")}, resetTime);
+
+								if ((status & 1 << 2) == 0) { 
+									break;
 								}
 								setDroneActivivationStatus("connected");
-								status_reset_timers.activated = setTimeout(setDroneActivivationStatus("disconnected"), resetTime);
+								clearTimeout(status_reset_timers.activated);
+								status_reset_timers.activated = setTimeout(() => {setDroneActivivationStatus("disconnected")}, resetTime);
 							}
 						}
 					}

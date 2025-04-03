@@ -3,15 +3,14 @@
 
 #include <Arduino.h>
 
-class Timer {
+class CountdownTimer {
     long long startTime;
     long long timer;
 public:
-    Timer();
+    CountdownTimer();
     void start(long long time);
     void stop();
     bool finished();
     bool finished(long long time);
-}
-
+};
 #endif

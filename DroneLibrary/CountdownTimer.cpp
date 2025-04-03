@@ -1,21 +1,21 @@
-#include "Timer.h"
+#include "CountdownTimer.h"
 
-Timer::Timer() : 
+CountdownTimer::CountdownTimer() : 
     startTime(0), 
     timer(0) 
-    { }
+    {}
 
-void Timer::start(long long time) {
+void CountdownTimer::start(long long time) {
     startTime = millis();
     timer = time;
 }
 
-void Timer::stop() {
+void CountdownTimer::stop() {
     startTime = 0;
     timer = 0;
 }
 
-bool Timer::finished() {
+bool CountdownTimer::finished() {
     if (startTime == 0)
         return false;
     
@@ -25,7 +25,7 @@ bool Timer::finished() {
     return false;
 }
 
-bool Timer::finished(long long time) {
+bool CountdownTimer::finished(long long time) {
     if (!finished())
         return false;
     start(time);
