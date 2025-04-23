@@ -54,8 +54,10 @@ Orientation orientation(MPU);
 
 bool activated = false;
 
-CountdownTimer sendTimer;
-long long sendTime = 50;
+// CountdownTimer sendTimer;
+// long long sendTime = 20;
+
+bool sending = false;
 
 CountdownTimer miscTimer;
 
@@ -107,10 +109,12 @@ void loop() {
     setDeltaTime();
     
     // Radio read
-    if (radio.available() && !sendTimer.finished()) {
+    if (radio.available()) {
         #ifdef DEBUG
           Serial.println("radio available");
         #endif
+      
+        sending = true;
         
         radio.read(&messageIn, sizeof(messageIn));
 
@@ -204,7 +208,7 @@ void loop() {
     }
     #ifdef DEBUG
     else {
-        if (!sendTimer.finished())
+        if (!sending)
           Serial.println("radio not available");
         else
           Serial.println("send-countdown done");
@@ -239,8 +243,8 @@ void loop() {
     }
 
     // Output
-    if (sendTimer.finished(sendTime)) 
-      if (!sendRadio()) sendTimer.start(0);
+    if (sending) 
+      sending = !sendRadio();
     
     sequenceTelemetry();
 }
@@ -264,39 +268,29 @@ bool sendRadio() {
       Serial.println(sendStack.getCount());
     #endif
 
-    bool result = false;
+    if (sendStack.getCount() <= 0)
+      return true;
 
     radio.stopListening();
-    while (sendStack.getCount() > 0) {
-        #ifdef DEBUG 
-          Serial.println("attempting to send");
-        #endif
+    RadioMessage message = sendStack.pop();
+    bool result = radio.write(&message, sizeof(message));
 
-        RadioMessage message = sendStack.pop();
-        result = radio.write(&message, sizeof(message));
-
-        #ifdef DEBUG
-          printRadioMessage(message);
-        #endif
-
-        if (!result){
-            #ifdef DEBUG
-              Serial.println("failed to send");
-            #endif
-
-            sendStack.push(message);
-            break;
-        }
-
-        #ifdef DEBUG
-          Serial.println("successfully sent");
-        #endif
-    }
-    radio.startListening();
     #ifdef DEBUG
-      Serial.print("(after) SendStack count: ");
-      Serial.println(sendStack.getCount());
+      printRadioMessage(message);
     #endif
+
+    if (!result) {
+        #ifdef DEBUG
+          Serial.println("failed to send");
+        #endif
+
+        sendStack.push(message);
+    }
+        
+    #ifdef DEBUG
+      Serial.println("successfully sent");
+    #endif
+    radio.startListening();
 
     return result;
 }

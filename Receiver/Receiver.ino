@@ -22,8 +22,10 @@ RadioMessage messageOut, messageIn;
 
 long previousTime;
 
-CountdownTimer sendTimer;
-long long sendTime = 50;
+// CountdownTimer sendTimer;
+// long long sendTime = 20;
+
+bool sending = true;
 
 uint8_t connectionStatus = 1;
 
@@ -80,7 +82,7 @@ void loop()
         #endif
 
         bool result;
-        if (sendTimer.finished(sendTime)) 
+        if (sending) 
           result = send();
         if (result) 
           instructionHandler.acknowledge(messageType);
@@ -88,6 +90,8 @@ void loop()
         switch (messageType) {
         case _MSG_CONTROLLER_INPUT:
             if (result) {
+                sending = false;
+
                 ControllerInstructions controller;
                 memcpy(&controller, messageOut.dataBuffer, sizeof(controller));
                 #ifdef DEBUG
@@ -162,7 +166,9 @@ void loop()
     }
 
     // Radio input
-    if (radio.available() && !sendTimer.finished()) {
+    if (radio.available()) {
+        sending = true;
+
         connectionStatus = connectionStatus | 0b010;
         
         radio.read(&messageIn, sizeof(messageIn));
