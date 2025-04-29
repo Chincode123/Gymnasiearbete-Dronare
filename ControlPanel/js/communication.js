@@ -277,6 +277,7 @@ class WritingHandler {
 		this.hasInstructions = false;
 		this.currentInstructions = null;
 		this.currentInstructionsType = null;
+		terminal.addToTerminal("[App] Acknowledge received for " + SerialMessage.messageNameFromType.get(this.currentInstructionsType));
 	}
 
 	confirmSendData(value, messageType) {
