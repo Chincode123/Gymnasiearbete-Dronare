@@ -7,6 +7,7 @@
 #include <Orientation.h>
 #include <RadioSendStack.h>
 #include <CountdownTimer.h>
+#include <Servo.h>
 
 #define DEBUG
 
@@ -25,7 +26,7 @@ RadioMessage messageIn, messageOut;
 #define MOTOR_BL_Pin 2
 int8_t motorPowerTL = 0, motorPowerTR = 0, motorPowerBR = 0, motorPowerBL = 0;
 MotorController motorController(motorPowerTL, motorPowerTR, motorPowerBR, motorPowerBL);
-
+Servo motorTL, motorTR, motorBR, motorBL;
 
 // PID-values
 float targetVelocity;
@@ -40,17 +41,14 @@ float targetRoll;
 float maxRoll;
 PID_Instructions PID_Roll;
 
-
 // Delta time
 unsigned long previousTime;
 float deltaTime;
 void setDeltaTime();
 
-
 // Spatial orientation/acceleration/velocity
 const int MPU = 0x68;
 Orientation orientation(MPU);
-
 
 bool activated = false;
 
@@ -88,10 +86,17 @@ void setup() {
     motorController.setPitchConstants(PID_Pitch);
     motorController.setRollConstants(PID_Roll);
 
-    pinMode(MOTOR_TL_Pin, OUTPUT);
-    pinMode(MOTOR_TR_Pin, OUTPUT);
-    pinMode(MOTOR_BR_Pin, OUTPUT);
-    pinMode(MOTOR_BL_Pin, OUTPUT);
+    // Set up motors
+    motorTL.attach(MOTOR_TL_Pin);
+    motorTR.attach(MOTOR_TR_Pin);
+    motorBR.attach(MOTOR_BR_Pin);
+    motorBL.attach(MOTOR_BL_Pin);
+    
+    // Set initial position
+    motorTL.writeMicroseconds(1000);
+    motorTR.writeMicroseconds(1000);
+    motorBR.writeMicroseconds(1000);
+    motorBL.writeMicroseconds(1000);
     
     // Initial time
     previousTime = micros();
@@ -224,10 +229,11 @@ void loop() {
         motorController.calculatePower(orientation.velocity.z, orientation.angles.x, orientation.angles.y, deltaTime);
 
         #ifndef DEBUG
-          analogWrite(MOTOR_TL_Pin, uint8_t(127 + motorPowerTL));   
-          analogWrite(MOTOR_TR_Pin, uint8_t(127 + motorPowerTR));   
-          analogWrite(MOTOR_BR_Pin, uint8_t(127 + motorPowerBR));   
-          analogWrite(MOTOR_BL_Pin, uint8_t(127 + motorPowerBL));
+          // Convert from -127..127 to 1000..2000 microseconds range
+          motorTL.writeMicroseconds(map(motorPowerTL, -127, 127, 1000, 2000));
+          motorTR.writeMicroseconds(map(motorPowerTR, -127, 127, 1000, 2000));
+          motorBR.writeMicroseconds(map(motorPowerBR, -127, 127, 1000, 2000));
+          motorBL.writeMicroseconds(map(motorPowerBL, -127, 127, 1000, 2000));
         #endif
     }
     else {
@@ -332,17 +338,17 @@ void activate() {
   activated = true;
   orientation.begin(500);
   #ifndef DEBUG
-  // Ramp up motors to 50%
-  uint8_t power = 0;
+  // Ramp up motors to middle position
+  uint16_t power = 1000;
   float time = 0;
   while (time < 1) {
       setDeltaTime();
-      analogWrite(MOTOR_TL_Pin, power);
-      analogWrite(MOTOR_TR_Pin, power);
-      analogWrite(MOTOR_BR_Pin, power);
-      analogWrite(MOTOR_BL_Pin, power);
+      motorTL.writeMicroseconds(power);
+      motorTR.writeMicroseconds(power);
+      motorBR.writeMicroseconds(power);
+      motorBL.writeMicroseconds(power);
       time += deltaTime;
-      power = 128 * time;
+      power = 1000 + (time * 500); // Ramp up to 1500μs
   }
   #endif
 
@@ -354,23 +360,23 @@ void deactivate() {
   activated = false;
   orientation.end();
   #ifndef DEBUG
-  // Ramp down motors to 0%
-  uint8_t power = 0;
+  // Ramp down motors to off
+  uint16_t power = 1500;
   float time = 0;
   while (time < 1) {
       setDeltaTime();
-      analogWrite(MOTOR_TL_Pin, power);
-      analogWrite(MOTOR_TR_Pin, power);
-      analogWrite(MOTOR_BR_Pin, power);
-      analogWrite(MOTOR_BL_Pin, power);
+      motorTL.writeMicroseconds(power);
+      motorTR.writeMicroseconds(power);
+      motorBR.writeMicroseconds(power);
+      motorBL.writeMicroseconds(power);
       time += deltaTime;
-      power = 128 * (1 - time);
+      power = 1500 - (time * 500); // Ramp down to 1000μs
   }
   #endif
-  digitalWrite(MOTOR_TL_Pin, LOW);
-  digitalWrite(MOTOR_TR_Pin, LOW);
-  digitalWrite(MOTOR_BR_Pin, LOW);
-  digitalWrite(MOTOR_BL_Pin, LOW);
+  motorTL.writeMicroseconds(1000);
+  motorTR.writeMicroseconds(1000);
+  motorBR.writeMicroseconds(1000);
+  motorBL.writeMicroseconds(1000);
   radioLogPush("Deactivated");
 }
 
