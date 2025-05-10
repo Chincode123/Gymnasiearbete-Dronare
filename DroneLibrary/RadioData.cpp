@@ -12,6 +12,7 @@ bool configureRadio(RF24& radio) {
     radio.setAutoAck(true);
     radio.setAddressWidth(5);
     radio.setPayloadSize(32);
+    radio.setRetries(0, 0);
 
     return true;
 }
