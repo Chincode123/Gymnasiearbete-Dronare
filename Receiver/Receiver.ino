@@ -2,9 +2,13 @@
 #include <RF24.h>
 #include <RadioData.h>
 #include <InstructionHandler.h>
-#include <Timer.h>
+#include <CountdownTimer.h>
 
 // #define DEBUG
+
+#ifdef DEBUG
+  #define DEBUG_PRINT(x) do { Serial.print(__FILE__); Serial.print(":"); Serial.print(__LINE__); Serial.print(" -> "); Serial.println(x); } while(0)
+#endif
 
 #define CE_PIN 7
 #define CSN_PIN 8
@@ -12,14 +16,16 @@
 RF24 radio(CE_PIN, CSN_PIN, 4000000);
 
 InstructionHandler instructionHandler;
-uint8_t readBuffer[32];
+uint8_t readBuffer[31];
 
 RadioMessage messageOut, messageIn;
 
 long previousTime;
 
-Timer sendTimer;
-long long sendTime = 5;
+// CountdownTimer sendTimer;
+// long long sendTime = 20;
+
+bool sending = true;
 
 uint8_t connectionStatus = 1;
 
@@ -43,10 +49,19 @@ void setup()
     previousTime = micros();
 
     sendTimer.start(sendTime);
+    
+    #ifdef DEBUG
+      DEBUG_PRINT("Setup complete!");
+      delay(5000);
+    #endif
 }
 
 void loop()
 {
+    #ifdef DEBUG
+      DEBUG_PRINT("loop start");
+    #endif
+
     float deltaTime = (float)(micros() - previousTime) / 1000000;
     previousTime = micros();
     if (deltaTime == 0) {
@@ -60,26 +75,27 @@ void loop()
     {
         uint8_t messageType = instructionHandler.getData(readBuffer);
         messageOut.messageType = messageType;
-        memcpy(messageOut.dataBuffer, &readBuffer, sizeof(messageOut.dataBuffer));
+        memcpy(messageOut.dataBuffer, readBuffer, sizeof(messageOut.dataBuffer));
         
         #ifdef DEBUG
           printRadioMessage(messageOut);
         #endif
 
         bool result;
-        if (sendTimer.finished(sendTime)) 
+        if (sending) 
           result = send();
-        }
         if (result) 
           instructionHandler.acknowledge(messageType);
 
         switch (messageType) {
         case _MSG_CONTROLLER_INPUT:
             if (result) {
+                sending = false;
+
                 ControllerInstructions controller;
                 memcpy(&controller, messageOut.dataBuffer, sizeof(controller));
                 #ifdef DEBUG
-                  Serial.print("x:");
+                  DEBUG_PRINT("x:");
                   Serial.print((float)controller.x / 127);
                   Serial.print(" y:");
                   Serial.print((float)controller.y / 127);
@@ -87,7 +103,7 @@ void loop()
                   Serial.println((float)controller.power / 127);
                 #endif
                 break;
-              }
+            }
         #ifdef DEBUG
             else {
               receiverPrint("Faild to send: Controller input");
@@ -150,8 +166,10 @@ void loop()
     }
 
     // Radio input
-    if (radio.available() && !sendTimer.finished()) {
-        connectonStatus = connectionStatus | 0b010;
+    if (radio.available()) {
+        sending = true;
+
+        connectionStatus = connectionStatus | 0b010;
         
         radio.read(&messageIn, sizeof(messageIn));
 
@@ -159,18 +177,30 @@ void loop()
           case _MSG_DRONE_LOG:
             dronePrint((const char*)messageIn.dataBuffer);
             break;
-          case: _MSG_ACTIVATE:
+          case _MSG_ACTIVATE:
             connectionStatus = connectionStatus | 0b100;
             break;
           case _MSG_DEACTIVATE:
             break;
           default:
+            #ifdef DEBUG
+              DEBUG_PRINT("begin: write");
+            #endif
             instructionHandler.write(messageIn.dataBuffer, messageIn.messageType);
-        }
+            #ifdef DEBUG
+              DEBUG_PRINT("end: write");
+            #endif
+          }
       }
       
-      instructionHandler.write(&connectionStatus, _MSG_CONNECTION_STATUS);
+      #ifdef DEBUG
+        DEBUG_PRINT("begin: write");
+      #endif
+      instructionHandler.write((uint8_t*)&connectionStatus, _MSG_CONNECTION_STATUS);
       instructionHandler.write((uint8_t*)&deltaTime, _MSG_RECEIVER_DELTATIME);
+      #ifdef DEBUG
+        DEBUG_PRINT("end: write");
+      #endif
 }
 
 bool send()
@@ -195,7 +225,11 @@ bool send()
 }
 
 void receiverPrint(const char* message) {
-  Serial.print("[Receiver] ");
+  #ifdef DEBUG
+    DEBUG_PRINT("[Receiver]");
+  #else
+    Serial.print("[Receiver] ");
+  #endif
   Serial.println(message);
 }
 
@@ -206,7 +240,11 @@ void dronePrint(const char* message) {
 
 #ifdef DEBUG
 void printRadioMessage(RadioMessage message) {
-    Serial.print("Message type: ");
+    #ifdef DEBUG
+      DEBUG_PRINT("Message type: ");
+    #else
+      Serial.print("Message type: ");
+    #endif
     Serial.println(message.messageType);
     Serial.print("Data: ");
     for (int i = 0; i < sizeof(message.dataBuffer); i++) {
