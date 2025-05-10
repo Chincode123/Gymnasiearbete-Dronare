@@ -2,8 +2,9 @@
 #include <Wire.h>
 #include <Arduino.h>
 
-Orientation::Orientation(uint8_t MPUAddress) : 
-    MPU(MPUAddress)
+Orientation::Orientation(uint8_t MPUAddress, vector3<float> positionOffset) : 
+    MPU(MPUAddress),
+    r(positionOffset);
     // angles(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}),
     // velocity(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)})
     // angularVelocityError(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)})
@@ -47,6 +48,9 @@ void Orientation::end() {
     angles = {0, 0 ,0};
     acceleration = {0, 0 ,0};
     velocity = {0, 0 ,0};
+    rawAcceleration = {0, 0, 0};
+    r = {0, 0, 0};
+    prevAngularVelocity = {0, 0, 0};
 }
 
 void Orientation::readFromIMU(vector3<float>& acceleration, vector3<float>& angularVelocity) {
@@ -95,9 +99,9 @@ void Orientation::readFromIMU(vector3<float>& acceleration, vector3<float>& angu
 }
 
 void Orientation::readFromIMU() {
-    readFromIMU(acceleration, rawAngularVelocity);
+    readFromIMU(rawAcceleration, rawAngularVelocity);
     
-    acceleration -= accelerationOffset;
+    rawAcceleration -= accelerationOffset;
     rawAngularVelocity -= angularVelocityOffset;
 
     // #ifdef Serial
@@ -116,9 +120,29 @@ void Orientation::readFromIMU() {
     // #endif
 }
 
+void Orientation::correctAccelerationLever(float deltaTime) {
+    vector3<float> angularAccelDeg = (rawAngularVelocity - prevAngularVelocity) / deltaTime;
+    prevAngularVelocity = rawAngularVelocity;
+
+    // 3) Convert angular rates and accelerations to radians for cross-products
+    constexpr float deg2rad = PI / 180.0f;
+    vector3<float> omegaRad = rawAngularVelocity * deg2rad;        // ω in rad/s
+    vector3<float> alphaRad = angularAccelDeg  * deg2rad;          // α in rad/s²
+
+    // 4) Compute rotational acceleration terms at offset r (in m)
+    //    centripetal: ω × (ω × r)
+    vector3<float> centripetal = omegaRad.cross(omegaRad.cross(r));
+    //    tangential: α × r
+    vector3<float> tangential  = alphaRad.cross(r);
+
+    // 5) Correct raw linear acceleration (m/s²) to get true C.G. accel
+    acceleration = rawAcceleration - centripetal - tangential;
+}
+
 void Orientation::update(float deltaTime) {
     readFromIMU();
 
+    correctAccelerationLever(deltaTime);
     calculateAngles(deltaTime);    
     calculateVelocity(deltaTime);
 }
@@ -209,10 +233,13 @@ void Orientation::calculateOffsets(uint16_t cycles) {
     
     angularVelocityOffset /= cycles;
     accelerationOffset /= cycles;
-
+    
+    long long prevTime = micros();
     for (int i = 0; i < cycles; i++) {
         readFromIMU(acceleration, angularVelocity);
         acceleration -= accelerationOffset;
+        correctAccelerationLever((float(micros() - prevTime) / 1000000.0f) - 0.0005);
+        prevTime = micros();
 
         accelerationAngleOffset += calculateAccelerationAngles((acceleration + accelerationOffset));
 
