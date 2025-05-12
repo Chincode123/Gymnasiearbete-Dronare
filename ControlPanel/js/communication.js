@@ -452,7 +452,7 @@ async function read() {
 								status_reset_timers.receiver = setTimeout(() => {setReceiverStatus("disconnected")}, resetTime);
 								
 								if ((status & (1 << 1)) == 0) { 
-									break;
+									continue;
 								}
 
 								setDroneConnectionStatus("connected");
@@ -460,7 +460,7 @@ async function read() {
 								status_reset_timers.drone = setTimeout(() => {setDroneConnectionStatus("disconnected")}, resetTime);
 
 								if ((status & (1 << 2)) == 0) { 
-									break;
+									continue;
 								}
 								setDroneActivivationStatus("connected");
 								clearTimeout(status_reset_timers.activated);
