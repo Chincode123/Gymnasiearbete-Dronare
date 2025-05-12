@@ -47,8 +47,6 @@ void setup()
     radio.startListening();
 
     previousTime = micros();
-
-    sendTimer.start(sendTime);
     
     #ifdef DEBUG
       DEBUG_PRINT("Setup complete!");
@@ -182,7 +180,7 @@ void loop()
             break;
           case _MSG_DEACTIVATE:
             break;
-          default:
+          case default:
             #ifdef DEBUG
               DEBUG_PRINT("begin: write");
             #endif

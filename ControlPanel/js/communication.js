@@ -191,8 +191,12 @@ class Terminal {
 	}
 
 	readByte(byte) {
-		if (byte == 10) {
+		if (byte == 10 || byte == 13) {
 			this.print();
+			return;
+		}
+		else if (byte < 32 || byte > 126) {
+			// ignore non printable characters
 			return;
 		}
 
@@ -447,11 +451,15 @@ async function read() {
 								clearTimeout(status_reset_timers.receiver);
 								status_reset_timers.receiver = setTimeout(() => {setReceiverStatus("disconnected")}, resetTime);
 								
+								if ((status & (1 << 1)) == 0) { 
+									break;
+								}
+
 								setDroneConnectionStatus("connected");
 								clearTimeout(status_reset_timers.drone);
 								status_reset_timers.drone = setTimeout(() => {setDroneConnectionStatus("disconnected")}, resetTime);
 
-								if ((status & 1 << 2) == 0) { 
+								if ((status & (1 << 2)) == 0) { 
 									break;
 								}
 								setDroneActivivationStatus("connected");
@@ -767,6 +775,9 @@ function setDroneConnectionStatus(status) {
 		else if (status == "unkown") {
 			color = status_colors.unknown;
 		}
+	}
+	else {
+		setDroneActivivationStatus("disconnected");
 	}
 
 	document.getElementById("drone-connection").style.color = color;
