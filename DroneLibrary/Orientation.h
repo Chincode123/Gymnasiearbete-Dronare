@@ -26,6 +26,10 @@ class Orientation {
     void calculateVelocity(float deltaTime);
 
     float limitAngle(float angle);
+
+    vector3<float> r;
+
+    void correctAccelerationLever(float deltaTime);
 public:
     Orientation(uint8_t MPUAddress);
 
@@ -33,10 +37,12 @@ public:
     void begin(uint16_t errorCycles);
     void end();
 
+    vector3<float> prevAngularVelocity;
     vector3<float> rawAngularVelocity;
     vector3<float> angularVelocity;
     vector3<float> angles;
     
+    vector3<float> rawAcceleration;
     vector3<float> acceleration;
     vector3<float> adjustedAcceleration;
     vector3<float> velocity;
