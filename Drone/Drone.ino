@@ -100,9 +100,7 @@ void setup() {
     
     // Initial time
     previousTime = micros();
-
-    sendTimer.start(sendTime);
-
+    
     radioLogPush("Connected");
 
     #ifdef DEBUG
@@ -205,6 +203,7 @@ void loop() {
                 sendStack.push(messageOut);
                 break;
             default:
+                sending = false;
                 if (sendStack.getCount() > 10)
                   sendStack.clear();
                 radioLogQueue("Error interpreting messageType");
@@ -292,10 +291,12 @@ bool sendRadio() {
 
         sendStack.push(message);
     }
-        
-    #ifdef DEBUG
-      Serial.println("successfully sent");
-    #endif
+    else {    
+      #ifdef DEBUG
+        Serial.println("successfully sent");
+      #endif
+    }
+    
     radio.startListening();
 
     return result;
