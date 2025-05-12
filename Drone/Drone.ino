@@ -204,8 +204,6 @@ void loop() {
                 break;
             default:
                 sending = false;
-                if (sendStack.getCount() > 10)
-                  sendStack.clear();
                 radioLogQueue("Error interpreting messageType");
                 break;
         }
@@ -241,7 +239,6 @@ void loop() {
         #endif
 
         if (miscTimer.finished(1000)) {
-            if (sendStack.getCount() < 10)
               radioLogPush("Waiting for activation");
         }
         else miscTimer.start(1000);
