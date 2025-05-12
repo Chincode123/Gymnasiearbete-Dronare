@@ -202,9 +202,9 @@ void loop()
       
       #ifdef DEBUG
         DEBUG_PRINT("begin: write");
-      #endif
-      instructionHandler.write((uint8_t*)&deltaTime, _MSG_RECEIVER_DELTATIME);
-      // instructionHandler.write(&connectionStatus, _MSG_CONNECTION_STATUS);
+        #endif
+        instructionHandler.write(&connectionStatus, _MSG_CONNECTION_STATUS);
+        instructionHandler.write((uint8_t*)&deltaTime, _MSG_RECEIVER_DELTATIME);
       #ifdef DEBUG
         DEBUG_PRINT("end: write");
       #endif
