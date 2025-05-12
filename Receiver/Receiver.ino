@@ -6,9 +6,9 @@
 
 // #define DEBUG
 
-#ifdef DEBUG
-  #define DEBUG_PRINT(x) do { Serial.print(__FILE__); Serial.print(":"); Serial.print(__LINE__); Serial.print(" -> "); Serial.println(x); } while(0)
-#endif
+// #ifdef DEBUG
+//   #define DEBUG_PRINT(x) do { Serial.print(__FILE__); Serial.print(":"); Serial.print(__LINE__); Serial.print(" -> "); Serial.println(x); } while(0)
+// #endif
 
 #define CE_PIN 7
 #define CSN_PIN 8
@@ -58,6 +58,8 @@ void loop()
 {
     #ifdef DEBUG
       DEBUG_PRINT("loop start");
+      Serial.print("Sending: ");
+      Serial.println(((sending) ? "true" : "false"));
     #endif
 
     float deltaTime = (float)(micros() - previousTime) / 1000000;
@@ -79,20 +81,21 @@ void loop()
           printRadioMessage(messageOut);
         #endif
 
-        bool result;
+        bool result = false;
         if (sending) 
           result = send();
-        if (result) 
+        if (result) {
+          sending = false;
           instructionHandler.acknowledge(messageType);
+        }
+
 
         switch (messageType) {
         case _MSG_CONTROLLER_INPUT:
             if (result) {
-                sending = false;
-
-                ControllerInstructions controller;
-                memcpy(&controller, messageOut.dataBuffer, sizeof(controller));
                 #ifdef DEBUG
+                  ControllerInstructions controller;
+                  memcpy(&controller, messageOut.dataBuffer, sizeof(controller));
                   DEBUG_PRINT("x:");
                   Serial.print((float)controller.x / 127);
                   Serial.print(" y:");
@@ -171,6 +174,11 @@ void loop()
         
         radio.read(&messageIn, sizeof(messageIn));
 
+        #ifdef DEBUG
+          Serial.println("Radio received");
+          printRadioMessage(messageIn);
+        #endif
+
         switch (messageIn.messageType) {
           case _MSG_DRONE_LOG:
             dronePrint((const char*)messageIn.dataBuffer);
@@ -180,7 +188,7 @@ void loop()
             break;
           case _MSG_DEACTIVATE:
             break;
-          case default:
+          default:
             #ifdef DEBUG
               DEBUG_PRINT("begin: write");
             #endif
@@ -188,14 +196,15 @@ void loop()
             #ifdef DEBUG
               DEBUG_PRINT("end: write");
             #endif
+            break;
           }
       }
       
       #ifdef DEBUG
         DEBUG_PRINT("begin: write");
       #endif
-      instructionHandler.write((uint8_t*)&connectionStatus, _MSG_CONNECTION_STATUS);
       instructionHandler.write((uint8_t*)&deltaTime, _MSG_RECEIVER_DELTATIME);
+      // instructionHandler.write(&connectionStatus, _MSG_CONNECTION_STATUS);
       #ifdef DEBUG
         DEBUG_PRINT("end: write");
       #endif
