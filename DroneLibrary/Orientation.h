@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "Vectors.h"
-#include "SmoothValue.h"
 
 class Orientation {
     const uint8_t MPU;
@@ -31,7 +30,7 @@ class Orientation {
 
     void correctAccelerationLever(float deltaTime);
 public:
-    Orientation(uint8_t MPUAddress);
+    Orientation(uint8_t MPUAddress, vector3<float> positionOffset);
 
     void begin();
     void begin(uint16_t errorCycles);

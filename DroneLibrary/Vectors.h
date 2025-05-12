@@ -7,10 +7,6 @@ template<typename T>
 struct vector3 {
     T x, y, z;
 
-    vector3<T>() {
-        *this = {0, 0, 0};
-    }
-
     float magnitude() {
         return sqrt((*this) * (*this));
     }
@@ -21,16 +17,6 @@ struct vector3 {
         y = other.y;
         z = other.z;
         return *this;
-    }
-
-    template<typename U>
-    vector3<T>& dot(vector3<U>& other) {
-        return *this * other;
-    }
-
-    template<typename U>
-    vector3<T>& cross(vector3<U>& other) {
-        return crossProduct(*this, other);
     }
 };
 
