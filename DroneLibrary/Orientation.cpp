@@ -4,10 +4,7 @@
 
 Orientation::Orientation(uint8_t MPUAddress, vector3<float> positionOffset) : 
     MPU(MPUAddress),
-    r(positionOffset);
-    // angles(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)}),
-    // velocity(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)})
-    // angularVelocityError(vector3<SmoothValue>{SmoothValue(0.1), SmoothValue(0.1), SmoothValue(0.1)})
+    r(positionOffset)
 { }
 
 void Orientation::begin() {
@@ -61,9 +58,9 @@ void Orientation::readFromIMU(vector3<float>& acceleration, vector3<float>& angu
     Wire.requestFrom(MPU, 6, true);
 
     // Values are between -2(g) and 2(g)
-    acceleration.z = (int16_t(Wire.read() << 8 | Wire.read()) / 16384.0);
-    acceleration.y = -(int16_t(Wire.read() << 8 | Wire.read()) / 16384.0);
     acceleration.x = -(int16_t(Wire.read() << 8 | Wire.read()) / 16384.0);
+    acceleration.z = (int16_t(Wire.read() << 8 | Wire.read()) / 16384.0);
+    acceleration.y = (int16_t(Wire.read() << 8 | Wire.read()) / 16384.0);
 
     float g = 9.82;
     acceleration *= g;
@@ -84,9 +81,9 @@ void Orientation::readFromIMU(vector3<float>& acceleration, vector3<float>& angu
     Wire.requestFrom(MPU, 6, true);
 
     // Values are between -250 and 250 degrees per second
-    angularVelocity.y = -(int16_t(Wire.read() << 8 | Wire.read()) / 131.0);
-    angularVelocity.z = (int16_t(Wire.read() << 8 | Wire.read()) / 131.0);
     angularVelocity.x = -(int16_t(Wire.read() << 8 | Wire.read()) / 131.0);
+    angularVelocity.z = (int16_t(Wire.read() << 8 | Wire.read()) / 131.0);
+    angularVelocity.y = (int16_t(Wire.read() << 8 | Wire.read()) / 131.0);
 
     // #ifdef Serial
     //     Serial.print("      Angular velocity: ");
@@ -131,9 +128,9 @@ void Orientation::correctAccelerationLever(float deltaTime) {
 
     // 4) Compute rotational acceleration terms at offset r (in m)
     //    centripetal: ω × (ω × r)
-    vector3<float> centripetal = omegaRad.cross(omegaRad.cross(r));
+    vector3<float> centripetal = crossProduct(omegaRad, crossProduct(omegaRad, r));
     //    tangential: α × r
-    vector3<float> tangential  = alphaRad.cross(r);
+    vector3<float> tangential  = crossProduct(alphaRad, r);
 
     // 5) Correct raw linear acceleration (m/s²) to get true C.G. accel
     acceleration = rawAcceleration - centripetal - tangential;

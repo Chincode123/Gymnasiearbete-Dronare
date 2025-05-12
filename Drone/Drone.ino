@@ -8,6 +8,7 @@
 #include <RadioSendStack.h>
 #include <CountdownTimer.h>
 #include <Servo.h>
+#include <Vectors.h>
 
 #define DEBUG
 
@@ -48,7 +49,8 @@ void setDeltaTime();
 
 // Spatial orientation/acceleration/velocity
 const int MPU = 0x68;
-Orientation orientation(MPU);
+const vector3<float> positionOffset = {0, 0.075, 0.015};
+Orientation orientation(MPU, positionOffset);
 
 bool activated = false;
 
@@ -87,10 +89,10 @@ void setup() {
     motorController.setRollConstants(PID_Roll);
 
     // Set up motors
-    motorTL.attach(MOTOR_TL_Pin);
-    motorTR.attach(MOTOR_TR_Pin);
-    motorBR.attach(MOTOR_BR_Pin);
-    motorBL.attach(MOTOR_BL_Pin);
+    motorTL.attach(MOTOR_TL_Pin, 1000, 2000);
+    motorTR.attach(MOTOR_TR_Pin, 1000, 2000);
+    motorBR.attach(MOTOR_BR_Pin, 1000, 2000);
+    motorBL.attach(MOTOR_BL_Pin, 1000, 2000);
     
     // Set initial position
     motorTL.writeMicroseconds(1000);
