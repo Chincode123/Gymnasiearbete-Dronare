@@ -1485,6 +1485,7 @@ MonoBehaviour:
   rollRange: 15
   currentPitch: 0
   currentRoll: 0
+  currentVerticalVelocity: 0
   centerOfMass: {x: 0, y: 0, z: 0}
   rigidbody: {fileID: 675060069}
 --- !u!54 &675060069
@@ -2462,24 +2463,25 @@ MonoBehaviour:
   - {fileID: 262341331}
   desiredPitch: -0
   pitchPID:
-    P: 1
-    I: 0.3
-    D: 0.05
+    P: 3
+    I: 0.1
+    D: 0.15
   desiredRoll: -0
   rollPID:
-    P: 1
-    I: 0.3
-    D: 0.05
+    P: 2.5
+    I: 0.08
+    D: 0.1
   desiredVelocity: 0
   velocityPID:
-    P: 100
-    I: 20
-    D: 3
+    P: 80
+    I: 30
+    D: 15
   velocityRange: 3
   pitchRange: 5
   rollRange: 5
   currentPitch: 0
   currentRoll: 0
+  currentVerticalVelocity: 0
   centerOfMass: {x: 0.085, y: 0.015, z: 0.03}
   rigidbody: {fileID: 1493849462}
 --- !u!54 &1493849462
@@ -2490,7 +2492,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1493849460}
   serializedVersion: 2
-  m_Mass: 0.5
+  m_Mass: 0.45
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 1
@@ -2506,7 +2508,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1493849460}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.559, z: 0}
+  m_LocalPosition: {x: 0, y: 1.07, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
