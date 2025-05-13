@@ -1,6 +1,4 @@
 #include <Arduino.h>
-#include <nRF24L01.h>
-#include <RF24.h>
 #include <RadioData.h>
 #include <MotorController.h>
 #include <Vectors.h>
@@ -9,14 +7,11 @@
 #include <CountdownTimer.h>
 #include <Servo.h>
 #include <Vectors.h>
+#include <InstructionHandler.h>
 
-#define DEBUG
+// #define DEBUGs
 
-#define CE_PIN 7
-#define CSN_PIN 6
-
-// Radio
-RF24 radio(CE_PIN, CSN_PIN, 4000000);
+InstructionHandler instructionHandler;
 RadioSendStack sendStack;
 RadioMessage messageIn, messageOut;
 
@@ -57,8 +52,6 @@ bool activated = false;
 // CountdownTimer sendTimer;
 // long long sendTime = 20;
 
-bool sending = false;
-
 CountdownTimer miscTimer;
 
 void setup() {
@@ -66,21 +59,6 @@ void setup() {
       Serial.begin(115200);
       while (!Serial);
     #endif
-
-    // Set up radio
-    while(!radio.begin()) {
-      #ifdef DEBUG
-        Serial.println("radio hardrware issue");
-      #endif
-    }
-    while(!configureRadio(radio)) {
-      #ifdef DEBUG
-        Serial.println("radio config issue");
-      #endif
-    }
-    radio.openWritingPipe(DRONE_ADDRESS);
-    radio.openReadingPipe(1, RECEIVER_ADDRESS);
-    radio.startListening();
 
     // Set up motor controller
     motorController.setTargetValues(&targetVelocity, &targetPitch, &targetRoll);
@@ -114,14 +92,12 @@ void loop() {
     setDeltaTime();
     
     // Radio read
-    if (radio.available()) {
+    if (instructionHandler.read()) {
         #ifdef DEBUG
-          Serial.println("radio available");
+          // Serial.println("radio available");
         #endif
-      
-        sending = true;
-        
-        radio.read(&messageIn, sizeof(messageIn));
+              
+        messageIn.messageType = instructionHandler.getData(&messageIn.dataBuffer);
 
         #ifdef DEBUG
           printRadioMessage(messageIn);
@@ -205,17 +181,13 @@ void loop() {
                 sendStack.push(messageOut);
                 break;
             default:
-                sending = false;
                 radioLogQueue("Error interpreting messageType");
                 break;
         }
     }
     #ifdef DEBUG
     else {
-        if (!sending)
-          Serial.println("radio not available");
-        else
-          Serial.println("send-countdown done");
+        
     }
     #endif
 
@@ -247,8 +219,7 @@ void loop() {
     }
 
     // Output
-    if (sending) 
-      sending = !sendRadio();
+    sendRadio();
     
     sequenceTelemetry();
 }
@@ -275,9 +246,9 @@ bool sendRadio() {
     if (sendStack.getCount() <= 0)
       return true;
 
-    radio.stopListening();
+    bool result = true;
     RadioMessage message = sendStack.pop();
-    bool result = radio.write(&message, sizeof(message));
+    instructionHandler.write(&message.dataBuffer, message.messageType);
 
     #ifdef DEBUG
       printRadioMessage(message);
@@ -296,8 +267,6 @@ bool sendRadio() {
       #endif
     }
     
-    radio.startListening();
-
     return result;
 }
 
