@@ -55,10 +55,8 @@ bool activated = false;
 CountdownTimer miscTimer;
 
 void setup() {
-    #ifdef DEBUG
-      Serial.begin(115200);
-      while (!Serial);
-    #endif
+    Serial.begin(115200);
+    while (!Serial);
 
     // Set up motor controller
     motorController.setTargetValues(&targetVelocity, &targetPitch, &targetRoll);
