@@ -61,9 +61,9 @@ This repository contains the software part of a multi-person project with the go
     - [Summary of Simulation](#summary-of-simulation)
   - [Summary](#summary)
 
-## Project Abstract
+## Project-Abstract
 
-....
+The objective of this project was to explore the feasibility of designing and building a simple, radio-controlled drone using a 3D printer and an Arduino microcontroller. As the use of unmanned aerial vehicles (UAVs) becomes increasingly common in both civilian and military contexts, this project aimed to investigate how accessible such technology is for amateur hobbyists or small-scale operations. The drone was designed with a modular 3D-printed frame consisting of six parts: a central body, four arms, and a lid. The design process went through three major iterations, improving aspects such as size, weight, and internal component layout. The final version was longer and wider to better accommodate the electronic systems. The software was split into four modules: one for overall drone control, one for the radio receiver, a web-based interface for remote operation, and a Unity simulation to calibrate motor behavior using a PID controller. The finished drone had a total weight of approximately 453 grams and maintained wireless signal communication up to 290 meters, exceeding the 250-meter requirement. However, due to hardware limitations, flight testing was incomplete, and the drone's flight time could not be verified. Based on motor specifications, it is unlikely that the drone would meet the targeted 10-minute flight duration. Despite these limitations, the project successfully demonstrated the development of a modular frame, functional software integration, and RF24-based wireless communication. Future improvements should focus on optimizing aerodynamic design, enhancing sensor feedback integration, and developing efficient battery management. Overall, the project provides a strong foundation for future iterations and highlights both the possibilities and challenges of constructing UAVs with limited resources.
 
 ## Materials
 
