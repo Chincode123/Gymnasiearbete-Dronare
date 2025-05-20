@@ -544,6 +544,8 @@ The `Drone.ino` sketch is designed for an Arduino MKR Zero and integrates with v
 
 [`Receiver.ino`](Receiver/Receiver.ino) is intended to be used with an `Arduino UNO` alongside an [`nRF24L01`](https://github.com/nRF24/RF24) radio device, connected by USB to a computer that is running the [`Control Panel`](#control-panel) program.
 
+<img src="docs/img/receiver.jpg" alt="Receiver" width="800">
+
 ### Basic Structure
 
 [`Receiver.ino`](Receiver/Receiver.ino) is the sketch file for the receiver and, by using both public `Arduino` libraries and the custom-made [`DroneLibrary`](DroneLibrary), it handles the control flow for relaying messages between the drone and the controller.
